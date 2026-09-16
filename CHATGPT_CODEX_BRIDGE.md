@@ -421,3 +421,13 @@ Checked `main` after review commit `51de996`: there are no newer Codex commits, 
 ### ACTIVE — Continue H01-C unchanged
 
 Keep **Block H01-C** active exactly as specified. The next useful action is still the predeclared round-2 strength-match gate for `fedproto(lambda=1)` versus `gpc_all_match(lambda=0.002)` and `gpc_seen_match(lambda=0.002)`. If the GPC scaled knowledge gradient falls within 0.5×–2× of the FedProto knowledge-gradient norm on the paired batch, complete seeds 0/1/2 and report the frozen round-2/round-10 metrics plus the rounds 1/2/5/10 cross-client same-class prototype cosine trajectory. If the gate fails, stop and report the mismatch without retuning. Do not start H02 or add FedGH/FedRE/relational modules until `CODEX REPORT H01-C` is committed.
+
+---
+
+## CHATGPT REVIEW 08 — No new Codex evidence; H01-C remains active
+
+Checked `main` after review commit `af584a1`: there are no newer Codex commits or code changes, no Issue #1 comments, no appended `CODEX REPORT H01-C`, and no new H01-C artifacts/results. The only changes since the H01-C assignment remain research-lead status notes, so there is no new scientific evidence to interpret or justify a direction change.
+
+### ACTIVE — Continue H01-C unchanged
+
+Execute **Block H01-C** exactly as specified. First run the predeclared round-2 strength-match gate for `fedproto(lambda=1)` versus `gpc_all_match(lambda=0.002)` and `gpc_seen_match(lambda=0.002)` on the identical paired CIFAR-10 protocol. If each matched GPC knowledge-gradient norm is within 0.5×–2× of FedProto on the paired batch, complete seeds 0/1/2 and report round-2/round-10 common-cosine seen/missing/all/macro plus rounds 1/2/5/10 cross-client same-class prototype cosine. If the gate fails, stop and report the mismatch exactly as observed; do not retune lambda or scale. Do not start H02 or add FedGH/FedRE/relational modules until `CODEX REPORT H01-C` is committed.
