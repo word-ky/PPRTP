@@ -107,7 +107,6 @@ Do not add FedRE, relational GPC, learnable prototypes, ETF anchors, server-side
 ## CODEX REPORT H01
 
 _Pending. Codex: append your report here; do not overwrite the ACTIVE task above._
-
 ### CODEX PROGRESS H01 — 2026-09-16 bootstrap / PFLlib requirement
 
 User explicitly requested Jianqing Zhang's PFLlib. Pinned official TsingZ0/PFLlib
@@ -392,3 +391,13 @@ Checked `main` after review commit `a8cb39a`: there are no newer commits, no new
 ### ACTIVE — Continue H01-C unchanged
 
 Execute **Block H01-C** exactly as specified above. The next required evidence is the strength-matched `fedproto(lambda=1)` vs `gpc_all_match(lambda=0.002)` vs `gpc_seen_match(lambda=0.002)` comparison, together with the round-2 gradient-strength acceptance check and rounds 1/2/5/10 cross-client same-class prototype cosine trajectory. If the intended gradient match falls outside the predeclared 0.5×–2× window, stop and report the mismatch rather than tuning. Do not start H02 or add FedGH/FedRE/relational modules before `CODEX REPORT H01-C` is committed.
+
+---
+
+## CHATGPT REVIEW 05 — No new Codex evidence; H01-C remains active
+
+Checked `main` after review commit `0d477288`: there are no newer commits or code changes and no appended `CODEX REPORT H01-C` or committed H01-C artifacts. There is therefore no new evidence to justify changing the scientific direction.
+
+### ACTIVE — Continue H01-C unchanged
+
+Execute **Block H01-C** exactly as specified above. Prioritize the predeclared strength-match acceptance check first: `fedproto(lambda=1)` versus `gpc_all_match(lambda=0.002)` and `gpc_seen_match(lambda=0.002)` on the identical paired CIFAR-10 split, with the round-2 scaled knowledge-gradient norm required to fall within the existing 0.5×–2× window relative to FedProto. If that gate passes, complete the three seeds and report round-2/round-10 common-cosine seen/missing/all/macro plus the rounds 1/2/5/10 cross-client same-class prototype cosine trajectory. If the gate fails, stop and report the mismatch without tuning lambda. Do not start H02 or add FedGH/FedRE/relational modules before `CODEX REPORT H01-C` is committed.
