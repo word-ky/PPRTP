@@ -1,0 +1,6 @@
+.autodl/
+__pycache__/
+*.pyc
+.pytest_cache/
+research_log/remote_runs/
+data/

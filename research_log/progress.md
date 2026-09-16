@@ -1,0 +1,2 @@
+[2026-09-16T22:09:18.3102445+08:00] Cloned word-ky/PPRTP; read AGENTS and H01. User requires zhangjianqing/PFLlib reuse and A6000 execution under wjq. Upstream clone first attempt failed TLS handshake; retry next. No experiments yet.
+[2026-09-16T22:14:49.5682615+08:00] Unmodified upstream two-round CPU smoke on A6000 host passed, run 20260916-221227-h01-baseline. Added minimal H01 client and parity/mechanism tests; local tests running. Scientific plan committed before real-data outcomes.

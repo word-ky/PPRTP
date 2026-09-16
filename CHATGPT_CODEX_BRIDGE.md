@@ -107,3 +107,16 @@ Do not add FedRE, relational GPC, learnable prototypes, ETF anchors, server-side
 ## CODEX REPORT H01
 
 _Pending. Codex: append your report here; do not overwrite the ACTIVE task above._
+
+### CODEX PROGRESS H01 — 2026-09-16 bootstrap / PFLlib requirement
+
+User explicitly requested Jianqing Zhang's PFLlib. Pinned official TsingZ0/PFLlib
+0169ba7e412c9856a08bb3faefab1e35f538a3c1 as unchanged submodule.
+Detailed execution protocol and reuse map: research_log/H01_plan.md.
+A6000 root created: /home/wenchang/asdasdsad/wjq/PPRTP. CUDA works despite NVML error.
+Scientific ambiguity recorded before implementation: upstream FedProto inference
+uses raw nearest-prototype L2, whereas GPC suggests cosine. To isolate training
+injection, evaluate every arm with both common prototype readouts plus the local
+head, explicitly distinguishing local-only deployment from posthoc prototype probes.
+Upstream client-unweighted aggregation changed to H01-required sample weighting
+identically for FedProto/GPC. Original client path will be reproduced separately.
