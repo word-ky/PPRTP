@@ -17,6 +17,18 @@ from pprtp.client import H01Client, aggregate, prototype_bank
 from pprtp.data import prepare
 
 
+def tensor_hash(tensors):
+    return hashlib.sha256(b''.join(t.detach().cpu().contiguous().numpy().tobytes()
+                                  for t in tensors)).hexdigest()
+
+
+def check_round_one(records):
+    reference = records[0]
+    for record in records[1:]:
+        assert record['client_model_hashes'] == reference['client_model_hashes'], 'Round-1 client mismatch'
+        assert record['prototype_bank_hash'] == reference['prototype_bank_hash'], 'Round-1 prototype mismatch'
+
+
 def metrics(predictions, labels, seen):
     count = torch.bincount(labels, minlength=10)
     correct = torch.bincount(labels[predictions == labels], minlength=10)
@@ -69,7 +81,7 @@ def run(cfg, mode, seed):
         clients.append(client)
     # Upstream constructor resets global seed to 0; all batch shuffles below use
     # explicit client/round generators, independent of constructor/evaluation RNG.
-    initial_hash=hashlib.sha256(b''.join(v.detach().cpu().numpy().tobytes() for v in args.model.state_dict().values())).hexdigest()
+    initial_hash=tensor_hash(args.model.state_dict().values())
     metadata=vars(cfg).copy()
     metadata.update(mode=mode,seed=seed,source_sha=os.environ.get('PPRTP_SOURCE_SHA','unknown'),
         upstream_sha='0169ba7e412c9856a08bb3faefab1e35f538a3c1', torch=torch.__version__,
@@ -99,6 +111,8 @@ def run(cfg, mode, seed):
                               for metric in ('seen','missing','all','macro')}
                       for readout in ('head','cosine','l2')}
             record=dict(round=r+1,metrics=summary,per_client=per_client,
+                client_model_hashes=[tensor_hash(c.model.state_dict().values()) for c in clients],
+                prototype_bank_hash=tensor_hash([bank]),
                 losses=[c.losses for c in clients],diagnostic_client0=clients[0].diagnostic,
                 prototype_cosine=(F.normalize(bank,dim=1)@F.normalize(bank,dim=1).T).cpu().tolist(),
                 prototype_norms=bank.norm(dim=1).tolist(),
@@ -107,6 +121,13 @@ def run(cfg, mode, seed):
                     upload_counts=sum(len(c.protos)*8 for c in clients),download_vectors=cfg.clients*10*512*4),
                 elapsed_seconds=time.time()-started)
             stream.write(json.dumps(record)+'\n'); stream.flush()
+            if r == 0:
+                prior = []
+                for other in cfg.modes:
+                    path = Path(cfg.output)/f'{other}_seed{seed}'/'rounds.jsonl'
+                    if path.exists():
+                        prior.append(json.loads(path.read_text().splitlines()[0]))
+                check_round_one(prior)
             print(json.dumps(dict(mode=mode,seed=seed,round=r+1,metrics=summary,elapsed=record['elapsed_seconds'])),flush=True)
             for client in clients:
                 client.set_protos(protos if mode!='local' else None)
@@ -140,6 +161,12 @@ def main():
     for seed in cfg.seeds:
         for mode in cfg.modes:
             run(cfg,mode,seed)
+        records=[json.loads((Path(cfg.output)/f'{mode}_seed{seed}'/'rounds.jsonl').read_text().splitlines()[0])
+                 for mode in cfg.modes]
+        check_round_one(records)
+        (Path(cfg.output)/f'round_one_pairing_seed{seed}.json').write_text(json.dumps(
+            dict(passed=True,modes=cfg.modes,seed=seed,client_model_hashes=records[0]['client_model_hashes'],
+                 prototype_bank_hash=records[0]['prototype_bank_hash']),indent=2))
 
 
 if __name__=='__main__':

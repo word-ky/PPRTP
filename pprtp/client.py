@@ -70,6 +70,10 @@ class H01Client(clientProto):
                     grad = torch.autograd.grad(knowledge, tuple(self.model.base.parameters()),
                                                retain_graph=True, allow_unused=True)
                     norm = sum(g.square().sum() for g in grad if g is not None).sqrt()
+                    local_grad = torch.autograd.grad(local, tuple(self.model.base.parameters()),
+                                                     retain_graph=True)
+                    local_norm = sum(g.square().sum() for g in local_grad).sqrt()
+                    scaled_norm = abs(self.lamda) * norm
                     missing = torch.ones(self.num_classes, dtype=torch.bool, device=z.device)
                     missing[getattr(self, "class_set", [0, 1])] = False
                     mass = None
@@ -78,6 +82,8 @@ class H01Client(clientProto):
                         probs = logits.masked_fill(~valid[None], -torch.inf).softmax(1)
                         mass = probs[:, missing].sum(1).mean().item()
                     self.diagnostic = dict(feature_extractor_knowledge_grad_norm=norm.item(),
+                        local_grad_norm=local_norm.item(), scaled_knowledge_grad_norm=scaled_norm.item(),
+                        knowledge_local_grad_ratio=(scaled_norm/local_norm).item() if local_norm.item() else None,
                         missing_probability_on_seen=mass, valid_mask=valid.tolist())
                 for j, label in enumerate(y.tolist()):
                     protos[label].append(z[j].detach())

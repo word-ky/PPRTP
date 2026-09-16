@@ -4,9 +4,30 @@ import pprtp
 import torch
 from test_baseline import fixture
 from pprtp.client import H01Client, knowledge_loss, aggregate, prototype_bank
+from pprtp.run import tensor_hash, check_round_one
 
 
 class MechanismTests(unittest.TestCase):
+    def test_round_one_pairing_all_modes_and_grad_ratio(self):
+        records=[]
+        for mode in ('local','fedproto','gpc'):
+            client=fixture(H01Client)
+            client.mode=mode
+            client.train()
+            records.append(dict(client_model_hashes=[tensor_hash(client.model.state_dict().values())],
+                prototype_bank_hash=tensor_hash([client.protos[k] for k in sorted(client.protos)])))
+            self.assertEqual(client.diagnostic['scaled_knowledge_grad_norm'],0.)
+            self.assertGreater(client.diagnostic['local_grad_norm'],0.)
+            client.set_protos(client.protos)
+            client.train()
+            d=client.diagnostic
+            self.assertAlmostEqual(d['scaled_knowledge_grad_norm']/d['local_grad_norm'],
+                                   d['knowledge_local_grad_ratio'],places=6)
+        check_round_one(records)
+        records[-1]['prototype_bank_hash']='different'
+        with self.assertRaises(AssertionError):
+            check_round_one(records)
+
     def test_missing_class_changes_gpc_loss_and_gradient_only(self):
         torch.manual_seed(7)
         z = torch.randn(4, 5, requires_grad=True)
