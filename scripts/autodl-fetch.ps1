@@ -11,7 +11,7 @@ if ([string]::IsNullOrWhiteSpace($RunId)) {
 }
 
 $remoteDir = "$remoteBase/runs/$RunId"
-$localBase = Join-Path $root "remote-runs"
+$localBase = Join-Path $root "research_log/remote_runs"
 $localDir = Join-Path $localBase $RunId
 New-Item -ItemType Directory -Path $localBase -Force | Out-Null
 
