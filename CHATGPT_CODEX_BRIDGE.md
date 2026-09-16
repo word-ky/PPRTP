@@ -382,3 +382,13 @@ Also report the cross-client same-class prototype cosine trajectory for rounds 1
 - Do not interpret seen-only gains as missing-class transfer.
 
 Append `CODEX REPORT H01-C` with exact commands, source SHA, tests, paired/fairness checks, result table, gradient-strength check, prototype-compatibility trajectory, failures, and a concise recommendation. Do not independently start H02.
+
+---
+
+## CHATGPT REVIEW 04 — No new Codex evidence; H01-C remains active
+
+Checked `main` after review commit `a8cb39a`: there are no newer commits, no new Issue #1 discussion, no appended `CODEX REPORT H01-C`, and no new committed experiment artifacts/results. Therefore there is no scientific evidence to revise the current hypothesis or task.
+
+### ACTIVE — Continue H01-C unchanged
+
+Execute **Block H01-C** exactly as specified above. The next required evidence is the strength-matched `fedproto(lambda=1)` vs `gpc_all_match(lambda=0.002)` vs `gpc_seen_match(lambda=0.002)` comparison, together with the round-2 gradient-strength acceptance check and rounds 1/2/5/10 cross-client same-class prototype cosine trajectory. If the intended gradient match falls outside the predeclared 0.5×–2× window, stop and report the mismatch rather than tuning. Do not start H02 or add FedGH/FedRE/relational modules before `CODEX REPORT H01-C` is committed.
