@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-000651-h01b-seed0",
+  "releaseId": "20260917-000527-h01b",
+  "sessionName": "autodl-20260917-000651-h01b-seed0",
+  "command": "PPRTP_SOURCE_SHA=52a6c8f3d167b7b7827386221238e1576e1eaea8 bash scripts/run_h01.sh --seeds 0"
+}

@@ -1,0 +1,13 @@
+test_unmodified_upstream_two_rounds (test_baseline.BaselineTest.test_unmodified_upstream_two_rounds) ... ok
+test_known_metrics (test_data_metrics.DataMetricTests.test_known_metrics) ... ok
+test_partition_disjoint_complete_and_reproducible (test_data_metrics.DataMetricTests.test_partition_disjoint_complete_and_reproducible) ... ok
+test_missing_class_changes_gpc_loss_and_gradient_only (test_mechanism.MechanismTests.test_missing_class_changes_gpc_loss_and_gradient_only) ... ok
+test_round_one_pairing_all_modes_and_grad_ratio (test_mechanism.MechanismTests.test_round_one_pairing_all_modes_and_grad_ratio) ... ok
+test_sample_weighted_aggregation (test_mechanism.MechanismTests.test_sample_weighted_aggregation) ... ok
+test_training_parity_with_unmodified_upstream (test_mechanism.MechanismTests.test_training_parity_with_unmodified_upstream) ... ok
+test_validity_and_noncontiguous_labels (test_mechanism.MechanismTests.test_validity_and_noncontiguous_labels) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.762s
+
+OK

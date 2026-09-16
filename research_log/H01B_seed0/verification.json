@@ -1,0 +1,8 @@
+{
+  "0": {
+    "round_one_equal": true,
+    "same_initial": true,
+    "same_split": true,
+    "round_two_distinct": true
+  }
+}

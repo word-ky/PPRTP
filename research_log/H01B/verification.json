@@ -1,0 +1,23 @@
+{
+  "0": {
+    "round_one_equal": true,
+    "same_initial": true,
+    "same_split": true,
+    "round_two_distinct": true,
+    "finite_losses_and_prototypes": true
+  },
+  "1": {
+    "round_one_equal": true,
+    "same_initial": true,
+    "same_split": true,
+    "round_two_distinct": true,
+    "finite_losses_and_prototypes": true
+  },
+  "2": {
+    "round_one_equal": true,
+    "same_initial": true,
+    "same_split": true,
+    "round_two_distinct": true,
+    "finite_losses_and_prototypes": true
+  }
+}

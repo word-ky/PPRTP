@@ -197,3 +197,111 @@ If the seed-0 run is stable and finishes comfortably, run seeds 1 and 2 with the
 - If GPC is comparable to FedProto with reasonable gradient scale, the simple hypothesis is weak; report it honestly before considering relational extensions.
 
 Do **not** add FedGH, FedRE, relational GPC, ETF anchors, trainable prototypes, server-head training, or model heterogeneity yet.
+
+---
+
+## CODEX REPORT H01-B — 2026-09-17 — DONE
+
+### Execution and provenance
+
+User-requested Jianqing Zhang PFLlib reused from official `TsingZ0/PFLlib` as unchanged
+submodule `0169ba7e412c9856a08bb3faefab1e35f538a3c1`. Implementation source:
+`52a6c8f3d167b7b7827386221238e1576e1eaea8`; earlier increments `74a3219`, `59af148`.
+Research review `b0aa904` was synchronized before the real experiment.
+
+Remote project created at `/home/wenchang/asdasdsad/wjq/PPRTP`; used RTX A6000 GPU0.
+All results are real CIFAR-10 SUBSET results: 2000 training / 1000 official-test
+examples, 10 clients, K=2, seeds0/1/2, 10 rounds, 1 local epoch, SGD lr.01,
+batch32, lambda1, scale10; PFLlib CNN512D. No post-hoc tuning.
+
+Exact commands, from repository root on the A6000 (PY is the existing TTFL venv):
+
+```bash
+PY=/home/wenchang/asdasdsad/wjq/TTFL/.venv/bin/python
+OMP_NUM_THREADS=1 "$PY" -m unittest discover -s tests -v
+PPRTP_SOURCE_SHA=52a6c8f3d167b7b7827386221238e1576e1eaea8 bash scripts/run_h01.sh --seeds 0 --rounds 2 --train-per-class 16 --test-per-class 10
+PPRTP_SOURCE_SHA=52a6c8f3d167b7b7827386221238e1576e1eaea8 bash scripts/run_h01.sh --seeds 0
+PPRTP_SOURCE_SHA=52a6c8f3d167b7b7827386221238e1576e1eaea8 bash scripts/run_h01.sh --seeds 1 2
+```
+
+The workflow supplies `AUTODL_ARTIFACTS_DIR`. Run receipts:
+- original upstream health: `20260916-221227-h01-baseline`, exit0;
+- CUDA real-data smoke: `20260917-000608-h01b-smoke`, exit0;
+- seed0: `20260917-000651-h01b-seed0`, exit0;
+- seeds1/2: `20260917-000820-h01b-seeds12`, exit0.
+
+Local final unit suite: **8 passed**. Remote suite: **8 passed** before each real
+run. Tests include upstream two-round parameter/prototype parity, absent-class
+GPC loss/feature-gradient sensitivity with FedProto invariance, detached prototype
+targets, weighted aggregation, validity/noncontiguous label mapping, split disjointness,
+known-answer metrics, and three-arm first-round equality. CUDA exercised all arms.
+
+### Results and required diagnostics
+
+**Round-1 pairing PASS for all three seeds:** every client model hash and global
+prototype hash identical across all arms. Initial weights and splits also match.
+Round-2 prototype hashes differ across all arms, confirming distinct updates.
+
+Full round2/round10 tables (head, common cosine, common L2; seen/missing/all/macro):
+- seed0: `research_log/H01B_seed0/RESULTS.md`;
+- three-seed mean/sample-SD: `research_log/H01B/RESULTS.md`;
+- raw per-client/per-round evidence: `research_log/H01B/receipts/`;
+- automated comparisons: `research_log/H01B/verification.json`.
+
+Round10 common cosine, mean ± sample SD across3seeds (percent):
+
+| Training | Seen | Missing | All | Macro |
+|---|---:|---:|---:|---:|
+| Local, posthoc prototype probe | 66.55 ± 6.51 | 0.00 ± 0.00 | 13.31 ± 1.30 | 13.31 ± 1.30 |
+| FedProto | 66.85 ± 5.57 | 0.00 ± 0.00 | 13.37 ± 1.11 | 13.37 ± 1.11 |
+| GPC | 69.80 ± 4.93 | 0.00 ± 0.00 | 13.96 ± 0.99 | 13.96 ± 0.99 |
+
+Local-only head all-class accuracy:12.77±0.46%. Local prototype readout is a
+communication-requiring diagnostic, not a local-only deployment result.
+
+First active global-loss round (round2), client0 first-batch gradients into base:
+
+| Seed | Local norm | FedProto knowledge norm / ratio | GPC knowledge norm / ratio |
+|---|---:|---:|---:|
+| 0 | 1.21295 | .00947862 / .00781455 | 5.75848 / 4.74752 |
+| 1 | 1.12790 | .00800925 / .00710101 | 3.72995 / 3.30698 |
+| 2 | 1.24102 | .0109992 / .00886303 | 3.79103 / 3.05477 |
+
+Knowledge norms include lambda. All losses/prototype norms finite. Prototype norm
+range across all arms/rounds/seeds:.874861–13.0381; final off-diagonal cosine maxima
+.801–.856, no zero-norm or identical-direction collapse. Training+evaluation took
+6.20–7.96seconds per arm (excludes startup/data loading); detailed runtime in table.
+All ten classes valid after aggregation each round; round1 has no global knowledge.
+Per-round payload identical for FedProto/GPC:40960 float32-vector upload bytes,
+160 count bytes,204800 vector-download bytes; excludes serialization/class-ID overhead.
+
+### Failures and interpretation
+
+An existing CIFAR archive was truncated. Initial real-data attempt
+`20260916-221759-h01-smoke` passed7tests but failed before training at Python HTTPS
+certificate verification; official curl then timed out. Preserved failed receipts.
+Recovered data through the MindSpore-documented mirror with original CIFAR archive
+MD5 `c58f30108f718f92721af3b95e74349a`; torchvision verified extracted files.
+NVML reports a server driver/library mismatch, but PyTorch CUDA training worked;
+no shared environment/driver changes were made.
+
+GPC exceeds FedProto by only0.59percentage points in final common-cosine all-class
+accuracy, entirely through seen classes; both have exactly0% missing-class accuracy
+in every seed. Thus this bounded test does not support the proposed strong
+missing-class recognition advantage. The absent-class gradient mechanism is
+implemented correctly, but competition alone did not preserve missing recognition.
+Equal lambda produced a major strength imbalance: GPC knowledge gradients exceed
+local CE by3.05–4.75x, while FedProto contributes less than1%; objective type is not
+isolated from optimization strength. These10-round subset results do not establish
+convergence or a general verdict about full CIFAR-10/prototype methods.
+
+### Recommended next action (research lead decides)
+
+Review this negative missing-class result; a frozen, controlled strength-matching
+experiment is the next diagnostic to consider before FedGH/relational extensions.
+No new objective, module, or hyperparameter sweep was started.
+
+Changed files: pinned vendor/PFLlib; pprtp/{client,data,run}.py; three test modules;
+project-local remote scripts; README/PROVENANCE; project research_log receipts,
+protocol, results, and HANDOFF. Final evidence commit is the commit containing this
+report; experiment source SHA above is immutable and stored in every run metadata.
