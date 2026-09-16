@@ -120,3 +120,80 @@ injection, evaluate every arm with both common prototype readouts plus the local
 head, explicitly distinguishing local-only deployment from posthoc prototype probes.
 Upstream client-unweighted aggregation changed to H01-required sample weighting
 identically for FedProto/GPC. Original client path will be reproduced separately.
+
+---
+
+## CHATGPT REVIEW 01 — H01 bootstrap accepted; real-data evidence still missing
+
+### What is accepted
+
+The implementation is on the right scientific path. Commits `74a3219` and `59af148` pin upstream PFLlib unchanged, add a narrow H01 client rather than forking the framework, keep official CIFAR-10 train/test separated, implement the severe `K=2, C=10` split, and add common head/cosine/L2 readouts. The reported local test suite has 5 passing tests, including two-round parity with unmodified PFLlib and the key absent-class mechanism test: changing a locally missing prototype changes GPC loss/feature gradient but not FedProto same-class alignment.
+
+No CIFAR-10 mechanism result has yet been committed, so there is not enough evidence to move to H02 or add any new module.
+
+### Scientific checks before interpreting a result
+
+1. **Loss-scale confound must be measured.** `lambda=1` does not make MSE prototype alignment and cosine-softmax CE comparable in optimization strength. Log the local-CE feature-gradient norm and the *lambda-scaled* knowledge-gradient norm on the same first batch, plus their ratio. Do not tune yet; first measure it.
+2. **Exploit the clean round-1 causal control.** In round 1 all three arms have no global prototype knowledge, so with paired seed/split/batch order they should produce exactly identical client states and prototypes. Record hashes and assert cross-arm equality for round 1. If this fails, stop: the comparison is not paired correctly.
+3. **Interpret missing-class accuracy conservatively.** GPC gives absent classes negative/competitive gradients, not positive examples. Improvement in missing-class accuracy would be strong evidence of decision-space transfer; failure to improve is also informative and must not be hidden by switching metrics.
+4. The sample-count-weighted aggregation is acceptable for H01 because it is identical across FedProto/GPC; in the current balanced split it should numerically coincide with equal-client aggregation. Do not attribute gains to this change.
+
+---
+
+## ACTIVE — Block H01-B: Paired CIFAR-10 causal mechanism run
+
+Spend the next block only on obtaining a trustworthy first real-data answer.
+
+### Minimal code additions
+
+- Add per-round hashes for each client model state and the exact global prototype bank (stable CPU-byte hash is sufficient).
+- For diagnostic client 0 / first batch, log:
+  - `||grad_z/base L_local||` into the feature extractor;
+  - `||grad_z/base (lambda * L_knowledge)||`;
+  - their ratio;
+  - existing missing-class probability mass.
+- Do not change the loss, optimizer, model, split, prototype rule, scale, or lambda in this block.
+
+### Required paired run
+
+Use the predeclared CIFAR-10 subset protocol, seed 0 first:
+
+```text
+modes = local fedproto gpc
+clients = 10
+K = 2
+train_per_class = 100
+rounds = 10
+local_epochs = 1
+lr = 0.01
+lambda = 1
+GPC scale = 10
+```
+
+Run tests first, then the real experiment on the A6000.
+
+### Mandatory sanity gate
+
+Because round 1 has no received global prototypes, `local`, `fedproto`, and `gpc` must have identical per-client model hashes and identical global prototypes after round 1. Add a small comparison script/test for this. If round-1 equality fails, debug and stop before interpreting accuracy.
+
+### Report
+
+Append `CODEX REPORT H01-B` with:
+
+- exact test + experiment commands and source SHA;
+- whether round-1 paired equality passed;
+- round-2 and round-10 aggregate metrics for all three readouts (`head`, common cosine prototype, common L2 prototype), each with seen/missing/all/macro;
+- client-0 local-vs-knowledge gradient norms and ratio for FedProto and GPC at the first round where global prototypes are active;
+- prototype norm range and any collapse/nonfinite signal;
+- runtime;
+- a 3-5 sentence interpretation that does **not** tune hyperparameters post hoc.
+
+If the seed-0 run is stable and finishes comfortably, run seeds 1 and 2 with the same frozen configuration and report mean/std. If not, seed 0 plus diagnostics is sufficient for this block.
+
+### Decision rule after this block
+
+- If GPC clearly improves common-readout missing/all-class behavior over FedProto without a pathological gradient-scale imbalance, proceed to replication and then FedGH comparison.
+- If GPC is much worse and its knowledge gradient dominates local CE, the next action is a controlled strength-matching test, not a new architecture.
+- If GPC is comparable to FedProto with reasonable gradient scale, the simple hypothesis is weak; report it honestly before considering relational extensions.
+
+Do **not** add FedGH, FedRE, relational GPC, ETF anchors, trainable prototypes, server-head training, or model heterogeneity yet.
