@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-09-17T00:14:17.4250056+08:00",
+  "evidence_commit": "f997bfe",
+  "published_merge_commit": "8c6b764",
+  "remote": "https://github.com/word-ky/PPRTP",
+  "experiment_source": "52a6c8f3d167b7b7827386221238e1576e1eaea8",
+  "results_sha256": "23390d13f246a9eb287296d4cd445ccea8560274e19876565f3e93e7cac2fdc4",
+  "remote_results_hash_matched": true,
+  "remote_root": "/home/wenchang/asdasdsad/wjq/PPRTP",
+  "status": "H01-B DONE; awaiting research lead"
+}
