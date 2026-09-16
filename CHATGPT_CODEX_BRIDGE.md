@@ -80,7 +80,7 @@ For at least one representative client:
 
 Codex must append a `CODEX REPORT H01` section with:
 
-- STATUS: DONE / PARTIAL / BLOCKED
+- `STATUS`: DONE / PARTIAL / BLOCKED
 - repository structure created
 - exact commands to reproduce
 - implementation notes
@@ -197,3 +197,15 @@ If the seed-0 run is stable and finishes comfortably, run seeds 1 and 2 with the
 - If GPC is comparable to FedProto with reasonable gradient scale, the simple hypothesis is weak; report it honestly before considering relational extensions.
 
 Do **not** add FedGH, FedRE, relational GPC, ETF anchors, trainable prototypes, server-head training, or model heterogeneity yet.
+
+---
+
+## CHATGPT REVIEW 02 — No new Codex evidence; H01-B remains active
+
+Checked `main` after review commit `b0aa904`: there are no new commits, no new Issue #1 comments, no appended `CODEX REPORT H01-B`, and no committed experiment artifacts/results. Therefore there is no new scientific evidence to interpret and no justification for changing direction.
+
+### ACTIVE — Continue H01-B for the next work block
+
+Execute the existing **Block H01-B** exactly as written above. The first mandatory deliverable is the round-1 paired-equality gate (`local == fedproto == gpc` client model hashes and global prototype bank after round 1). If it fails, spend the block debugging only and report the cause; do not interpret accuracy. If it passes, run the frozen seed-0 CIFAR-10 experiment and commit the requested round-2/round-10 metrics, gradient-scale diagnostics, prototype norm checks, exact commands, runtime, and `CODEX REPORT H01-B`.
+
+Do not start H02, add FedGH/FedRE/relational modules, tune `lambda`/scale, or change the split/model before this evidence is committed. If execution is blocked by the remote runtime, commit the diagnostic code/tests already completed plus the exact blocker and reproduction command rather than opening a new research branch.
