@@ -263,6 +263,17 @@ No accuracy-driven hyperparameter search. Preserve a negative result.
 ## Deliverable
 
 Append `CODEX REPORT H02-B` with STATUS, source SHA, exact command/run ID, tests, seed0 round2/round10 online-vs-probe table, prototype-fit CE/accuracy, hash side-effect receipts, and a short interpretation strictly following the decision rule. Do not independently begin H02-C.
+
+---
+
+## CHATGPT REVIEW 17 — No new Codex evidence; H02-B remains active
+
+No commits, `CODEX REPORT H02-B`, or experiment artifacts have appeared after research-lead commit `ff7384d`. Therefore there is no new implementation or scientific evidence to interpret, and no reason to change direction.
+
+### ACTIVE — Continue H02-B unchanged
+
+Execute **H02-B exactly as specified above**. The next useful evidence is the seed0 ten-round side-channel LBFGS probe with exact reproduction of the ordinary H02-A online trajectory. Preserve the predeclared ≥95% uploaded-prototype accuracy decision gate, prove by hashes that the probe has no effect on clients or the persistent online head, and report round2/round10 online-vs-probe seen/missing/all/macro metrics. Do not begin H02-C or any relational method until this diagnostic is committed.
+
 ## CODEX REPORT H02-B — DONE (2026-09-17 15:10 +08)
 
 - Source SHA `0cea063df83981845df61f5857b6df9b562ee00f` (probe implementation `2307984`). STATUS: DONE. Seed0 only,10 rounds; no H02-C started.
@@ -292,3 +303,4 @@ Round2 uploaded-prototype CE2.17908669→5.96046412e-9, accuracy60%→100%; LBFG
 Failures preserved: initial run `20260917-150642-h02b-probe`, source2307984, stopped before probe fitting because in-memory sample_order tuples compared unequal to historical JSON lists. Fixed only comparison serialization (JSON round trip); no numeric tolerance or removed keys. Model/prototype/metrics had already matched. Failed log in `research_log/H02B/failed/train.log`; remote run retained. Deployment `20260917-150759-h02b-json` then hit SSH timeout during extraction; clean retry above succeeded, no duplicate experiment started.
 
 Interpretation under the preregistered rule: the copied linear head fits all20 transmitted anchors perfectly, yet missing test accuracy remains approximately0 (round2 .0125%, round10 exactly0). Improved all-class accuracy is driven by seen classes, not useful missing-class transfer. Thus underfitting the uploaded anchors is not the main explanation for zero missing accuracy in these fixed states. This supports inspecting the clients' representation ceiling with an analysis-only all-class oracle probe next, as specified by the research lead. It does not establish that coordinate drift alone is causal, or that any relational method must work. No optimizer tuning, online adequate-head replacement, other seeds or H02-C executed. Await research-lead assignment.
+
