@@ -1,0 +1,11 @@
+{
+  "canonical_entire_h04a_exact": true,
+  "all_ten_online_exact": true,
+  "provenance_exact": true,
+  "raw_prototypes_labels_counts_matched": true,
+  "state_rng_modes_gradients_unchanged": true,
+  "ret_missing": 1.086412726482825,
+  "ret_all": 0.9840637423472147,
+  "alignment_gain_pp": 23.88749986886978,
+  "verdict": "A: strong class-prototype compression"
+}
