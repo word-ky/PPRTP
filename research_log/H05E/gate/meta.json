@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-052707-h05e-precondition",
+  "releaseId": "20260918-052650-h05e",
+  "sessionName": "autodl-20260918-052707-h05e-precondition",
+  "command": "PPRTP_SOURCE_SHA=a8999c935c138dd9993c31bdea9d162db77fa8ed bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --precondition-probe"
+}

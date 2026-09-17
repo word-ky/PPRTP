@@ -97,3 +97,6 @@ Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round onl
 
 [2026-09-18T05:25:50.4221820+08:00] H05-E assigned37e5341: exact H05D fp64feature/label hashes first; support-only thinSVD all255singularvalues retained, T=Vdiag(sqrt(n)/s), no recenter/clamp/truncation. Same LBFGS2000 and two arms.
 [2026-09-18T05:26:49.9352278+08:00] H05-E34tests pass, previous33preserved. New test checks finite invertibleT, support/test inverse reconstruction and arbitrary affine logits bothdirections; preconditioner takes onlyX, no labels/test. Historical H05D pre-cast/cast hashes asserted beforeSVD;postwhitening Frobeniusresidual<1e-8, reconstructionrelative<1e-9.
+[2026-09-18T05:27:25.7849663+08:00] H05-E launched sourcea8999c935c138dd9993c31bdea9d162db77fa8ed release20260918-052650-h05e run20260918-052707-h05e-precondition.
+
+[2026-09-18T05:29:37.760514] H05-E DONE sourcea8999c9/run20260918-052707-h05e-precondition exit0;34tests pass. ExactH05Dinputhashes,all10online/state/RNG/modes/grad. Condition~1,reconstruction<1.47e-13. Pairedfit100 grad_inf9.23e-10 missing12.3375;brokenfit83.5 grad_inf5.845e-8 missing6.5125;q.561114266 delta5.825 => adequatelyfitintermediate. H05E/gate+BRIDGE;awaitlead,noextensions.

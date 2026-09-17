@@ -1,0 +1,12 @@
+{
+  "all_ten_online_exact": true,
+  "h05d_input_features_exact": true,
+  "precast_features_exact": true,
+  "fp64_only_cast_roundtrip_exact": true,
+  "state_rng_modes_gradients_unchanged": true,
+  "Rpre": 12.337499931454659,
+  "Spre": 6.51249997317791,
+  "q_rel_pre": 0.5611142663538219,
+  "delta_rel_pre": 5.824999958276749,
+  "verdict": "adequately fit, intermediate"
+}
