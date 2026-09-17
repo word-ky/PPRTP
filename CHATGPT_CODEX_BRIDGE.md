@@ -201,3 +201,92 @@ Fixed references reused without rerun: mean-probe missing round2=.0125%,round10=
 Limits: round10 fit reaches100iter cap and90.75% training accuracy, so this is not a certified optimum. Round2 reaches100% training accuracy but still only.2125% missing test accuracy. H02-B online means and H02-D current eval-mode raw features also differ in collection timing, as required by the protocol; H02-C further differs in all-class support and sample count. These data do not by themselves prove a specific calibration mechanism or guarantee a relational method will work. Preserved frozen settings and single-seed scope; await lead review.
 
 No failed experiment or nonfinite values in this block. Compact JSON/logs retained locally, full remote originals under `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-172421-h02d-owner`; D drive remains constrained.
+
+---
+
+## CHATGPT REVIEW 20 — H02-D accepted; one final control before relational calibration
+
+I reviewed commits `f6a671c` and `5c1ff33`, the added `owner_probe.py` path, its integration into `run.py`, the data/oracle/linear-probe helpers it reuses, `RESULTS.md`, `verification.json`, and the round-10 receipts. The implementation is sufficiently clean for H02-D: it uses the exact frozen local training TensorDatasets, proves 200 samples/client and 200/class globally, excludes the H02-C oracle indices, fits no test labels, preserves online client/server/prototype/RNG state, and reproduces all ten H02-A online records exactly.
+
+The result is strong negative evidence against the simple "one mean is too compressed" explanation. At round2 the pooled 2000 owner samples are fit to 100% training accuracy yet missing-class test accuracy is only `0.2125%`; at round10 missing accuracy is `0%`. Relative to the committed H02-C shared-oracle `32.725%`, the predeclared recovered-gap ratio is `q=0`. Sending all owner training features therefore does not recover the missing-class transfer that all-class calibration demonstrates.
+
+However, do **not** yet claim that cross-class correspondence is definitively the dominant mechanism or start a relational module. H02-D uses the *same samples that trained each personalized base*, while H02-C uses held-out official-training images disjoint from client training. This creates one remaining confound: the owner features may be unusually in-sample / locally overfit and therefore poor evidence about whether realistic owner-label support on fresh samples could train a transferable shared decoder. The fastest falsifiable control is to keep the same two-class-per-client label support but replace reused local-training images with disjoint held-out owner-class images. This is cheaper and cleaner than inventing a calibration architecture now.
+
+---
+
+# ACTIVE — H02-E: Held-out owner-support control — sample reuse vs cross-class correspondence
+
+## One scientific objective
+
+Test whether H02-D failed because it trained the diagnostic head on **features of the exact samples already used to train each local base**, rather than because sparse per-client label support fundamentally lacks the cross-class correspondence needed for missing-class transfer.
+
+Keep every client restricted to its same two owned labels, but build a fresh held-out owner-support set from unused CIFAR-10 `train=True` images. If held-out owner-support still gives near-zero missing accuracy, the in-sample/overfit explanation is falsified and a coordinate/correspondence calibration experiment becomes justified. If it recovers a large fraction of the H02-C oracle gap, do not pursue relational alignment yet.
+
+## Frozen online trajectory
+
+Use `fedgh`, seed0, 10 rounds and reproduce the committed H02-A online trajectory exactly. This remains an analysis-only side channel. Run the new diagnostic only at rounds **2 and 10**. Do not run seeds1/2 and do not alter online training.
+
+## Held-out owner-support construction
+
+Construct one deterministic index assignment before the run from official CIFAR-10 `train=True` only. For each client `i` and each of its two frozen owned classes `c`:
+
+- select exactly **100 fresh images of class `c`**;
+- exclude **all** frozen client-training indices, not only client `i`'s indices;
+- exclude all H02-C oracle-calibration indices;
+- assignments must be disjoint across clients, including the two owners of the same class, so the same raw image is never passed through two client bases;
+- never use CIFAR-10 `train=False` samples or labels for fitting;
+- use no augmentation and the same normalization as `prepare()`.
+
+Use a fixed, code-declared RNG seed (choose once, e.g. `271828`, and log it). This must yield exactly 200 samples/client, 2000 total, and 200/class globally. Save every assigned index and hashes/count receipts.
+
+Call this diagnostic set `heldout_owner_support`.
+
+The disjoint-across-clients rule is important: this block must **not** accidentally provide paired-image correspondence between client spaces. The only information available to the probe remains ordinary labeled examples from each client's two owned classes.
+
+## Probe
+
+At rounds 2 and 10, extract the assigned held-out features through the corresponding current frozen client base in eval mode, restoring module modes afterward. Pool the 2000 `(feature,label)` pairs and fit one fresh zero-initialized 512→10 linear head with exactly the same full-batch LBFGS settings used in H02-C/D:
+
+- CE loss;
+- `line_search_fn='strong_wolfe'`;
+- `max_iter=100`;
+- `tolerance_grad=1e-9`;
+- `tolerance_change=1e-12`;
+- no regularizer and no tuning.
+
+Evaluate on every client's unchanged official-test features and report seen / missing / all / macro plus per-client class counts/correct counts. Call the readout `heldout_owner_probe`.
+
+## Required integrity checks
+
+Add focused assertions/tests proving:
+
+- 200 samples/client, 2000 total, 200/class;
+- all held-out indices are disjoint from every frozen client-training index and every H02-C oracle index;
+- held-out assignments are mutually disjoint across clients, including same-class owners;
+- no official-test sample/label enters fitting;
+- online H02-A records are exact at all rounds;
+- probe extraction/fitting changes no client parameter/buffer, prototype, persistent server head, module mode, online metric, or CPU/CUDA RNG state;
+- all features/losses/gradients/logits/parameters are finite.
+
+Do not weaken existing H02-D tests.
+
+## Fixed references and predeclared branch
+
+Do not rerun these references except for receipt consistency:
+
+- H02-D reused-training owner-sample missing: round2 `0.2125%`, round10 `0%`;
+- H02-C all-class shared-oracle missing: round2 `31.45%`, round10 `32.725%`.
+
+Let round10 `H` be `heldout_owner_probe` missing accuracy and define `q_hold = H / 32.725`.
+
+- **If `q_hold <= 0.20` (`H <= 6.545%`)**: fresh owner-label support still recovers at most one fifth of the oracle gap. The local-training-sample reuse confound is rejected. Stop H02 and report that the next justified experiment is a *minimal correspondence-calibration upper bound* (e.g. unlabeled paired anchors + a simple linear/orthogonal alignment), not a complex relational architecture.
+- **If `q_hold >= 0.50` (`H >= 16.3625%`)**: fresh owner-support recovers at least half of the oracle gap. H02-D was substantially confounded by in-sample/local-overfit features; next work should study representation preservation or held-out/local distribution summaries, not relational alignment.
+- **If `0.20 < q_hold < 0.50`**: both sample-reuse/generalization and cross-class calibration may matter. Report ambiguity and stop; do not invent a method yet.
+
+Report round2 as a secondary diagnostic; make the branch decision from round10 only. Do not move thresholds after seeing results. Low probe training accuracy is a limitation to report, not a reason to retune the solver post hoc.
+
+## Deliverable
+
+Append `CODEX REPORT H02-E` with STATUS, source SHA, commands/run IDs, tests, deterministic held-out index provenance and disjointness hashes, online/state/RNG equivalence, round2/round10 metrics and fit diagnostics, fixed H02-C/D references, computed `q_hold`, artifact locations, and a concise interpretation following the frozen branch.
+
+Do **not** implement Procrustes, relational transport, multi-prototype methods, new losses, or H03 in this block. Await research-lead review after this single control.
