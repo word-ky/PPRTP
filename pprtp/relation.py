@@ -28,7 +28,7 @@ def permute_relations(r,values):
     return out
 
 
-def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,broken=False,conditioned=False,structural_null=False):
+def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,broken=False,conditioned=False,structural_null=False,feature_receipt=False,expected_features=None):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(server.state_dict().values()),
@@ -73,6 +73,12 @@ def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,bro
                 statistics_hash=tensor_hash([mean,std]),raw_support_hash=tensor_hash([pooled]),
                 before=matrix_diagnostics(pooled,input_aware=structural_null),after=matrix_diagnostics(torch.cat(zz),input_aware=structural_null),
                 labels_used=False,test_used=False,input_dtype=str(zz[0].dtype))
+        if feature_receipt or expected_features is not None:
+            fixed=dict(support_hash=tensor_hash([torch.cat(zz)]),test_hash=tensor_hash([torch.cat(tt)]),
+                support_labels_hash=tensor_hash(yy),test_labels_hash=tensor_hash(ty),dtype=str(zz[0].dtype))
+        if expected_features is not None:
+            assert fixed==expected_features
+            zz=[cast_fixed(z) for z in zz];tt=[cast_fixed(z) for z in tt]
         template=torch.nn.Linear(zz[0].shape[1],10,device=zz[0].device,dtype=zz[0].dtype)
         probe,fit=fit_linear(template,torch.cat(zz),torch.cat(yy),zero=True,max_iter=2000)
         fit['head_hash']=tensor_hash(probe.state_dict().values());fit['final_support']=support_gradient(probe,zz,yy)
@@ -92,4 +98,15 @@ def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,bro
     if structural_null: result['structural_null']=structural
     if conditioned: result['conditioning']=conditioning
     if broken: result['permutations']=perms
+    if feature_receipt or expected_features is not None: result['fixed_features']=fixed
+    if expected_features is not None:
+        result['casting']=dict(input_dtype='torch.float32',solver_dtype='torch.float64',roundtrip_bitwise_equal=True,
+            support_hash=tensor_hash([torch.cat(zz)]),test_hash=tensor_hash([torch.cat(tt)]))
     return result
+
+
+def cast_fixed(x):
+    assert x.dtype==torch.float32
+    out=x.to(torch.float64)
+    assert torch.equal(out.float(),x)
+    return out
