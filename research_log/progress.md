@@ -80,3 +80,5 @@ Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round onl
 [2026-09-18T01:10:58.3361534+08:00] H05-A raw centered relation256 implemented,pairedvscolumnbroken seeds314159+i;client0identity,sameperm support/test,bitwise inverse checks.29tests pass including doubleorthogonaltranslationinvariance and columnisolation. Exact savedseed0 support/anchors;no normalization/SVD/map.
 
 [2026-09-18T01:15:34.2106176+08:00] H05-A DONE sourcede2f60c/run20260918-011118-h05a-relation exit0;29tests pass;online/provenance/state/RNG/modes/grad exact. Pairedmissing11.025 broken4.8125 q.501421258 delta6.2125;fit65.90/76.65 both2000cap grad_inf.0284156/.0092431 => FIT-LIMITED,no negativeconclusion. Gramdisagreement.1532-1.1020. H05A/gate+BRIDGE;stopawaitlead,no rescue.
+
+[2026-09-18T02:19:29.7435939+08:00] H05-B assigned72042fc;sharedsupport-only float32 zscore eacharm,positive std strict,noeps. SVDdiagnosticfloat64 max(shape)*eps64*smax.30tests pass mandatory affine-logit equivalence included. Training remainsfloat32 LBFGS2000. Historicalprefix/permutations/Grams/state exact checks;no extra capacity.
