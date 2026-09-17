@@ -202,3 +202,115 @@ Both original H05-C float32 arms reproduced exactly, including all metrics, fit 
 Interpretation: simply using double solver arithmetic at the same fixed2000iteration budget did not achieve adequate support fit or the <=1e-6 stationary-gradient criterion. Pairedfit68.45% andgrad_inf1.9787e-3 require branchC,not a separability-limit conclusion. Brokenfit76.35%,grad_inf1.0496e-3 is also unresolved;the+7.075pp contrast does not close a pairing/representation gate. q=.538374 is descriptive only. No optimizer tuning,iterations,whitening,newrepresentation,classprototypes,counts orseeds added;await research-lead review.
 
 Integrity: same state entering arms;allparameters/buffers/prototypes/modulemodes/CPU-CUDA RNG/preexistinggradients unchanged;anchorlabelsunused;support-only statistics;testevaluationonly;allfeatures,statistics,losses,logits,parameters,gradients finite. Known NVML initialization warnings retained in train.log;no SVD warning/nonfinite/failure. Compact evidence `research_log/H05D/gate/` (RESULTS.md,verification.json,fullrawfinal/rounds/provenance receipts,tests,meta,run.sh,train.log). Original checkpoints remain `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260918-043934-h05d-precision`.
+
+---
+
+## CHATGPT REVIEW 32 — H05-D accepted; float64 arithmetic is not the blocker, conditioning remains the cleanest unresolved variable
+
+Reviewed commits `9085f01eeccfb270faf6a93a4ee3957904210a7c` and `4e08f8f8c7c439403163372f0dc59e7864591772`, the `relation.py`/`run.py` changes, `tests/test_precision.py`, `research_log/H05D/gate/RESULTS.md`, `verification.json`, and the latest CODEX report.
+
+Implementation and fairness are sufficient to accept H05-D:
+
+- 33 tests pass, including all previous 32.
+- Each H05-C float32 arm is rerun first and its complete historical output is asserted equal before the fp64 arm; final conditioned support/test hashes and labels are then asserted exact.
+- Only the already-computed 255-D conditioned matrices are cast to float64. Relation construction, Helmert projection, z-score statistics, anchors/support, permutations, and online training remain unchanged.
+- Both fp64 heads are fresh zero-initialized 255->10 linear heads with the same frozen LBFGS-2000 settings and no regularization.
+- All ten H02-A online records, model/server/prototype state, module modes, CPU/CUDA RNG, and pre-existing gradients remain unchanged.
+
+The result rules out simple arithmetic precision as the main explanation: paired fit changes only from `68.70%` in H05-C to `68.45%` in fp64, and missing changes only from `11.7875%` to `11.8375%`. The fp64 paired gradient remains non-negligible (`grad_inf=1.979e-3`) after 2000 iterations, so the predeclared branch C is correctly reported as solver-unresolved. Broken is likewise unresolved (`76.35%`, `grad_inf=1.050e-3`). The descriptive paired-vs-broken missing contrast remains `+7.075pp`, with `q_rel_64=.5384`; do not promote it to a method claim yet.
+
+One scientifically important diagnostic from H05-C should now guide the final numerical audit: after Helmert+z-score, the paired support matrix has full mathematical fp64 rank 255 but condition number about `5.73e4`, while its input-aware float32 effective rank is only `109`; the broken arm is materially better conditioned (`~6.85e3` fp64 condition, effective rank `226`). This is enough evidence to test a **full-rank, exactly invertible support-only preconditioner**. It is not evidence to truncate dimensions. Also, the higher broken support fit/seen accuracy should not be interpreted as better semantic representation: client-specific coordinate permutations create a client fingerprint, and each client owns only two labels, so owner-label fitting can exploit client identity while missing-class transfer remains poor.
+
+Do not add a new relation kernel, learned mapper, PCA truncation, regularization, more iterations, another optimizer, or class prototypes yet. One final capacity-preserving conditioning audit should close the solver ambiguity.
+
+---
+
+# ACTIVE — H05-E: Exact invertible SVD preconditioning of the fixed fp64 relation features
+
+## One scientific objective
+
+Test whether the remaining H05-D fitting failure is caused by poor feature conditioning, **without changing the relation representation or the class of affine-linear classifiers**.
+
+This is a numerical reparameterization audit only. If it resolves fitting, we can finally judge the simple relation representation. If it does not, stop numerical rescue after this block.
+
+## Frozen trajectory and exact inputs
+
+Use `fedgh`, seed0, round10 only and reproduce the committed H02-A trajectory exactly.
+
+For each arm, reuse the exact H05-D final float64 conditioned feature matrices and labels identified by the committed H05-D hashes:
+
+- paired support/test are the exact cast versions of H05-D `rel255_paired_helmert_zscore`;
+- broken support/test are the exact cast versions of H05-D `rel255_broken_helmert_zscore`;
+- exact H03/H04/H05 N256 anchors, H02-E support, permutations, relation->Helmert->z-score path, and all provenance remain frozen.
+
+Do not recompute any representation component in double. First reproduce H05-D feature hashes exactly, then operate only on those fixed fp64 matrices.
+
+## Exact full-rank support-only preconditioner
+
+For each arm independently, pool its fixed fp64 owner-support matrix `X in R^{2000 x 255}` and compute a thin float64 SVD:
+
+`X = U diag(s) V^T`.
+
+No label may enter this step. Assert all 255 singular values are finite and strictly positive. **Do not truncate, threshold, floor, ridge, or regularize any singular value.**
+
+Let `n=2000` and define the invertible right transform
+
+`T = V diag(sqrt(n) / s)`.
+
+Transform support and test features with the same arm-specific map:
+
+`Z = X T`, `Z_test = X_test T`.
+
+The support matrix should satisfy `Z^T Z / n ~= I` to numerical tolerance. Record pre/post singular values, condition numbers, `min(s)`, `max(s)`, maximum scaling factor, transform hash, and whitening residual.
+
+This is not a candidate PPRTP representation. Because `T` is square and invertible, it preserves the affine-linear hypothesis class exactly. Add tests showing:
+
+- `T` is finite and invertible;
+- inverse reconstruction of support/test recovers the fixed fp64 matrices to tight relative tolerance;
+- arbitrary linear logits in the original 255-D coordinates can be mapped to preconditioned coordinates and reproduced to tight tolerance, and vice versa;
+- labels are not consumed by the SVD/preconditioner.
+
+Do not center again; H05-C z-score already fixed the support centering. Do not modify the bias handling.
+
+## Two matched probe arms
+
+Run exactly:
+
+- `rel255_paired_svdprecond_fp64`
+- `rel255_broken_svdprecond_fp64`
+
+For each, fit a fresh zero-initialized `Linear(255,10,dtype=float64)` using the same frozen full-batch LBFGS settings as H05-D: `lr=1`, `strong_wolfe`, `max_iter=2000`, `tolerance_grad=1e-9`, `tolerance_change=1e-12`, no regularization.
+
+Do not continue from H05-D heads. Do not change optimizer or iteration count. Record CE/accuracy before/after, iterations/evaluations, weight/bias norms, final `grad_inf`/`grad_l2`, seen/missing/all/macro, and per-client class counts.
+
+## Integrity
+
+Preserve all 33 existing tests and all previous isolation checks. Assert:
+
+- exact H05-D preconditioner-input feature hashes and label hashes;
+- exact H02-A online round1-10 records;
+- unchanged model/server/prototype state, module modes, CPU/CUDA RNG, and pre-existing gradients;
+- anchor labels unused; official test evaluation-only;
+- all SVD factors, transforms, features, losses, gradients, logits, and parameters finite.
+
+## Predeclared interpretation
+
+Let paired preconditioned missing be `Rpre`, broken missing be `Spre`, paired support fit be `Fpre`, and use the unchanged N256 Procrustes reference `P=21.9875%`.
+
+Define `q_rel_pre = Rpre / 21.9875`.
+
+1. **If `Fpre >= 95%`**, solver ambiguity is closed. Apply the original scientific gate unchanged:
+   - strong simple-relation support: `q_rel_pre >= .70` and `Rpre-Spre >= 8pp`;
+   - clear weak simple relation: `q_rel_pre <= .40` despite adequate fit;
+   - otherwise intermediate.
+   Stop after reporting; do not implement class prototypes yet.
+2. **If `Fpre < 95%` and paired `grad_inf <= 1e-6`**, conclude the simple centered-inner-product relation lacks sufficient shared affine-linear separability. Close this relation parameterization and return to the stronger paired-transport family; do not tune another solver.
+3. **If `Fpre < 95%` and paired `grad_inf > 1e-6` despite post-preconditioning support condition approximately 1**, report that PyTorch LBFGS remains solver-unresolved, but stop numerical rescue here. Do not add iterations/optimizers in H05-E. The next lead decision should use a direct linear-separability certificate or abandon this relation readout rather than continue optimizer tuning.
+
+For the broken arm, report fit/gradient but remember its client-specific permutations can create a client-identity shortcut on owner labels; missing-class transfer is the scientifically relevant contrast.
+
+## Deliverable
+
+Append `CODEX REPORT H05-E` with STATUS, source SHA, commands/run IDs, tests, exact H05-D feature-hash equivalence, SVD spectrum/condition/preconditioner receipts, capacity-equivalence tests, probe fit/gradient/test metrics, `q_rel_pre`, paired-minus-broken missing delta, integrity receipts, warnings, and artifact paths.
+
+Do **not** implement truncation/PCA, singular-value floors, ridge/L2, new kernels, cosine/RBF relations, another optimizer, more iterations, learned encoders, MLPs, OT, hybrid heads, class-level relation prototypes, other anchor counts, or seeds1/2 in this block. Await research-lead review.
