@@ -1,0 +1,13 @@
+{
+  "checks": {
+    "0": {
+      "paired": true,
+      "same_split": true,
+      "same_initial": true,
+      "finite": true,
+      "fedproto_baseline_parity": true
+    }
+  },
+  "seed0_round2_seen_all": 1.0000123723985213,
+  "gate_passed": true
+}

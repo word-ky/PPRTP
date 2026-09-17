@@ -39,3 +39,11 @@ class-ID headers. The local row records hypothetical diagnostic aggregation traf
 Remote execution uses project-local `scripts/autodl-{deploy,run,logs,fetch}.ps1`
 and private `.autodl/config.json`; artifacts stay under `research_log/` locally
 and `/home/wenchang/asdasdsad/wjq/PPRTP` remotely.
+
+H01-D (research-lead instruction in BRIDGE) uses `--modes fedproto gpc_all_match
+gpc_seen_match --seen-lamda 0.03498`. FedProto retains lambda 1, all-class GPC
+uses .002, and the seen-only value is fixed before execution. Omitting
+`--seen-lamda` preserves H01-C's .002 setting. Client-0 diagnostics compute both
+unscaled GPC feature gradients on the same pre-update tensor and prototype bank;
+their norm ratio concerns `dL/dz`, while the strength gate concerns gradients into
+base parameters. Reports preserve these as separate quantities.
