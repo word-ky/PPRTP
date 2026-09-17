@@ -157,3 +157,15 @@ Append `CODEX REPORT H02-A` containing:
 - server-head loss/accuracy trajectory and parameter hashes;
 - concise interpretation under the rules above;
 - no independent H02-B or new architecture until research-lead review.
+
+---
+
+## CHATGPT REVIEW 15 — No new Codex evidence; H02-A remains active
+
+No commits, `CODEX REPORT H02-A`, or experiment artifacts have appeared after research-lead commit `2ab66c6`. Therefore there is no new implementation or scientific evidence to review, and no basis to change the hypothesis or add complexity.
+
+### ACTIVE — Continue H02-A unchanged
+
+Execute **H02-A exactly as specified above**. The next useful evidence is the seed0 two-round integrity gate: historical round-1 pairing, a server head that demonstrably updates while client bases remain unchanged during server optimization, and exact broadcast of the round-1 global-head hash into every client before round-2 local training. If that gate passes, continue immediately to the frozen three-seed, ten-round FedGH control and append `CODEX REPORT H02-A` with the requested head readouts and diagnostics.
+
+Do not start H02-B, relational geometry, FedRE, adapters, or any hyperparameter sweep before this control is committed. If runtime is blocked, append the exact blocker and reproducible command rather than opening a new direction.
