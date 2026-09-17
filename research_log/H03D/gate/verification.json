@@ -1,0 +1,13 @@
+{
+  "all_ten_online_rounds_exact": true,
+  "paired_500_exact": true,
+  "alignment_exact": true,
+  "indices_exact": true,
+  "state_rng_modes_unchanged": true,
+  "P2000": 23.54999989271164,
+  "q2000": 0.7196333045901189,
+  "delta2000": 23.54999989271164,
+  "grad_inf": 9.562426583897832e-08,
+  "grad_l2": 6.139803190308157e-07,
+  "verdict": "formal persistence gate closes positively"
+}

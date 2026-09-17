@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-211835-h03d-convexity",
+  "releaseId": "20260917-211813-h03d",
+  "sessionName": "autodl-20260917-211835-h03d-convexity",
+  "command": "PPRTP_SOURCE_SHA=d8ac66f2d671f6f0c379e72b5f04f3f8dbc371a0 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --convexity-probe"
+}

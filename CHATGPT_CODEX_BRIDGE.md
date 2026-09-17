@@ -130,3 +130,37 @@ In every branch, do not infer causality from changes in the head fit alone. The 
 Append `CODEX REPORT H03-D` with STATUS, source SHA, exact commands/run IDs, tests, exact reproduction receipt for H03-C `paired_500`, `paired_2000` fit/gradient/test metrics, per-client support fit, unchanged alignment diagnostics/hashes, online/state/RNG receipts, `q2000/delta2000`, artifacts, and a concise interpretation following the frozen branch.
 
 Do **not** implement anchor-count/rank compression, random projections, CORAL/whitening, affine/nonlinear alignment, transport losses, hybrid/gating heads, new seeds, or publication-scale runs in H03-D. Await research-lead review.
+
+## CODEX REPORT H03-D — DONE (2026-09-17 21:20 +08)
+
+STATUS: DONE. Source `d8ac66f2d671f6f0c379e72b5f04f3f8dbc371a0`; release `20260917-211813-h03d`; run `20260917-211835-h03d-convexity`, exit0. **Predeclared formal persistence gate closes positively.** Seed0,round10 only; no additional methods,optimizer alternatives,normalization or tuning.
+
+Files: `pprtp/paired.py` adds opt-in final support gradient/per-client evaluation via autograd.grad without accumulating .grad; `pprtp/run.py` adds --convexity-probe; `tests/test_paired.py` adds finite final-gradient/state/existing-grad preservation test; `scripts/report_h03d.py` generates independently checked report.23 tests pass locally/remotely,previous22 preserved.
+
+Exact commands (AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h03d
+./scripts/autodl-run.ps1 -Name h03d-convexity -Cmd 'PPRTP_SOURCE_SHA=d8ac66f2d671f6f0c379e72b5f04f3f8dbc371a0 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --convexity-probe'
+D:\anaconda3\python.exe scripts/report_h03d.py research_log/H03D/gate
+```
+
+All H03-C paired_500 output exactly reproduced before running paired_2000: full fit dictionary including head hash/norms/CE/accuracy/iterations/evaluations,all test metrics/per-client counts,alignment and transform hashes,state/RNG/mode receipts. Fresh paired_2000 starts from zero,not continued500 weights; same fullbatch LBFGS lr1,strong_wolfe,tolerance_grad1e-9,tolerance_change1e-12,no regularizer,only max_iter2000 changes.
+
+Anchor hash `1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125`;support hash `2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073`. Complete provenance exact H03-C. No anchor labels or test fitting. All10 H02-A online metrics/client/prototype/server records exact. Both arms begin with identical state,preserve client/server parameters/buffers/prototypes,module modes and CPU/CUDA RNG. Final gradient is computed within existing isolation checks; original client/server .grad untouched by the diagnostic. All quantities finite.
+
+| Arm | Seen % | Missing % | All % | Macro % | CE before -> after | Support fit | Iter/eval |
+|---|---:|---:|---:|---:|---|---:|---|
+| no_align_500 historical reference | 70.80 | 0 | 14.16 | 14.16 | 2.30258393 -> 1.50203121e-8 | 100% | 320/360 |
+| paired_500 exactly reproduced | 34.60 | 25.75 | 27.52 | 27.52 | 2.30258393 -> .628464222 | 79.10% | 500/518 |
+| paired_2000 | 31.10 | 23.55 | 25.06 | 25.060001 | 2.30258393 -> 9.20881931e-8 | 100% | 1651/1743 |
+
+Final paired_2000 `grad_inf=9.56242658e-8`, `grad_l2=6.13980319e-7`;weight norm952430.8125,bias norm19294.361328125. Each client0..9 has200/200 support correct (100%);per-class correct/counts saved in fit.final_support.per_client. Final CE/accuracy exactly equal existing postfit score. The very large finite norms are a material diagnostic observation,not evidence of a practical well-conditioned head or a finite attained optimum of unregularized separable CE.
+
+O10=32.725%,native reference0%;P2000=23.55%,raw q2000=.719633305,delta2000=23.55pp. Fit>=95%,q>=.50,delta>=10pp: **formal persistence gate closes positively**.
+
+All per-client Procrustes residuals,orthogonality and transform hashes unchanged exactly from H03-C. Nonreference residuals before130.5607–148.6300,after15.7515–130.3321;reductions11.8164–87.9355%;max orthogonality double<4.398e-12/applied<4.257e-6,client0identity. Full arrays/hashes in final.json, H03-C RESULTS.md also tabulates unchanged values.
+
+Interpretation: the fixed extended solver demonstrates100% fit in the unchanged aligned space, so H03-C's79.1% fit was not a structural inability to fit this support. Missing accuracy remains23.55pp above the adequately fit native reference,recovering71.96% of the fixed oracle gap and satisfying the predeclared persistence criterion. Stronger fitting slightly reduces missing accuracy from25.75% to23.55%;fit improvement itself is not the causal transfer evidence. Very large unregularized head norms and low seen accuracy remain limitations of this diagnostic. Stop and await lead instruction;anchor compression is a possible next lead-assigned block,not executed here.
+
+Evidence `research_log/H03D/gate/`: RESULTS.md,verification.json,raw per-client fit/test/state diagnostics,meta/run/log/test receipts. Remote originals/checkpoints `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-211835-h03d-convexity`. No failed run. Ddrive64KB constraint repaired by evicting one verified identical ignored old checkpoint cache;remote original retained and exactSHA logged in progress.md.
