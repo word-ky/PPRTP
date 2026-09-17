@@ -290,3 +290,34 @@ Report round2 as a secondary diagnostic; make the branch decision from round10 o
 Append `CODEX REPORT H02-E` with STATUS, source SHA, commands/run IDs, tests, deterministic held-out index provenance and disjointness hashes, online/state/RNG equivalence, round2/round10 metrics and fit diagnostics, fixed H02-C/D references, computed `q_hold`, artifact locations, and a concise interpretation following the frozen branch.
 
 Do **not** implement Procrustes, relational transport, multi-prototype methods, new losses, or H03 in this block. Await research-lead review after this single control.
+
+## CODEX REPORT H02-E — DONE (2026-09-17 18:32 +08)
+
+STATUS: DONE. Source `db1be82a0cdce75961a002ad78fc1cf486972d84`; successful run `20260917-183036-h02e-heldout`, release `20260917-183006-h02e`, exit0. Seed0 only,10 online rounds, diagnostic2/10 only. No Procrustes/relational transport/multi-prototype/new loss/H03 implemented.
+
+Files: `pprtp/heldout.py`, opt-in `--heldout-owner-probe` integration in `pprtp/run.py`, explicit module-mode preservation assertion in reused `owner_probe.py`, `tests/test_heldout.py`, `scripts/report_h02e.py`. Reuses original PFLlib online path and existing frozen-feature/full-batch LBFGS routine. One zero-initialized copied512→10 head; lr1(default),max_iter100,strong_wolfe,tolerance_grad1e-9,tolerance_change1e-12,no regularization or tuning.
+
+Exact commands (project root; AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h02e
+./scripts/autodl-run.ps1 -Name h02e-heldout -Cmd 'PPRTP_SOURCE_SHA=db1be82a0cdce75961a002ad78fc1cf486972d84 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --heldout-owner-probe'
+D:\anaconda3\python.exe scripts/report_h02e.py research_log/H02E/full
+```
+
+18 tests pass locally/remotely, including all H02-D tests unchanged. Deterministic assignment RNG271828, class ascending then owner client ascending.100 fresh images/owned class,200/client,2000total,200/global class. Every raw image assigned to exactly one client. Excluded union of all frozen client-training indices and all H02-C oracle-calibration indices. Official CIFAR10(train=True) only, exact previous normalization/no augmentation. Test images/labels enter evaluation only; existing test-label perturbation test confirms fitted head unchanged. Assignment hash `2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073`. Every assigned index/count/source recorded in `research_log/H02E/full/artifacts/experiment/fedgh_seed0/heldout_owner_support.json`; reporting independently verifies hash and train/oracle/cross-client disjointness.
+
+All10 ordinary online H02-A client/prototype/server hashes and metrics match exactly. Probe records/asserts identical client parameter+buffer states, per-client prototypes, persistent server state, module training modes, CPU/CUDA RNG before/after. All extracted features/losses/gradients/logits/fitted parameters finite. Per-client class counts/correct counts and metrics, fit CE/accuracy before/after, norms/hashes, optimizer counts and side-effect receipts retained in `research_log/H02E/full/artifacts/experiment/fedgh_seed0/rounds.jsonl`. Independent verification and summary in `research_log/H02E/full/verification.json` and `RESULTS.md`.
+
+Seed0 accuracy %, mean over10 clients:
+
+| Round | Readout | Seen | Missing | All | Macro | Fit CE before→after | Fit accuracy before→after | LBFGS iter/eval |
+|---|---|---:|---:|---:|---:|---|---|---|
+| 2 | heldout_owner_probe | 71.75 | .0875 | 14.42 | 14.42 | 2.30258393→5.30481259e-9 | 10%→100% | 94/115 |
+| 10 | heldout_owner_probe | 72.60 | 0 | 14.52 | 14.52 | 2.30258393→.225471973 | 10%→89.95% | 100/108 |
+
+Fixed references reused, not rerun: H02-D owner-sample missing round2=.2125%,round10=0%; H02-C shared-oracle missing round2=31.45%,round10=32.725%. Round10 H=0%, so **q_hold=H/32.725=0**, selecting the frozen q_hold≤.20 branch. Fresh disjoint owner support still recovers none of the demonstrated oracle gap. Thus local-training-sample reuse is not supported as the explanation for failure under this protocol. Following the preregistration, stop H02; the next justified experiment for lead consideration is a minimal correspondence-calibration upper bound, not a complex relational architecture. No such next experiment was implemented.
+
+Limitations: single seed/small CIFAR subset; round10 LBFGS reaches100iteration cap with89.95% training accuracy, so no certified converged optimum or definitive causal mechanism is claimed. Round2 fits100% yet missing test accuracy is only.0875%. Low fit accuracy was reported, not tuned away; the all-class oracle comparison retains support/sample-count differences. These limits qualify the branch interpretation.
+
+Operational failures: initial Git fetch hit full D drive. Evicted only an ignored duplicate smoke checkpoint after exact remote/local SHA match (path/hash in progress; remote original retained), then fetch succeeded. Default SCP upload closed once; existing legacy-SCP retry succeeded. No failed experiment/nonfinite result. Full checkpoints remain under `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-183036-h02e-heldout`; compact JSON/logs local. Await research-lead review.

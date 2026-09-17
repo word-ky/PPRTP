@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-183036-h02e-heldout",
+  "releaseId": "20260917-183006-h02e",
+  "sessionName": "autodl-20260917-183036-h02e-heldout",
+  "command": "PPRTP_SOURCE_SHA=db1be82a0cdce75961a002ad78fc1cf486972d84 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --heldout-owner-probe"
+}
