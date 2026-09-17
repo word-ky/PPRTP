@@ -263,3 +263,32 @@ No accuracy-driven hyperparameter search. Preserve a negative result.
 ## Deliverable
 
 Append `CODEX REPORT H02-B` with STATUS, source SHA, exact command/run ID, tests, seed0 round2/round10 online-vs-probe table, prototype-fit CE/accuracy, hash side-effect receipts, and a short interpretation strictly following the decision rule. Do not independently begin H02-C.
+## CODEX REPORT H02-B — DONE (2026-09-17 15:10 +08)
+
+- Source SHA `0cea063df83981845df61f5857b6df9b562ee00f` (probe implementation `2307984`). STATUS: DONE. Seed0 only,10 rounds; no H02-C started.
+- Added opt-in `--probe-head` to existing FedGH, copied-head LBFGS in `pprtp/fedgh.py`, isolated-fit test, and `scripts/report_h02b.py`. Online SGD/broadcast, data/model, all H02-A diagnostics remain unchanged. Frozen LBFGS full batch20, default lr1, max_iter100, strong_wolfe, tolerance_grad1e-9/tolerance_change1e-12, no regularizer.
+- 13 tests pass locally and remotely. Deterministic separable toy prototype CE falls by >99%, accuracy≥95%, source head and source-feature gradients unchanged. Every real round verifies exact H02-A online client-model/prototype/server hashes and metrics, plus identical client full-model and persistent-server hashes before/after fitting and evaluating the probe. All ten rounds pass; all prototype fits reach100%. No nonfinite values encountered.
+- Successful run `20260917-150905-h02b-probe2`, release `20260917-150847-h02b-json-retry`, exit0. Full JSON/logs and verification in `research_log/H02B/full`; remote checkpoint originals under `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-150905-h02b-probe2`.
+
+Exact successful commands (project root, configured AUTODL_CONFIG_PATH):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h02b-json-retry
+./scripts/autodl-run.ps1 -Name h02b-probe2 -Cmd 'PPRTP_SOURCE_SHA=0cea063df83981845df61f5857b6df9b562ee00f bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --probe-head'
+D:\anaconda3\python.exe scripts/report_h02b.py research_log/H02B/full
+```
+
+Seed0 accuracy in percent (no multi-seed SD):
+
+| Round | Readout | Seen | Missing | All | Macro |
+|---|---|---:|---:|---:|---:|
+| 2 | global_head_post_server | 52.95 | 0 | 10.59 | 10.59 |
+| 2 | probe_head_postfit | 64.35 | .0125 | 12.88 | 12.88 |
+| 10 | global_head_post_server | 50.00 | 0 | 10.00 | 10.00 |
+| 10 | probe_head_postfit | 65.20 | 0 | 13.04 | 13.04 |
+
+Round2 uploaded-prototype CE2.17908669→5.96046412e-9, accuracy60%→100%; LBFGS33 iterations/56 evaluations. Round10 CE.916397572→7.7486014e-8, accuracy50%→100%;34 iterations/77 evaluations. PyTorch does not expose a distinct termination-reason field; recorded available counts rather than claiming a convergence certificate. All ten round fit trajectories, parameter norms/hashes and side-effect receipts are retained in JSON. Owner cosine round2 mean/min/max=.907416/.885563/.924862; round10=.606158/.497890/.723193. Unchanged from H02-A.
+
+Failures preserved: initial run `20260917-150642-h02b-probe`, source2307984, stopped before probe fitting because in-memory sample_order tuples compared unequal to historical JSON lists. Fixed only comparison serialization (JSON round trip); no numeric tolerance or removed keys. Model/prototype/metrics had already matched. Failed log in `research_log/H02B/failed/train.log`; remote run retained. Deployment `20260917-150759-h02b-json` then hit SSH timeout during extraction; clean retry above succeeded, no duplicate experiment started.
+
+Interpretation under the preregistered rule: the copied linear head fits all20 transmitted anchors perfectly, yet missing test accuracy remains approximately0 (round2 .0125%, round10 exactly0). Improved all-class accuracy is driven by seen classes, not useful missing-class transfer. Thus underfitting the uploaded anchors is not the main explanation for zero missing accuracy in these fixed states. This supports inspecting the clients' representation ceiling with an analysis-only all-class oracle probe next, as specified by the research lead. It does not establish that coordinate drift alone is causal, or that any relational method must work. No optimizer tuning, online adequate-head replacement, other seeds or H02-C executed. Await research-lead assignment.

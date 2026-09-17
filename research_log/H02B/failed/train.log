@@ -1,0 +1,37 @@
+[autodl] run_id=20260917-150642-h02b-probe
+[autodl] started_at=2026-09-17T15:06:47+08:00
+test_unmodified_upstream_two_rounds (test_baseline.BaselineTest.test_unmodified_upstream_two_rounds) ... ok
+test_known_metrics (test_data_metrics.DataMetricTests.test_known_metrics) ... ok
+test_partition_disjoint_complete_and_reproducible (test_data_metrics.DataMetricTests.test_partition_disjoint_complete_and_reproducible) ... ok
+test_probe_separable_and_side_effect_free (test_fedgh.FedGHTest.test_probe_separable_and_side_effect_free) ... ok
+test_server_update_detach_broadcast_and_all_classes (test_fedgh.FedGHTest.test_server_update_detach_broadcast_and_all_classes) ... ok
+test_denominator_and_detachment (test_h01c.H01CTests.test_denominator_and_detachment) ... ok
+test_owner_cosine (test_h01c.H01CTests.test_owner_cosine) ... ok
+test_same_tensor_direction_matches_direct_autograd (test_h01c.H01CTests.test_same_tensor_direction_matches_direct_autograd) ... ok
+test_missing_class_changes_gpc_loss_and_gradient_only (test_mechanism.MechanismTests.test_missing_class_changes_gpc_loss_and_gradient_only) ... ok
+test_round_one_pairing_all_modes_and_grad_ratio (test_mechanism.MechanismTests.test_round_one_pairing_all_modes_and_grad_ratio) ... ok
+test_sample_weighted_aggregation (test_mechanism.MechanismTests.test_sample_weighted_aggregation) ... ok
+test_training_parity_with_unmodified_upstream (test_mechanism.MechanismTests.test_training_parity_with_unmodified_upstream) ... ok
+test_validity_and_noncontiguous_labels (test_mechanism.MechanismTests.test_validity_and_noncontiguous_labels) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.511s
+
+OK
+/home/wenchang/anaconda3/envs/python3.12-tk2-2.3/lib/python3.12/site-packages/torch/cuda/__init__.py:654: UserWarning: Can't initialize NVML
+  warnings.warn("Can't initialize NVML")
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/wenchang/asdasdsad/wjq/PPRTP/releases/20260917-150625-h02b/pprtp/run.py", line 256, in <module>
+    main()
+  File "/home/wenchang/asdasdsad/wjq/PPRTP/releases/20260917-150625-h02b/pprtp/run.py", line 246, in main
+    run(cfg,mode,seed)
+  File "/home/wenchang/asdasdsad/wjq/PPRTP/releases/20260917-150625-h02b/pprtp/run.py", line 181, in run
+    assert record[key]==old[key], f'H02-A online mismatch: round {r+1}, {key}'
+           ^^^^^^^^^^^^^^^^^^^^^
+AssertionError: H02-A online mismatch: round 1, server_head
+Files already downloaded and verified
+Files already downloaded and verified
+[autodl] finished_at=2026-09-17T15:06:58+08:00
+[autodl] exit_code=1

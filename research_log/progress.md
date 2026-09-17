@@ -29,3 +29,6 @@ Synced ff7384d and read review16/H02-B. Added opt-in copied-head full-batch LBFG
 
 ## 2026-09-17 15:08 +08 — H02-B comparison serialization repair
 Initial run20260917-150642-h02b-probe exited1 before probe: round1 server_head comparison matched model/prototype/metrics but Python tuple sample_order compared unequal to JSON historical lists. Normalize the live record through JSON for equality (same persisted representation); retain all keys and exact values. No training/optimizer changes. Failed remote log retained. Prior implementation timestamp14:20 was based on heartbeat time; actual deployment15:06.
+
+## 2026-09-17 15:10 +08 — H02-B completed
+Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round online historical and side-effect checks pass; all20prototype fits100%. R2 probe missing.0125% all12.88%;R10 missing0% all13.04%. Anchors can be fit, missing-class test recognition remains absent. Initial record tuple/list mismatch and transient SSH deploy timeout repaired minimally; failed log preserved. Compact results and receipts under research_log/H02B; BRIDGE DONE. Await lead next task; no H02-C.

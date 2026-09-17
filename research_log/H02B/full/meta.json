@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-150905-h02b-probe2",
+  "releaseId": "20260917-150847-h02b-json-retry",
+  "sessionName": "autodl-20260917-150905-h02b-probe2",
+  "command": "PPRTP_SOURCE_SHA=0cea063df83981845df61f5857b6df9b562ee00f bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --probe-head"
+}
