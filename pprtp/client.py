@@ -16,8 +16,12 @@ def prototype_bank(protos, classes, reference):
     return bank.detach(), valid
 
 
-def knowledge_loss(z, y, bank, valid, mode, scale=10.):
+def knowledge_loss(z, y, bank, valid, mode, scale=10., class_set=None):
     bank = bank.detach()
+    if mode == "gpc_seen_match":
+        seen = torch.zeros_like(valid)
+        seen[class_set] = True
+        valid = valid & seen
     if mode == "local" or not valid.any():
         return z.sum() * 0
     assert ((y >= 0) & (y < len(bank))).all()
@@ -27,7 +31,7 @@ def knowledge_loss(z, y, bank, valid, mode, scale=10.):
         target = z.detach().clone()
         target[eligible] = bank[y[eligible]]
         return F.mse_loss(z, target)
-    if mode == "gpc":
+    if mode in ("gpc", "gpc_all_match", "gpc_seen_match"):
         if not eligible.any():
             return z.sum() * 0
         logits = scale * F.normalize(z[eligible], dim=1) @ F.normalize(bank, dim=1).T
@@ -65,7 +69,8 @@ class H01Client(clientProto):
                 z = self.model.base(x)
                 local = self.loss(self.model.head(z), y)
                 bank, valid = prototype_bank(self.global_protos, self.num_classes, z)
-                knowledge = knowledge_loss(z, y, bank, valid, self.mode, self.scale)
+                knowledge = knowledge_loss(z, y, bank, valid, self.mode, self.scale,
+                                           getattr(self, "class_set", None))
                 if self.diagnostic is None and self.id == 0:
                     grad = torch.autograd.grad(knowledge, tuple(self.model.base.parameters()),
                                                retain_graph=True, allow_unused=True)

@@ -22,6 +22,17 @@ def tensor_hash(tensors):
                                   for t in tensors)).hexdigest()
 
 
+def owner_compatibility(clients):
+    values = {}
+    for label in range(10):
+        owners = [c for c in clients if label in c.protos]
+        if len(owners) == 2:
+            values[label] = dict(owners=[c.id for c in owners], cosine=F.cosine_similarity(
+                owners[0].protos[label][None], owners[1].protos[label][None]).item())
+    cosines = [v['cosine'] for v in values.values()]
+    return dict(per_class=values, mean=float(np.mean(cosines)), min=min(cosines), max=max(cosines)) if cosines else None
+
+
 def check_round_one(records):
     reference = records[0]
     for record in records[1:]:
@@ -73,7 +84,8 @@ def run(cfg, mode, seed):
         algorithm=mode, mode=mode, scale=cfg.scale, dataset='Cifar10',device=cfg.device,
         save_folder_name='items',num_classes=10,batch_size=cfg.batch_size,
         local_learning_rate=cfg.lr,local_epochs=cfg.local_epochs,few_shot=0,
-        learning_rate_decay_gamma=1.,learning_rate_decay=False,lamda=cfg.lamda)
+        learning_rate_decay_gamma=1.,learning_rate_decay=False,
+        lamda=.002 if mode in ('gpc_all_match','gpc_seen_match') else cfg.lamda)
     clients=[]
     for i, ds in enumerate(datasets):
         client=H01Client(args,i,len(ds),len(test),train_slow=False,send_slow=False)
@@ -83,7 +95,7 @@ def run(cfg, mode, seed):
     # explicit client/round generators, independent of constructor/evaluation RNG.
     initial_hash=tensor_hash(args.model.state_dict().values())
     metadata=vars(cfg).copy()
-    metadata.update(mode=mode,seed=seed,source_sha=os.environ.get('PPRTP_SOURCE_SHA','unknown'),
+    metadata.update(mode=mode,seed=seed,lamda=args.lamda,source_sha=os.environ.get('PPRTP_SOURCE_SHA','unknown'),
         upstream_sha='0169ba7e412c9856a08bb3faefab1e35f538a3c1', torch=torch.__version__,
         cuda=torch.version.cuda, gpu=torch.cuda.get_device_name(cfg.device) if cfg.device.startswith('cuda') else None,
         model='PFLlib FedAvgCNN 512D', optimizer='SGD, no momentum/decay',
@@ -99,6 +111,7 @@ def run(cfg, mode, seed):
                 loader=DataLoader(datasets[i],batch_size=cfg.batch_size,shuffle=True,drop_last=False,generator=gen)
                 client.load_train_data=lambda loader=loader: loader
                 client.train()
+            compatibility=owner_compatibility(clients)
             protos=aggregate(clients)
             # All ten classes covered by construction. Missing validity remains
             # supported and unit-tested at the loss seam, but is not hidden here.
@@ -111,6 +124,7 @@ def run(cfg, mode, seed):
                               for metric in ('seen','missing','all','macro')}
                       for readout in ('head','cosine','l2')}
             record=dict(round=r+1,metrics=summary,per_client=per_client,
+                owner_prototype_compatibility=compatibility,
                 client_model_hashes=[tensor_hash(c.model.state_dict().values()) for c in clients],
                 prototype_bank_hash=tensor_hash([bank]),
                 losses=[c.losses for c in clients],diagnostic_client0=clients[0].diagnostic,
