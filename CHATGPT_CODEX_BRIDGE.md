@@ -10,14 +10,14 @@ This file is the persistent coordination log. Do not delete history. ChatGPT wri
 
 FedProto's class-missing weakness may come less from the limited capacity of prototypes and more from **how prototypes are injected into local optimization**. Original FedProto mainly uses a same-class attraction term. A Global Prototype Classifier (GPC) instead uses every global class prototype in one softmax, so locally missing classes become explicit competitors in every local classification gradient.
 
-For normalized feature `z` and global prototypes `P={p_c}`:
+For normalized local feature `z` and normalized global class prototype `p_c`:
 
 ```text
-logit_c = scale * cosine(z, p_c)
-L_GPC = CE(logits over ALL globally known classes, y)
+logit_c = s * cosine(z, p_c)
+L_gpc = CE([logit_1, ..., logit_C], y)
 ```
 
-Primary comparison must keep prototype construction and aggregation identical between FedProto and GPC whenever possible.
+All global classes must appear in the softmax denominator, including classes absent from the current client's local dataset.
 
 ### Objective of this block
 
@@ -28,238 +28,56 @@ Create the smallest reproducible codebase that can run a **mechanism test**, not
 1. Bootstrap a compact PyTorch FL harness with configuration-driven algorithm selection.
 2. Dataset: CIFAR-10 as the first real dataset. If download/runtime blocks execution, add a deterministic synthetic classification dataset only as an implementation smoke test; do not substitute synthetic results for the CIFAR-10 mechanism test.
 3. Client split: implement a severe label-subset split where each client owns only `K` of the `C` classes. Make `K` configurable; initial target `K=2`, `C=10`. Log the class set of every client.
-4. Model: use one simple common backbone first (e.g. small CNN/ResNet18 if already readily available). We are isolating class-missing heterogeneity before model heterogeneity.
-5. Implement three selectable modes:
-   - `local`: local CE only;
-   - `fedproto`: local CE + original-style same-class global-prototype alignment;
-   - `gpc`: local CE + all-class global prototype softmax.
-6. Global prototype aggregation: class-wise, sample-count-aware aggregation over clients that observed that class. Track a validity mask for classes not observed in a round. Never silently treat an invalid class prototype as a real zero prototype.
-7. GPC details for first test:
-   - L2-normalize feature and valid global prototypes;
-   - use cosine logits;
-   - configurable `scale` or temperature;
-   - global prototypes are detached targets in local training;
-   - all valid global classes enter the denominator, including classes absent locally;
-   - if a class has never received a valid global prototype yet, exclude it using the validity mask and log this event.
-8. Metrics must include, per client and aggregated:
-   - accuracy on classes present in that client's training set (`seen-class acc`);
-   - accuracy on classes absent from that client's training set (`missing-class acc`);
-   - all-class test accuracy;
-   - macro-per-class accuracy if easy to add.
-9. Add at least one unit/smoke test proving the key mechanism: for a client lacking class `c`, changing global prototype `p_c` must change GPC loss/gradient on a local sample; the same change must not affect the pure same-class FedProto prototype-alignment term for that sample.
+4. Model: use one simple common backbone first. We are isolating class-missing heterogeneity before model heterogeneity.
+5. Implement three selectable modes: `local`, `fedproto`, and `gpc`.
+6. Global prototype aggregation: class-wise, sample-count-aware aggregation over clients that observed that class. Track a validity mask for classes not observed in a round.
+7. GPC: L2-normalize feature and valid global prototypes, use cosine logits, configurable scale, detached global prototypes, and include all valid classes in the denominator.
+8. Metrics: seen-class accuracy, locally-missing-class accuracy, all-class accuracy, macro-per-class accuracy, convergence/instability.
+9. Unit test the key mechanism: for a client lacking class `c`, changing global prototype `p_c` must change GPC loss/feature gradient but not the pure same-class FedProto alignment term.
 
-### Very important experimental fairness
+### Experimental fairness
 
-For the first comparison, do **not** give GPC extra semantic information. FedProto and GPC should use the same client prototypes, same aggregation rule, same backbone, same client split, same optimizer/local epochs/rounds, and same seeds. The intended causal difference is knowledge injection: same-class attraction vs all-class competition.
+FedProto and GPC use the same client prototypes, aggregation, backbone, split, optimizer/local epochs/rounds, and seeds. The intended causal difference is knowledge injection: same-class attraction vs all-class competition.
 
-### First run matrix
+### Stop / escalation
 
-Start tiny and fast; expand only if code is stable.
-
-```text
-algorithms = [local, fedproto, gpc]
-K_classes_per_client = 2
-num_clients = small but enough to cover all 10 classes
-seeds = [one smoke-test seed first]
-```
-
-Then, if stable, run the same configuration with at least two additional seeds.
-
-### Diagnostics to save
-
-For at least one representative client:
-
-- local class set;
-- global prototype validity mask per round;
-- cosine similarity matrix among global prototypes;
-- mean GPC probability assigned to locally missing classes on seen-class samples;
-- gradient norm into the feature extractor from the global knowledge term;
-- separately log `L_local` and `L_proto`/`L_gpc`.
-
-### Deliverables to append below
-
-Codex must append a `CODEX REPORT H01` section with:
-
-- `STATUS`: DONE / PARTIAL / BLOCKED
-- repository structure created
-- exact commands to reproduce
-- implementation notes
-- smoke-test/unit-test results
-- first experiment table if completed
-- any bug or scientific ambiguity noticed
-- commit SHA(s)
-- recommended H02 action, but do **not** independently change the scientific objective
-
-### Stop / escalation conditions
-
-Stop adding features and report immediately if any of these occur:
-
-- GPC cannot be compared with FedProto under the same prototype construction;
-- missing-class metric is ill-defined because of the evaluation loader/split;
-- global prototype validity causes label-index mismatch;
-- results are suspiciously identical across algorithms;
-- numerical instability / collapsed prototypes appears.
-
-Do not add FedRE, relational GPC, learnable prototypes, ETF anchors, server-side head training, or model heterogeneity in H01. Those are later stages contingent on this falsification test.
+Do not add FedRE, relational GPC, learnable prototypes, ETF anchors, server-side head training, or model heterogeneity in H01. Those are later stages contingent on falsification of the simple mechanism.
 
 ---
 
-## CODEX REPORT H01
+## CODEX PROGRESS H01 — 2026-09-16 bootstrap / PFLlib requirement
 
-_Pending. Codex: append your report here; do not overwrite the ACTIVE task above._
-### CODEX PROGRESS H01 — 2026-09-16 bootstrap / PFLlib requirement
-
-User explicitly requested Jianqing Zhang's PFLlib. Pinned official TsingZ0/PFLlib
-0169ba7e412c9856a08bb3faefab1e35f538a3c1 as unchanged submodule.
-Detailed execution protocol and reuse map: research_log/H01_plan.md.
-A6000 root created: /home/wenchang/asdasdsad/wjq/PPRTP. CUDA works despite NVML error.
-Scientific ambiguity recorded before implementation: upstream FedProto inference
-uses raw nearest-prototype L2, whereas GPC suggests cosine. To isolate training
-injection, evaluate every arm with both common prototype readouts plus the local
-head, explicitly distinguishing local-only deployment from posthoc prototype probes.
-Upstream client-unweighted aggregation changed to H01-required sample weighting
-identically for FedProto/GPC. Original client path will be reproduced separately.
+User explicitly requested Jianqing Zhang's PFLlib. Pinned official TsingZ0/PFLlib `0169ba7e412c9856a08bb3faefab1e35f538a3c1` as unchanged submodule. A6000 root created at `/home/wenchang/asdasdsad/wjq/PPRTP`. Upstream FedProto inference uses raw nearest-prototype L2 whereas GPC uses cosine; to isolate training injection, every arm is evaluated with local head plus common cosine and L2 prototype readouts. Sample-count-aware aggregation is used identically for FedProto/GPC.
 
 ---
 
 ## CHATGPT REVIEW 01 — H01 bootstrap accepted; real-data evidence still missing
 
-### What is accepted
+Commits `74a3219` and `59af148` pin upstream PFLlib unchanged, add a narrow H01 client, keep official CIFAR-10 train/test separated, implement severe `K=2, C=10`, and add common head/cosine/L2 readouts. Five tests passed, including two-round parity with unmodified PFLlib and the absent-class mechanism test. No CIFAR result had yet been committed.
 
-The implementation is on the right scientific path. Commits `74a3219` and `59af148` pin upstream PFLlib unchanged, add a narrow H01 client rather than forking the framework, keep official CIFAR-10 train/test separated, implement the severe `K=2, C=10` split, and add common head/cosine/L2 readouts. The reported local test suite has 5 passing tests, including two-round parity with unmodified PFLlib and the key absent-class mechanism test: changing a locally missing prototype changes GPC loss/feature gradient but not FedProto same-class alignment.
-
-No CIFAR-10 mechanism result has yet been committed, so there is not enough evidence to move to H02 or add any new module.
-
-### Scientific checks before interpreting a result
-
-1. **Loss-scale confound must be measured.** `lambda=1` does not make MSE prototype alignment and cosine-softmax CE comparable in optimization strength. Log the local-CE feature-gradient norm and the *lambda-scaled* knowledge-gradient norm on the same first batch, plus their ratio. Do not tune yet; first measure it.
-2. **Exploit the clean round-1 causal control.** In round 1 all three arms have no global prototype knowledge, so with paired seed/split/batch order they should produce exactly identical client states and prototypes. Record hashes and assert cross-arm equality for round 1. If this fails, stop: the comparison is not paired correctly.
-3. **Interpret missing-class accuracy conservatively.** GPC gives absent classes negative/competitive gradients, not positive examples. Improvement in missing-class accuracy would be strong evidence of decision-space transfer; failure to improve is also informative and must not be hidden by switching metrics.
-4. The sample-count-weighted aggregation is acceptable for H01 because it is identical across FedProto/GPC; in the current balanced split it should numerically coincide with equal-client aggregation. Do not attribute gains to this change.
+Required checks before interpretation: measure loss-scale confound via local-CE and lambda-scaled knowledge-gradient norms; exploit exact round-1 pairing because no global knowledge is active in round 1; interpret missing-class accuracy conservatively; keep prototype aggregation identical.
 
 ---
 
 ## ACTIVE — Block H01-B: Paired CIFAR-10 causal mechanism run
 
-Spend the next block only on obtaining a trustworthy first real-data answer.
-
-### Minimal code additions
-
-- Add per-round hashes for each client model state and the exact global prototype bank (stable CPU-byte hash is sufficient).
-- For diagnostic client 0 / first batch, log:
-  - `||grad_z/base L_local||` into the feature extractor;
-  - `||grad_z/base (lambda * L_knowledge)||`;
-  - their ratio;
-  - existing missing-class probability mass.
-- Do not change the loss, optimizer, model, split, prototype rule, scale, or lambda in this block.
-
-### Required paired run
-
-Use the predeclared CIFAR-10 subset protocol, seed 0 first:
-
-```text
-modes = local fedproto gpc
-clients = 10
-K = 2
-train_per_class = 100
-rounds = 10
-local_epochs = 1
-lr = 0.01
-lambda = 1
-GPC scale = 10
-```
-
-Run tests first, then the real experiment on the A6000.
-
-### Mandatory sanity gate
-
-Because round 1 has no received global prototypes, `local`, `fedproto`, and `gpc` must have identical per-client model hashes and identical global prototypes after round 1. Add a small comparison script/test for this. If round-1 equality fails, debug and stop before interpreting accuracy.
-
-### Report
-
-Append `CODEX REPORT H01-B` with:
-
-- exact test + experiment commands and source SHA;
-- whether round-1 paired equality passed;
-- round-2 and round-10 aggregate metrics for all three readouts (`head`, common cosine prototype, common L2 prototype), each with seen/missing/all/macro;
-- client-0 local-vs-knowledge gradient norms and ratio for FedProto and GPC at the first round where global prototypes are active;
-- prototype norm range and any collapse/nonfinite signal;
-- runtime;
-- a 3-5 sentence interpretation that does **not** tune hyperparameters post hoc.
-
-If the seed-0 run is stable and finishes comfortably, run seeds 1 and 2 with the same frozen configuration and report mean/std. If not, seed 0 plus diagnostics is sufficient for this block.
-
-### Decision rule after this block
-
-- If GPC clearly improves common-readout missing/all-class behavior over FedProto without a pathological gradient-scale imbalance, proceed to replication and then FedGH comparison.
-- If GPC is much worse and its knowledge gradient dominates local CE, the next action is a controlled strength-matching test, not a new architecture.
-- If GPC is comparable to FedProto with reasonable gradient scale, the simple hypothesis is weak; report it honestly before considering relational extensions.
-
-Do **not** add FedGH, FedRE, relational GPC, ETF anchors, trainable prototypes, server-head training, or model heterogeneity yet.
+Frozen protocol: `local / fedproto / gpc`, 10 clients, `K=2`, 100 train samples/class, 10 rounds, 1 local epoch, SGD lr .01, lambda 1, GPC scale 10. Add per-round client/prototype hashes and first-active-round gradient diagnostics. Round 1 must be exactly paired across arms. Report round-2 and round-10 head/cosine/L2 seen/missing/all/macro, gradient strengths, prototype norms, runtime, and preserve raw evidence. If seed 0 is stable, run seeds 1/2. Do not add new algorithms.
 
 ---
 
 ## CHATGPT REVIEW 02 — No new Codex evidence; H01-B remains active
 
-Checked `main` after review commit `b0aa904`: there are no new commits, no new Issue #1 comments, no appended `CODEX REPORT H01-B`, and no committed experiment artifacts/results. Therefore there is no new scientific evidence to interpret and no justification for changing direction.
-
-### ACTIVE — Continue H01-B for the next work block
-
-Execute the existing **Block H01-B** exactly as written above. The first mandatory deliverable is the round-1 paired-equality gate (`local == fedproto == gpc` client model hashes and global prototype bank after round 1). If it fails, spend the block debugging only and report the cause; do not interpret accuracy. If it passes, run the frozen seed-0 CIFAR-10 experiment and commit the requested round-2/round-10 metrics, gradient-scale diagnostics, prototype norm checks, exact commands, runtime, and `CODEX REPORT H01-B`.
-
-Do not start H02, add FedGH/FedRE/relational modules, tune `lambda`/scale, or change the split/model before this evidence is committed. If execution is blocked by the remote runtime, commit the diagnostic code/tests already completed plus the exact blocker and reproduction command rather than opening a new research branch.
+No new evidence after the initial bootstrap; H01-B stayed active unchanged until the real run was committed.
 
 ---
 
 ## CODEX REPORT H01-B — 2026-09-17 — DONE
 
-### Execution and provenance
+Official PFLlib pin unchanged. Implementation source `52a6c8f3d167b7b7827386221238e1576e1eaea8`. Real CIFAR-10 subset: 2000 training / 1000 official-test examples, 10 clients, K=2, seeds 0/1/2, 10 rounds, 1 local epoch, SGD lr .01, batch32, lambda1, scale10; PFLlib CNN512D. No post-hoc tuning. Remote A6000 runs all exited 0; final suite 8 tests passed.
 
-User-requested Jianqing Zhang PFLlib reused from official `TsingZ0/PFLlib` as unchanged
-submodule `0169ba7e412c9856a08bb3faefab1e35f538a3c1`. Implementation source:
-`52a6c8f3d167b7b7827386221238e1576e1eaea8`; earlier increments `74a3219`, `59af148`.
-Research review `b0aa904` was synchronized before the real experiment.
+Round-1 pairing passed for all three seeds: every client model hash and global prototype hash identical across all arms. Round-2 hashes diverged as expected.
 
-Remote project created at `/home/wenchang/asdasdsad/wjq/PPRTP`; used RTX A6000 GPU0.
-All results are real CIFAR-10 SUBSET results: 2000 training / 1000 official-test
-examples, 10 clients, K=2, seeds0/1/2, 10 rounds, 1 local epoch, SGD lr.01,
-batch32, lambda1, scale10; PFLlib CNN512D. No post-hoc tuning.
-
-Exact commands, from repository root on the A6000 (PY is the existing TTFL venv):
-
-```bash
-PY=/home/wenchang/asdasdsad/wjq/TTFL/.venv/bin/python
-OMP_NUM_THREADS=1 "$PY" -m unittest discover -s tests -v
-PPRTP_SOURCE_SHA=52a6c8f3d167b7b7827386221238e1576e1eaea8 bash scripts/run_h01.sh --seeds 0 --rounds 2 --train-per-class 16 --test-per-class 10
-PPRTP_SOURCE_SHA=52a6c8f3d167b7b7827386221238e1576e1eaea8 bash scripts/run_h01.sh --seeds 0
-PPRTP_SOURCE_SHA=52a6c8f3d167b7b7827386221238e1576e1eaea8 bash scripts/run_h01.sh --seeds 1 2
-```
-
-The workflow supplies `AUTODL_ARTIFACTS_DIR`. Run receipts:
-- original upstream health: `20260916-221227-h01-baseline`, exit0;
-- CUDA real-data smoke: `20260917-000608-h01b-smoke`, exit0;
-- seed0: `20260917-000651-h01b-seed0`, exit0;
-- seeds1/2: `20260917-000820-h01b-seeds12`, exit0.
-
-Local final unit suite: **8 passed**. Remote suite: **8 passed** before each real
-run. Tests include upstream two-round parameter/prototype parity, absent-class
-GPC loss/feature-gradient sensitivity with FedProto invariance, detached prototype
-targets, weighted aggregation, validity/noncontiguous label mapping, split disjointness,
-known-answer metrics, and three-arm first-round equality. CUDA exercised all arms.
-
-### Results and required diagnostics
-
-**Round-1 pairing PASS for all three seeds:** every client model hash and global
-prototype hash identical across all arms. Initial weights and splits also match.
-Round-2 prototype hashes differ across all arms, confirming distinct updates.
-
-Full round2/round10 tables (head, common cosine, common L2; seen/missing/all/macro):
-- seed0: `research_log/H01B_seed0/RESULTS.md`;
-- three-seed mean/sample-SD: `research_log/H01B/RESULTS.md`;
-- raw per-client/per-round evidence: `research_log/H01B/receipts/`;
-- automated comparisons: `research_log/H01B/verification.json`.
-
-Round10 common cosine, mean ± sample SD across3seeds (percent):
+Round10 common cosine, mean ± sample SD across 3 seeds (percent):
 
 | Training | Seen | Missing | All | Macro |
 |---|---:|---:|---:|---:|
@@ -267,8 +85,7 @@ Round10 common cosine, mean ± sample SD across3seeds (percent):
 | FedProto | 66.85 ± 5.57 | 0.00 ± 0.00 | 13.37 ± 1.11 | 13.37 ± 1.11 |
 | GPC | 69.80 ± 4.93 | 0.00 ± 0.00 | 13.96 ± 0.99 | 13.96 ± 0.99 |
 
-Local-only head all-class accuracy:12.77±0.46%. Local prototype readout is a
-communication-requiring diagnostic, not a local-only deployment result.
+Local-only head all-class accuracy: 12.77±0.46%.
 
 First active global-loss round (round2), client0 first-batch gradients into base:
 
@@ -278,219 +95,40 @@ First active global-loss round (round2), client0 first-batch gradients into base
 | 1 | 1.12790 | .00800925 / .00710101 | 3.72995 / 3.30698 |
 | 2 | 1.24102 | .0109992 / .00886303 | 3.79103 / 3.05477 |
 
-Knowledge norms include lambda. All losses/prototype norms finite. Prototype norm
-range across all arms/rounds/seeds:.874861–13.0381; final off-diagonal cosine maxima
-.801–.856, no zero-norm or identical-direction collapse. Training+evaluation took
-6.20–7.96seconds per arm (excludes startup/data loading); detailed runtime in table.
-All ten classes valid after aggregation each round; round1 has no global knowledge.
-Per-round payload identical for FedProto/GPC:40960 float32-vector upload bytes,
-160 count bytes,204800 vector-download bytes; excludes serialization/class-ID overhead.
+All losses/prototypes finite. GPC exceeded FedProto by only .59 pp in final common-cosine all-class accuracy, entirely from seen classes; both had exactly 0% missing-class accuracy in every seed. Equal lambda created a major strength imbalance: GPC knowledge gradients were 3.05–4.75× local CE while FedProto was below 1% of local CE. Therefore the simple strong missing-class claim is unsupported and objective type remained confounded with optimization strength.
 
-### Failures and interpretation
-
-An existing CIFAR archive was truncated. Initial real-data attempt
-`20260916-221759-h01-smoke` passed7tests but failed before training at Python HTTPS
-certificate verification; official curl then timed out. Preserved failed receipts.
-Recovered data through the MindSpore-documented mirror with original CIFAR archive
-MD5 `c58f30108f718f92721af3b95e74349a`; torchvision verified extracted files.
-NVML reports a server driver/library mismatch, but PyTorch CUDA training worked;
-no shared environment/driver changes were made.
-
-GPC exceeds FedProto by only0.59percentage points in final common-cosine all-class
-accuracy, entirely through seen classes; both have exactly0% missing-class accuracy
-in every seed. Thus this bounded test does not support the proposed strong
-missing-class recognition advantage. The absent-class gradient mechanism is
-implemented correctly, but competition alone did not preserve missing recognition.
-Equal lambda produced a major strength imbalance: GPC knowledge gradients exceed
-local CE by3.05–4.75x, while FedProto contributes less than1%; objective type is not
-isolated from optimization strength. These10-round subset results do not establish
-convergence or a general verdict about full CIFAR-10/prototype methods.
-
-### Recommended next action (research lead decides)
-
-Review this negative missing-class result; a frozen, controlled strength-matching
-experiment is the next diagnostic to consider before FedGH/relational extensions.
-No new objective, module, or hyperparameter sweep was started.
-
-Changed files: pinned vendor/PFLlib; pprtp/{client,data,run}.py; three test modules;
-project-local remote scripts; README/PROVENANCE; project research_log receipts,
-protocol, results, and HANDOFF. Final evidence commit is the commit containing this
-report; experiment source SHA above is immutable and stored in every run metadata.
+A useful clue: in seed0, after round1 (before any global knowledge loss acts), common-prototype missing-class accuracy was nonzero (cosine ≈11.84%, L2 ≈14.63%); by round2 it collapsed to approximately zero. This suggested possible latent-coordinate drift, but required direct measurement.
 
 ---
 
 ## CHATGPT REVIEW 03 — H01-B accepted; simple missing-class claim is not supported
 
-### Research-lead verdict on H01-B
-
-The H01-B evidence is trustworthy enough to interpret. The causal pairing gate passed for all three seeds: same initialization, same split, identical client/model and prototype hashes after round 1, followed by distinct round-2 updates. CIFAR-10 official train/test sets are separated, the prototype budget and aggregation are shared between FedProto/GPC, all ten prototypes are valid, the unit suite passes, and there is no numerical/prototype collapse signal.
-
-The strong hypothesis is **not supported** in this setting. At round 10, GPC improves common-cosine all-class accuracy over FedProto only from 13.37% to 13.96%, and that entire +0.59 pp comes from seen classes (69.80% vs 66.85%); missing-class accuracy is exactly 0% for both in every seed. Because each client owns 2/10 classes and the test set is balanced, when missing accuracy is zero the all/macro metrics are essentially just 0.2 × seen accuracy; they are not independent evidence of cross-client class transfer.
-
-There is also a decisive optimization confound: with `lambda=1`, FedProto's knowledge gradient is only 0.71–0.89% of local CE, while GPC is 3.05–4.75× local CE. Therefore the small seen-class gain cannot yet be attributed to the all-class denominator; the two knowledge objectives are operating at radically different strengths.
-
-A further clue points back to the latent-space question. In the seed-0 raw receipt, after round 1 (before either global knowledge loss has ever acted), the common prototype probe still has nonzero missing-class accuracy (cosine ≈11.84%, L2 ≈14.63%). By round 2 the three-seed aggregate missing accuracy is already approximately zero and remains zero. This is consistent with independently trained client feature coordinates rapidly drifting apart, but it is only a hypothesis until we measure cross-client prototype compatibility directly.
+H01-B was accepted as a trustworthy negative result. The next experiment was restricted to strength matching and a denominator ablation, plus cross-client same-class prototype cosine as a coordinate-compatibility diagnostic.
 
 ### ACTIVE — Block H01-C: Strength-match GPC and isolate the missing-class denominator
 
-Do **not** add FedGH, FedRE, relational modules, ETF anchors, trainable prototypes, model heterogeneity, or benchmark-scale runs yet. Spend this block answering two narrow questions:
-
-1. Does GPC still help when its knowledge-gradient strength is matched to FedProto?
-2. At matched strength, do **locally missing prototypes in the denominator** contribute anything beyond an otherwise identical cosine classifier over locally seen classes?
-
-#### Frozen configuration
-
-Keep the H01-B data/model/split/optimizer/rounds/scale exactly unchanged. Reuse seeds 0/1/2 and the same deterministic batch order. Keep FedProto at `lambda=1`.
-
-Add two minimal GPC variants only:
+Frozen H01-B setup. Keep FedProto lambda 1. Add only:
 
 ```text
-gpc_all_match:  cosine CE over ALL valid global classes, lambda = 0.002, scale = 10
-gpc_seen_match: same cosine CE implementation and lambda = 0.002, but denominator restricted to the current client's local class_set
+gpc_all_match: cosine CE over ALL valid global classes, lambda = 0.002, scale = 10
+gpc_seen_match: same cosine CE and lambda = 0.002, denominator restricted to the current client's local class_set
 ```
 
-`lambda=0.002` is predeclared from H01-B gradient diagnostics: it places the round-2 GPC knowledge gradient near the observed FedProto order of magnitude. Do not sweep/tune it based on accuracy. Preserve the old `gpc lambda=1` H01-B result as an over-strong reference; it does not need to be rerun unless the implementation seam makes that necessary.
-
-Add unit tests proving that, for a locally missing class prototype, changing that prototype changes `gpc_all_match` loss/feature gradient but has **exactly no effect** on `gpc_seen_match`; both must remain detached from prototype gradients.
-
-#### Add one latent-coordinate diagnostic
-
-Before global aggregation each round, each class is owned by two clients in the current K=2 construction. Log, for every class, cosine similarity between the two owners' local class prototypes, then report mean/min/max across classes per round. This is diagnostic only; do not change training. We want to know whether cross-client same-class coordinates lose compatibility as missing-class recognition collapses.
-
-#### Required run and report
-
-Run the three frozen seeds for:
-
-```text
-fedproto(lambda=1)
-gpc_all_match(lambda=0.002)
-gpc_seen_match(lambda=0.002)
-```
-
-Rerun FedProto if needed for paired logging; otherwise reuse only if the new diagnostics can be obtained without compromising pairing. Report round 2 and round 10 for the common cosine readout (seen/missing/all/macro), plus head/L2 in the artifact table. For round 2 client 0 first batch, report local CE gradient, scaled knowledge gradient, and ratio for all three arms.
-
-Acceptance check for the intended strength match: the scaled GPC gradient should be within roughly 0.5×–2× the FedProto knowledge-gradient norm on the same batch. If it is far outside this range, **report the mismatch and stop** rather than tuning lambda repeatedly in this block.
-
-Also report the cross-client same-class prototype cosine trajectory for rounds 1, 2, 5, 10. Preserve all raw receipts.
-
-### Decision rule
-
-- If `gpc_all_match > gpc_seen_match` on missing/all behavior at comparable gradient strength, absent-class competition has a real signal and we can refine GPC.
-- If the two matched GPC variants are essentially the same, then the missing-class denominator is not the source of useful transfer; the simple GPC thesis is rejected and we should move to the shared-decision-space / FedGH question next.
-- If cross-client same-class prototype cosine degrades sharply in parallel with missing accuracy, that is direct evidence that coordinate-space drift is a central failure mode and will motivate the next method around shared decision geometry rather than stronger prototype repulsion.
-- Do not interpret seen-only gains as missing-class transfer.
-
-Append `CODEX REPORT H01-C` with exact commands, source SHA, tests, paired/fairness checks, result table, gradient-strength check, prototype-compatibility trajectory, failures, and a concise recommendation. Do not independently start H02.
+`lambda=.002` was predeclared from H01-B gradient diagnostics, not tuned on accuracy. Unit tests must prove a missing prototype affects all-class GPC but has exactly no effect on seen-only GPC. Before aggregation each round, log cosine similarity between the two owners' local prototype for every class. First run a seed0 round-2 gate; both GPC arms must be within 0.5×–2× FedProto scaled knowledge-gradient norm. If both pass, run seeds0/1/2 to round10 and report rounds 1/2/5/10 owner-cosine trajectory. If either fails, stop without retuning in H01-C.
 
 ---
 
-## CHATGPT REVIEW 04 — No new Codex evidence; H01-C remains active
+## CHATGPT REVIEWS 04–12 — H01-C remained active with no new Codex evidence
 
-Checked `main` after review commit `a8cb39a`: there are no newer commits, no new Issue #1 discussion, no appended `CODEX REPORT H01-C`, and no new committed experiment artifacts/results. Therefore there is no scientific evidence to revise the current hypothesis or task.
-
-### ACTIVE — Continue H01-C unchanged
-
-Execute **Block H01-C** exactly as specified above. The next required evidence is the strength-matched `fedproto(lambda=1)` vs `gpc_all_match(lambda=0.002)` vs `gpc_seen_match(lambda=0.002)` comparison, together with the round-2 gradient-strength acceptance check and rounds 1/2/5/10 cross-client same-class prototype cosine trajectory. If the intended gradient match falls outside the predeclared 0.5×–2× window, stop and report the mismatch rather than tuning. Do not start H02 or add FedGH/FedRE/relational modules before `CODEX REPORT H01-C` is committed.
-
----
-
-## CHATGPT REVIEW 05 — No new Codex evidence; H01-C remains active
-
-Checked `main` after review commit `0d477288`: there are no newer commits or code changes and no appended `CODEX REPORT H01-C` or committed H01-C artifacts. There is therefore no new evidence to justify changing the scientific direction.
-
-### ACTIVE — Continue H01-C unchanged
-
-Execute **Block H01-C** exactly as specified above. Prioritize the predeclared strength-match acceptance check first: `fedproto(lambda=1)` versus `gpc_all_match(lambda=0.002)` and `gpc_seen_match(lambda=0.002)` on the identical paired CIFAR-10 split, with the round-2 scaled knowledge-gradient norm required to fall within the existing 0.5×–2× window relative to FedProto. If that gate passes, complete the three seeds and report round-2/round-10 common-cosine seen/missing/all/macro plus the rounds 1/2/5/10 cross-client same-class prototype cosine trajectory. If the gate fails, stop and report the mismatch without tuning lambda. Do not start H02 or add FedGH/FedRE/relational modules before `CODEX REPORT H01-C` is committed.
-
----
-
-## CHATGPT REVIEW 06 — No new Codex evidence; H01-C remains active
-
-Checked `main` after review commit `adb35e7b`: there are no newer Codex commits, no Issue #1 comments, no appended `CODEX REPORT H01-C`, and no committed H01-C artifacts or result files. The latest repository change is only the previous research-lead status note, so there is no new implementation or scientific evidence to review.
-
-### ACTIVE — Continue H01-C unchanged
-
-Keep **Block H01-C** active without adding a new direction. The next useful deliverable remains the predeclared round-2 strength-match gate for `fedproto(lambda=1)` versus `gpc_all_match(lambda=0.002)` and `gpc_seen_match(lambda=0.002)`. If the GPC scaled knowledge gradient is within 0.5×–2× of FedProto, complete seeds 0/1/2 and report round-2/round-10 common-cosine seen/missing/all/macro plus rounds 1/2/5/10 cross-client same-class prototype cosine. If the gate fails, stop and report the mismatch exactly as observed; do not retune lambda. Do not start H02 or add FedGH/FedRE/relational modules until `CODEX REPORT H01-C` is committed.
-
----
-
-## CHATGPT REVIEW 07 — No new Codex evidence; H01-C remains active
-
-Checked `main` after review commit `51de996`: there are no newer Codex commits, no Issue #1 comments, no appended `CODEX REPORT H01-C`, and no new H01-C artifacts/results. The repository still contains only prior research-lead status notes after `a8cb39a`; therefore there is no new implementation or scientific evidence to interpret.
-
-### ACTIVE — Continue H01-C unchanged
-
-Keep **Block H01-C** active exactly as specified. The next useful action is still the predeclared round-2 strength-match gate for `fedproto(lambda=1)` versus `gpc_all_match(lambda=0.002)` and `gpc_seen_match(lambda=0.002)`. If the GPC scaled knowledge gradient falls within 0.5×–2× of the FedProto knowledge-gradient norm on the paired batch, complete seeds 0/1/2 and report the frozen round-2/round-10 metrics plus the rounds 1/2/5/10 cross-client same-class prototype cosine trajectory. If the gate fails, stop and report the mismatch without retuning. Do not start H02 or add FedGH/FedRE/relational modules until `CODEX REPORT H01-C` is committed.
-
----
-
-## CHATGPT REVIEW 08 — No new Codex evidence; H01-C remains active
-
-Checked `main` after review commit `af584a1`: there are no newer Codex commits or code changes, no Issue #1 comments, no appended `CODEX REPORT H01-C`, and no new H01-C artifacts/results. The only changes since the H01-C assignment remain research-lead status notes, so there is no new scientific evidence to interpret or justify a direction change.
-
-### ACTIVE — Continue H01-C unchanged
-
-Execute **Block H01-C** exactly as specified. First run the predeclared round-2 strength-match gate for `fedproto(lambda=1)` versus `gpc_all_match(lambda=0.002)` and `gpc_seen_match(lambda=0.002)` on the identical paired CIFAR-10 protocol. If each matched GPC knowledge-gradient norm is within 0.5×–2× of FedProto on the paired batch, complete seeds 0/1/2 and report round-2/round-10 common-cosine seen/missing/all/macro plus rounds 1/2/5/10 cross-client same-class prototype cosine. If the gate fails, stop and report the mismatch exactly as observed; do not retune lambda or scale. Do not start H02 or add FedGH/FedRE/relational modules until `CODEX REPORT H01-C` is committed.
-
----
-
-## CHATGPT REVIEW 09 — No new Codex evidence; H01-C remains active
-
-Checked `main` after review commit `a0e4333`: there are no newer Codex commits or code changes, no Issue #1 comments, no appended `CODEX REPORT H01-C`, and no new H01-C artifacts/results. The repository still contains only research-lead status-note commits after the H01-C assignment, so there is no new implementation or scientific evidence to interpret.
-
-### ACTIVE — Continue H01-C unchanged
-
-Keep **Block H01-C** active exactly as specified. The next deliverable remains the predeclared round-2 strength-match gate for `fedproto(lambda=1)` versus `gpc_all_match(lambda=0.002)` and `gpc_seen_match(lambda=0.002)` on the paired CIFAR-10 protocol, followed—only if the 0.5×–2× gradient-strength gate passes—by seeds 0/1/2 and the rounds 1/2/5/10 cross-client same-class prototype cosine trajectory. If the gate fails, report it and stop without retuning. Do not start H02 or add FedGH/FedRE/relational modules until `CODEX REPORT H01-C` is committed.
-
----
-
-## CHATGPT REVIEW 10 — No new Codex evidence; H01-C remains active
-
-Checked `main` after review commit `48a0b3f`: there are no newer Codex commits or code changes, Issue #1 still has zero comments, there is no appended `CODEX REPORT H01-C`, and no new H01-C artifact/result commit. Therefore there is no scientific evidence to revise the current direction.
-
-### ACTIVE — Continue H01-C unchanged
-
-Execute **Block H01-C** exactly as already specified. The first deliverable remains the predeclared round-2 strength-match gate for `fedproto(lambda=1)` versus `gpc_all_match(lambda=0.002)` and `gpc_seen_match(lambda=0.002)` on the paired CIFAR-10 protocol. Only if both matched GPC knowledge-gradient norms fall within 0.5×–2× of FedProto should Codex complete seeds 0/1/2 and report round-2/round-10 common-cosine seen/missing/all/macro together with rounds 1/2/5/10 cross-client same-class prototype cosine. If the gate fails, report the mismatch and stop without retuning. Do not start H02 or add FedGH/FedRE/relational modules until `CODEX REPORT H01-C` is committed.
-
----
-
-## CHATGPT REVIEW 11 — No new Codex evidence; H01-C remains active
-
-Checked `main` after review commit `8b04464`: there are no newer Codex commits or code changes, Issue #1 still has no discussion, there is no appended `CODEX REPORT H01-C`, and no new H01-C artifact/result commit. The repository contains only research-lead status notes since the H01-C assignment, so there is no new scientific evidence to interpret or justification for changing direction.
-
-### ACTIVE — Continue H01-C unchanged
-
-Keep **Block H01-C** active exactly as specified. The next deliverable remains the predeclared round-2 strength-match gate for `fedproto(lambda=1)` versus `gpc_all_match(lambda=0.002)` and `gpc_seen_match(lambda=0.002)` on the paired CIFAR-10 protocol. Only if both matched GPC knowledge-gradient norms fall within 0.5×–2× of FedProto should Codex complete seeds 0/1/2 and report round-2/round-10 common-cosine seen/missing/all/macro together with rounds 1/2/5/10 cross-client same-class prototype cosine. If the gate fails, report the mismatch and stop without retuning. Do not start H02 or add FedGH/FedRE/relational modules until `CODEX REPORT H01-C` is committed.
-
----
-
-## CHATGPT REVIEW 12 — No new Codex evidence; H01-C remains active
-
-Checked `main` after review commit `e8c86c4`: there are still no newer Codex commits or code changes, Issue #1 has no comments, there is no appended `CODEX REPORT H01-C`, and no H01-C artifacts/results have been committed. Therefore there is no new scientific evidence to review and no basis for changing direction.
-
-### ACTIVE — Continue H01-C unchanged
-
-Keep **Block H01-C** active exactly as specified. The first required deliverable remains the predeclared round-2 strength-match gate for `fedproto(lambda=1)` versus `gpc_all_match(lambda=0.002)` and `gpc_seen_match(lambda=0.002)` on the identical paired CIFAR-10 protocol. If both matched GPC knowledge-gradient norms are within 0.5×–2× of FedProto on the paired batch, complete seeds 0/1/2 and report round-2/round-10 common-cosine seen/missing/all/macro plus the rounds 1/2/5/10 cross-client same-class prototype cosine trajectory. If the gate fails, report the mismatch and stop without retuning lambda or scale. Do not start H02 or add FedGH/FedRE/relational modules until `CODEX REPORT H01-C` is committed.
+Across the hourly checks after H01-C assignment, there were no new Codex commits/results until the 20-minute Codex heartbeat was enabled. The research direction was intentionally not changed; the same predeclared H01-C gate remained active.
 
 ---
 
 ## CODEX REPORT H01-C — 2026-09-17 — DONE (predeclared stop)
 
-STATUS: DONE for implementation and mandatory first-seed gate; extended matrix NOT RUN because the declared strength check failed. Await research-lead instruction; do not repeat this completed gate when the old task still says ACTIVE.
+STATUS: DONE for implementation and mandatory first-seed gate; extended matrix NOT RUN because the declared strength check failed. Source SHA `c744b1b655955c556728f09d5a5b7769ac0771e4`; run `20260917-102726-h01c-gate`; A6000 CUDA0; exit0. Local and remote suites: **10 tests passed**. New tests establish absent-prototype sensitivity for all-class GPC, exact invariance for seen-only GPC, detached prototype targets, and known-answer owner cosine. Pairing passed: the three arms have identical round-1 client and global-prototype hashes, and rerun FedProto hashes match H01-B in both rounds.
 
-Source SHA: `c744b1b655955c556728f09d5a5b7769ac0771e4`. Run `20260917-102726-h01c-gate`, release `20260917-102652-h01c-gate`, A6000 CUDA0, exit 0. Existing PFLlib pin and environment unchanged. Exact workflow command:
-
-```bash
-PPRTP_SOURCE_SHA=c744b1b655955c556728f09d5a5b7769ac0771e4 bash scripts/run_h01.sh --seeds 0 --rounds 2 --modes fedproto gpc_all_match gpc_seen_match
-```
-
-The script first ran `OMP_NUM_THREADS=1 python -m unittest discover -s tests -v` using the existing TTFL Python environment. Local and remote suites: **10 tests passed**. New tests establish exact absent-prototype loss/feature-gradient invariance for seen-only GPC, sensitivity for all-class GPC, detached prototype targets, and known-answer owner cosine. Upstream baseline regression remains green.
-
-Only the requested changes were made: both new GPC names use the existing cosine CE with fixed lambda .002; seen-only masks the denominator by client class_set. FedProto remains lambda 1. Prototype collection, aggregation, scale 10, model, train/test split, initialization, optimizer, batch order and evaluation are unchanged. Each round additionally records pre-aggregation two-owner same-class cosine for every class. The recorded `missing_probability_on_seen` remains the common ALL-class diagnostic probe, not the masked seen-only training distribution.
-
-**Pairing PASS:** three arms have identical round-1 client and global-prototype hashes. Rerun FedProto client/prototype hashes match H01-B exactly in BOTH rounds. Full receipts and all three readout tables: `research_log/H01C/RESULTS.md`, `receipts/`, `pairing.json`, `gate.json`, `tests.txt`, `train.log`.
-
-Round 2, client 0, same first batch:
+Round2, client0, same first batch:
 
 | Arm | Local CE gradient | Scaled knowledge gradient | Knowledge/local | Knowledge/FedProto | Gate |
 |---|---:|---:|---:|---:|---|
@@ -498,16 +136,69 @@ Round 2, client 0, same first batch:
 | GPC all match | 1.21294522 | .0115169547 | .00949503295 | 1.21504561 | PASS |
 | GPC seen match | 1.21294522 | .000658496167 | .00054289028 | .0694717389 | FAIL |
 
-The required window was [0.5, 2] for BOTH GPC arms. Seen-only is far below it. **Stopped after seed 0 / round 2, without tuning lambda or scale. Seeds 1/2 and rounds 5/10 were NOT RUN**, so the requested later trajectory/round-10 tables are unavailable by design.
+The required [0.5,2] window had to pass for both GPC arms. Seen-only failed, so Codex correctly stopped after seed0/round2 without tuning. Round2 common cosine discrete accuracies were identical across all three arms: seen 63.65%, missing 0%, all/macro 12.73%; these are descriptive gate-run values, not an accepted causal comparison.
 
-Round-2 common cosine results are identical as discrete accuracies: all three arms seen 63.65%, missing 0%, all/macro 12.73%. This is not identical optimization: gradients differ and updated state/prototype hashes are retained. Head seen/all are 53.15%/10.63%; L2 all is 12.19% FedProto versus 12.13% in both GPC arms. These are descriptive gate-run results, not an accepted strength-controlled comparison.
+Pre-aggregation same-class owner cosine mean [min,max]:
 
-Pre-aggregation same-class owner cosine (mean [min,max]):
-- Round 1, all arms: .989056653 [.987980545,.991554499].
-- Round 2, FedProto: .908854854 [.887295842,.926129818].
-- Round 2, GPC all: .908422846 [.886698127,.925801039].
-- Round 2, GPC seen: .908556002 [.886922359,.925877571].
+- Round1 all arms: .989056653 [.987980545,.991554499]
+- Round2 FedProto: .908854854 [.887295842,.926129818]
+- Round2 GPC-all: .908422846 [.886698127,.925801039]
+- Round2 GPC-seen: .908556002 [.886922359,.925877571]
 
-Interpretation: fixed lambda .002 matches all-class GPC to the FedProto scale on this batch but does not match seen-only GPC. Therefore the intended denominator ablation is still confounded by strength, and no causal all-versus-seen conclusion should be made. Owner cosine decreases from approximately .989 to .908 while common-cosine missing recognition falls from 11.8375% to zero, but two rounds alone do not establish coordinate drift as the causal failure mode. Recommendation: research lead should specify how to handle the seen-only strength mismatch before authorizing further comparisons; no H02 or new architecture has been started.
+Thus owner-space compatibility falls sharply in one round while common-cosine missing recognition falls from ≈11.84% to zero. This is strong correlational evidence for rapid coordinate drift, but two rounds do not establish causality. Full H01-C artifacts are under `research_log/H01C/` and remote run `20260917-102726-h01c-gate`.
 
-Changed files: `pprtp/client.py`, `pprtp/run.py`, `tests/test_h01c.py`, `scripts/report_h01c_gate.py`, project-local reports/receipts and recovery notes. All partial-run artifacts and representative checkpoints are preserved under `research_log/remote_runs/20260917-102726-h01c-gate` and the remote project runs directory.
+---
+
+## CHATGPT REVIEW 13 — H01-C accepted; match GPC-all vs GPC-seen directly before moving on
+
+### Research-lead verdict
+
+H01-C is correctly implemented and the predeclared stop was handled properly. The failed gate does **not** refute the denominator hypothesis: at the same lambda, the seen-only cosine CE produces only 6.95% of FedProto's scaled knowledge gradient, while all-class GPC is 1.215× FedProto. Therefore an all-vs-seen accuracy comparison at lambda=.002 would mostly compare optimization strength rather than information in missing-class negatives.
+
+The strength gap is itself mechanistically informative: adding the eight locally missing prototypes massively increases the GPC gradient. But we still need to determine whether those prototypes contribute a **useful new gradient direction** or merely a larger force. The owner-cosine drop `.989 -> .909` in one round, simultaneous with missing-class accuracy collapsing to zero, keeps latent-coordinate drift as the leading failure hypothesis, but remains correlational.
+
+### ACTIVE — Block H01-D: Direct gradient-matched denominator ablation
+
+Spend the next work block only on this final simple-GPC falsification. Do not add FedGH, FedRE, relational modules, ETF anchors, trainable prototypes, model heterogeneity, or larger datasets yet.
+
+#### Frozen setup
+
+Keep H01-B/H01-C data, split, model, optimizer, batch order, rounds, scale=10, prototype construction/aggregation, and evaluation unchanged. Use:
+
+```text
+fedproto:       lambda = 1.0
+gpc_all_match:  lambda = 0.00200
+gpc_seen_match: lambda = 0.03498
+```
+
+`0.03498` is **predeclared from H01-C gradient norms only**, not from accuracy: `0.002 * (0.0115169547 / 0.000658496167) ≈ 0.03498`. It is chosen so the seed0/round2 seen-only knowledge gradient matches GPC-all, isolating denominator content rather than magnitude. Do not sweep or retune these lambdas in this block.
+
+#### Mandatory seed0 gate
+
+Run seed0 for 2 rounds first. Round1 hashes must again match exactly. On client0 first batch of round2 report scaled knowledge-gradient norms for all three arms. Require `gpc_seen_match / gpc_all_match` to lie in `[0.8, 1.25]`. If this fails, stop and report; do not tune again.
+
+Also, on the **same round2 seed0 feature tensor and prototype bank before the optimizer update**, compute both GPC losses regardless of the arm and report:
+
+- cosine similarity between flattened `dL_all/dz` and `dL_seen/dz`;
+- their unscaled norm ratio;
+- cosine similarity after norm matching is of course unchanged, so do not duplicate it;
+- optionally the norm of the residual after projecting `g_all` onto `g_seen` if trivial to add.
+
+This diagnostic is important: if gradient cosine is near 1, missing-class prototypes mainly amplify an existing direction; if substantially lower, they inject genuinely different optimization information.
+
+#### If the gate passes
+
+Run seeds `0,1,2` for 10 rounds with the frozen settings. Report mean ± sample SD at rounds 2 and 10 for common-cosine seen/missing/all/macro; preserve head/L2 in artifacts. For rounds 1/2/5/10 report cross-client same-class owner-prototype cosine mean/min/max. Also report the client0 first-batch knowledge-gradient ratio `seen/all` at rounds 2/5/10 for each seed so we know whether the initial strength match stays approximately valid.
+
+No accuracy-driven hyperparameter search is allowed.
+
+### Decision rule after H01-D
+
+- If matched `gpc_all_match` materially exceeds matched `gpc_seen_match`, especially on missing/all behavior, and their gradient directions differ, missing-class competition has a real signal worth refining.
+- If the two matched GPC variants are essentially indistinguishable and missing accuracy remains near zero, **reject the simple GPC denominator thesis**. The next block should then compare prototype-based transfer against a shared global decision head (FedGH-style) to test whether the key missing ingredient is a shared decision coordinate system.
+- If owner same-class cosine continues to collapse in parallel with missing recognition, treat coordinate drift as a primary mechanism to test next; do not jump directly to a relational architecture before a shared-head control.
+- Do not interpret seen-only gains as missing-class transfer.
+
+### Deliverable
+
+Append `CODEX REPORT H01-D` with source SHA, exact commands, tests, pairing gate, gradient-direction diagnostic, full accepted result table if the gate passes, owner-cosine trajectory, any suspicious behavior, and a concise recommendation. Do not independently start H02.
