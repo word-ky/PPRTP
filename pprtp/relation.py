@@ -28,7 +28,7 @@ def permute_relations(r,values):
     return out
 
 
-def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,broken=False,conditioned=False,structural_null=False,feature_receipt=False,expected_features=None):
+def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,broken=False,conditioned=False,structural_null=False,feature_receipt=False,expected_features=None,expected_casting=None):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(server.state_dict().values()),
@@ -79,6 +79,20 @@ def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,bro
         if expected_features is not None:
             assert fixed==expected_features
             zz=[cast_fixed(z) for z in zz];tt=[cast_fixed(z) for z in tt]
+        if expected_features is not None:
+            casting=dict(input_dtype='torch.float32',solver_dtype='torch.float64',roundtrip_bitwise_equal=True,
+                support_hash=tensor_hash([torch.cat(zz)]),test_hash=tensor_hash([torch.cat(tt)]))
+        if expected_casting is not None:
+            assert casting==expected_casting
+            from pprtp.precondition import precondition,apply_precondition
+            t,inverse,preconditioning=precondition(torch.cat(zz))
+            preconditioning['transform_hash']=tensor_hash([t])
+            preconditioning['inverse_hash']=tensor_hash([inverse])
+            support_transformed=[apply_precondition(z,t,inverse) for z in zz]
+            test_transformed=[apply_precondition(z,t,inverse) for z in tt]
+            zz=[a[0] for a in support_transformed];tt=[a[0] for a in test_transformed]
+            preconditioning['support_reconstruction_relative']=[a[1] for a in support_transformed]
+            preconditioning['test_reconstruction_relative']=[a[1] for a in test_transformed]
         template=torch.nn.Linear(zz[0].shape[1],10,device=zz[0].device,dtype=zz[0].dtype)
         probe,fit=fit_linear(template,torch.cat(zz),torch.cat(yy),zero=True,max_iter=2000)
         fit['head_hash']=tensor_hash(probe.state_dict().values());fit['final_support']=support_gradient(probe,zz,yy)
@@ -99,9 +113,8 @@ def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,bro
     if conditioned: result['conditioning']=conditioning
     if broken: result['permutations']=perms
     if feature_receipt or expected_features is not None: result['fixed_features']=fixed
-    if expected_features is not None:
-        result['casting']=dict(input_dtype='torch.float32',solver_dtype='torch.float64',roundtrip_bitwise_equal=True,
-            support_hash=tensor_hash([torch.cat(zz)]),test_hash=tensor_hash([torch.cat(tt)]))
+    if expected_features is not None: result['casting']=casting
+    if expected_casting is not None: result['preconditioning']=preconditioning
     return result
 
 

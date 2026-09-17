@@ -94,3 +94,6 @@ Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round onl
 [2026-09-18T04:39:51.8264170+08:00] H05-D launched source9085f01eeccfb270faf6a93a4ee3957904210a7c release20260918-043913-h05d run20260918-043934-h05d-precision; waiting for historical reproduction and fixed fp64 heads.
 
 [2026-09-18T04:42:59.734025] H05-D DONE source9085f01/run20260918-043934-h05d-precision exit0;33tests pass. H05C completeoutputexact,precastfeatureshash exact,castbackbitwise;allonline/state/RNG/modes/grad exact. Paired/broken fit68.45/76.35 missing11.8375/4.7625 grad_inf.00197867/.00104956;both2000cap => C solver-unresolved. q.538374088 delta7.075;H05D/gate+BRIDGE;stopawaitlead.
+
+[2026-09-18T05:25:50.4221820+08:00] H05-E assigned37e5341: exact H05D fp64feature/label hashes first; support-only thinSVD all255singularvalues retained, T=Vdiag(sqrt(n)/s), no recenter/clamp/truncation. Same LBFGS2000 and two arms.
+[2026-09-18T05:26:49.9352278+08:00] H05-E34tests pass, previous33preserved. New test checks finite invertibleT, support/test inverse reconstruction and arbitrary affine logits bothdirections; preconditioner takes onlyX, no labels/test. Historical H05D pre-cast/cast hashes asserted beforeSVD;postwhitening Frobeniusresidual<1e-8, reconstructionrelative<1e-9.
