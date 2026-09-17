@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-102726-h01c-gate",
+  "releaseId": "20260917-102652-h01c-gate",
+  "sessionName": "autodl-20260917-102726-h01c-gate",
+  "command": "PPRTP_SOURCE_SHA=c744b1b655955c556728f09d5a5b7769ac0771e4 bash scripts/run_h01.sh --seeds 0 --rounds 2 --modes fedproto gpc_all_match gpc_seen_match"
+}

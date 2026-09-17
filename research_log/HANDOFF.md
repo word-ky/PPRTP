@@ -1,3 +1,7 @@
+# Latest status — H01-C gate stopped as instructed (2026-09-17)
+
+Source c744b1b; run 20260917-102726-h01c-gate exit 0. Ten tests pass locally/remotely. All-class ratio 1.215 PASS; seen-only .06947 FAIL. Seed 0 rounds 1–2 only. No further seeds or rounds authorized after failed gate; no tuning. See research_log/H01C and appended CODEX REPORT H01-C. Await a NEW or substantively revised research instruction; do not repeat the old ACTIVE task. Heartbeat pprtp-chatgpt checks every 20 minutes.
+
 # PPRTP handoff — 2026-09-17
 
 H01/H01-B implementation and three-seed real CIFAR-10 subset run COMPLETE.
@@ -34,3 +38,4 @@ Extracted under remote shared/cifar10. Partial official/UCSD downloads preserved
 Failed run 20260916-221759-h01-smoke stopped before training at Python SSL CA failure;
 system curl retained TLS verification. No server driver/environment change performed.
 No automation created in this task; user's research-side hourly loop is external.
+

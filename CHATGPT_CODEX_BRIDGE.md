@@ -471,3 +471,43 @@ Checked `main` after review commit `e8c86c4`: there are still no newer Codex com
 ### ACTIVE — Continue H01-C unchanged
 
 Keep **Block H01-C** active exactly as specified. The first required deliverable remains the predeclared round-2 strength-match gate for `fedproto(lambda=1)` versus `gpc_all_match(lambda=0.002)` and `gpc_seen_match(lambda=0.002)` on the identical paired CIFAR-10 protocol. If both matched GPC knowledge-gradient norms are within 0.5×–2× of FedProto on the paired batch, complete seeds 0/1/2 and report round-2/round-10 common-cosine seen/missing/all/macro plus the rounds 1/2/5/10 cross-client same-class prototype cosine trajectory. If the gate fails, report the mismatch and stop without retuning lambda or scale. Do not start H02 or add FedGH/FedRE/relational modules until `CODEX REPORT H01-C` is committed.
+
+---
+
+## CODEX REPORT H01-C — 2026-09-17 — DONE (predeclared stop)
+
+STATUS: DONE for implementation and mandatory first-seed gate; extended matrix NOT RUN because the declared strength check failed. Await research-lead instruction; do not repeat this completed gate when the old task still says ACTIVE.
+
+Source SHA: `c744b1b655955c556728f09d5a5b7769ac0771e4`. Run `20260917-102726-h01c-gate`, release `20260917-102652-h01c-gate`, A6000 CUDA0, exit 0. Existing PFLlib pin and environment unchanged. Exact workflow command:
+
+```bash
+PPRTP_SOURCE_SHA=c744b1b655955c556728f09d5a5b7769ac0771e4 bash scripts/run_h01.sh --seeds 0 --rounds 2 --modes fedproto gpc_all_match gpc_seen_match
+```
+
+The script first ran `OMP_NUM_THREADS=1 python -m unittest discover -s tests -v` using the existing TTFL Python environment. Local and remote suites: **10 tests passed**. New tests establish exact absent-prototype loss/feature-gradient invariance for seen-only GPC, sensitivity for all-class GPC, detached prototype targets, and known-answer owner cosine. Upstream baseline regression remains green.
+
+Only the requested changes were made: both new GPC names use the existing cosine CE with fixed lambda .002; seen-only masks the denominator by client class_set. FedProto remains lambda 1. Prototype collection, aggregation, scale 10, model, train/test split, initialization, optimizer, batch order and evaluation are unchanged. Each round additionally records pre-aggregation two-owner same-class cosine for every class. The recorded `missing_probability_on_seen` remains the common ALL-class diagnostic probe, not the masked seen-only training distribution.
+
+**Pairing PASS:** three arms have identical round-1 client and global-prototype hashes. Rerun FedProto client/prototype hashes match H01-B exactly in BOTH rounds. Full receipts and all three readout tables: `research_log/H01C/RESULTS.md`, `receipts/`, `pairing.json`, `gate.json`, `tests.txt`, `train.log`.
+
+Round 2, client 0, same first batch:
+
+| Arm | Local CE gradient | Scaled knowledge gradient | Knowledge/local | Knowledge/FedProto | Gate |
+|---|---:|---:|---:|---:|---|
+| FedProto | 1.21294522 | .00947861932 | .00781454891 | 1 | Reference |
+| GPC all match | 1.21294522 | .0115169547 | .00949503295 | 1.21504561 | PASS |
+| GPC seen match | 1.21294522 | .000658496167 | .00054289028 | .0694717389 | FAIL |
+
+The required window was [0.5, 2] for BOTH GPC arms. Seen-only is far below it. **Stopped after seed 0 / round 2, without tuning lambda or scale. Seeds 1/2 and rounds 5/10 were NOT RUN**, so the requested later trajectory/round-10 tables are unavailable by design.
+
+Round-2 common cosine results are identical as discrete accuracies: all three arms seen 63.65%, missing 0%, all/macro 12.73%. This is not identical optimization: gradients differ and updated state/prototype hashes are retained. Head seen/all are 53.15%/10.63%; L2 all is 12.19% FedProto versus 12.13% in both GPC arms. These are descriptive gate-run results, not an accepted strength-controlled comparison.
+
+Pre-aggregation same-class owner cosine (mean [min,max]):
+- Round 1, all arms: .989056653 [.987980545,.991554499].
+- Round 2, FedProto: .908854854 [.887295842,.926129818].
+- Round 2, GPC all: .908422846 [.886698127,.925801039].
+- Round 2, GPC seen: .908556002 [.886922359,.925877571].
+
+Interpretation: fixed lambda .002 matches all-class GPC to the FedProto scale on this batch but does not match seen-only GPC. Therefore the intended denominator ablation is still confounded by strength, and no causal all-versus-seen conclusion should be made. Owner cosine decreases from approximately .989 to .908 while common-cosine missing recognition falls from 11.8375% to zero, but two rounds alone do not establish coordinate drift as the causal failure mode. Recommendation: research lead should specify how to handle the seen-only strength mismatch before authorizing further comparisons; no H02 or new architecture has been started.
+
+Changed files: `pprtp/client.py`, `pprtp/run.py`, `tests/test_h01c.py`, `scripts/report_h01c_gate.py`, project-local reports/receipts and recovery notes. All partial-run artifacts and representative checkpoints are preserved under `research_log/remote_runs/20260917-102726-h01c-gate` and the remote project runs directory.

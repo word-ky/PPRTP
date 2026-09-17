@@ -1,0 +1,33 @@
+[autodl] run_id=20260917-102726-h01c-gate
+[autodl] started_at=2026-09-17T10:27:30+08:00
+test_unmodified_upstream_two_rounds (test_baseline.BaselineTest.test_unmodified_upstream_two_rounds) ... ok
+test_known_metrics (test_data_metrics.DataMetricTests.test_known_metrics) ... ok
+test_partition_disjoint_complete_and_reproducible (test_data_metrics.DataMetricTests.test_partition_disjoint_complete_and_reproducible) ... ok
+test_denominator_and_detachment (test_h01c.H01CTests.test_denominator_and_detachment) ... ok
+test_owner_cosine (test_h01c.H01CTests.test_owner_cosine) ... ok
+test_missing_class_changes_gpc_loss_and_gradient_only (test_mechanism.MechanismTests.test_missing_class_changes_gpc_loss_and_gradient_only) ... ok
+test_round_one_pairing_all_modes_and_grad_ratio (test_mechanism.MechanismTests.test_round_one_pairing_all_modes_and_grad_ratio) ... ok
+test_sample_weighted_aggregation (test_mechanism.MechanismTests.test_sample_weighted_aggregation) ... ok
+test_training_parity_with_unmodified_upstream (test_mechanism.MechanismTests.test_training_parity_with_unmodified_upstream) ... ok
+test_validity_and_noncontiguous_labels (test_mechanism.MechanismTests.test_validity_and_noncontiguous_labels) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.359s
+
+OK
+/home/wenchang/anaconda3/envs/python3.12-tk2-2.3/lib/python3.12/site-packages/torch/cuda/__init__.py:654: UserWarning: Can't initialize NVML
+  warnings.warn("Can't initialize NVML")
+Files already downloaded and verified
+Files already downloaded and verified
+{"mode": "fedproto", "seed": 0, "round": 1, "metrics": {"head": {"seen": 0.503999999165535, "missing": 0.0, "all": 0.10080000013113022, "macro": 0.1008000023663044}, "cosine": {"seen": 0.6325000107288361, "missing": 0.11837500035762787, "all": 0.22119999825954437, "macro": 0.22119999676942825}, "l2": {"seen": 0.6129999935626984, "missing": 0.14624999985098838, "all": 0.23959999829530715, "macro": 0.23959999829530715}}, "elapsed": 0.8760356903076172}
+{"mode": "fedproto", "seed": 0, "round": 2, "metrics": {"head": {"seen": 0.5314999997615815, "missing": 0.0, "all": 0.1063000001013279, "macro": 0.1063000001013279}, "cosine": {"seen": 0.6365000069141388, "missing": 0.0, "all": 0.12730000019073487, "macro": 0.12729999646544457}, "l2": {"seen": 0.6084999978542328, "missing": 0.00024999999441206456, "all": 0.12190000042319298, "macro": 0.12190000042319298}}, "elapsed": 1.5137999057769775}
+Files already downloaded and verified
+Files already downloaded and verified
+{"mode": "gpc_all_match", "seed": 0, "round": 1, "metrics": {"head": {"seen": 0.503999999165535, "missing": 0.0, "all": 0.10080000013113022, "macro": 0.1008000023663044}, "cosine": {"seen": 0.6325000107288361, "missing": 0.11837500035762787, "all": 0.22119999825954437, "macro": 0.22119999676942825}, "l2": {"seen": 0.6129999935626984, "missing": 0.14624999985098838, "all": 0.23959999829530715, "macro": 0.23959999829530715}}, "elapsed": 0.5075838565826416}
+{"mode": "gpc_all_match", "seed": 0, "round": 2, "metrics": {"head": {"seen": 0.5314999997615815, "missing": 0.0, "all": 0.1063000001013279, "macro": 0.1063000001013279}, "cosine": {"seen": 0.6365000069141388, "missing": 0.0, "all": 0.12729999870061875, "macro": 0.12729999870061875}, "l2": {"seen": 0.6054999947547912, "missing": 0.00024999999441206456, "all": 0.12129999995231629, "macro": 0.12129999995231629}}, "elapsed": 1.4531614780426025}
+Files already downloaded and verified
+Files already downloaded and verified
+{"mode": "gpc_seen_match", "seed": 0, "round": 1, "metrics": {"head": {"seen": 0.503999999165535, "missing": 0.0, "all": 0.10080000013113022, "macro": 0.1008000023663044}, "cosine": {"seen": 0.6325000107288361, "missing": 0.11837500035762787, "all": 0.22119999825954437, "macro": 0.22119999676942825}, "l2": {"seen": 0.6129999935626984, "missing": 0.14624999985098838, "all": 0.23959999829530715, "macro": 0.23959999829530715}}, "elapsed": 0.5145978927612305}
+{"mode": "gpc_seen_match", "seed": 0, "round": 2, "metrics": {"head": {"seen": 0.5314999997615815, "missing": 0.0, "all": 0.1063000001013279, "macro": 0.1063000001013279}, "cosine": {"seen": 0.6365000069141388, "missing": 0.0, "all": 0.1272999994456768, "macro": 0.1272999957203865}, "l2": {"seen": 0.6054999947547912, "missing": 0.00024999999441206456, "all": 0.12129999995231629, "macro": 0.12129999995231629}}, "elapsed": 1.2399625778198242}
+[autodl] finished_at=2026-09-17T10:27:47+08:00
+[autodl] exit_code=0

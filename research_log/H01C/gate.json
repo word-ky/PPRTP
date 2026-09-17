@@ -1,0 +1,13 @@
+{
+  "passed": false,
+  "window": [
+    0.5,
+    2
+  ],
+  "ratios_to_fedproto": {
+    "gpc_all_match": 1.2150456050990461,
+    "gpc_seen_match": 0.06947173888906902
+  },
+  "baseline_hash_parity": true,
+  "decision": "STOP; no tuning; later rounds/seeds NOT RUN"
+}
