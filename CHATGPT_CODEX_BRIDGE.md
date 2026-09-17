@@ -174,3 +174,63 @@ Do **not** call H05-A deployable. Its useful property is structural: the represe
 Append `CODEX REPORT H05-A` with STATUS, source SHA, exact commands/run IDs, tests, provenance hashes, paired/broken support-fit diagnostics, seen/missing/all/macro metrics, `q_rel`, `delta_rel`, Gram-disagreement table, permutation receipts, state/RNG/gradient equivalence, warnings, and artifact paths. Preserve negative results.
 
 Do **not** implement class-relation prototypes, learned relation encoders, MLPs, PCA/random projection, whitening/CORAL, OT, new online losses, gating/hybrid heads, other anchor counts, or seeds1/2 in H05-A. Await research-lead review.
+## CODEX REPORT H05-A — DONE (2026-09-18 01:14 +08)
+
+STATUS: DONE; **fit-limited / optimization unresolved**,no negative representation verdict. Source `de2f60cd10217761345c6416378087159ad88e03`;release `20260918-011059-h05a`;run `20260918-011118-h05a-relation`,exit0. Exactly paired/broken relation256 arms,seed0round10. No normalization,scaling,SVD,map,prototype compression or solver extension.
+
+Files: `pprtp/relation.py`,opt-in `pprtp/run.py --relation-probe`,`tests/test_relation.py`,`scripts/report_h05a.py`.29 tests pass locally/remotely,previous27 preserved. New double-precision synthetic test verifies orthogonal rotation+translation invariance;column permutation test verifies deterministic client0identity and per-row bitwise multiset preservation.
+
+Commands (AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h05a
+./scripts/autodl-run.ps1 -Name h05a-relation -Cmd 'PPRTP_SOURCE_SHA=de2f60cd10217761345c6416378087159ad88e03 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --relation-probe'
+D:\anaconda3\python.exe scripts/report_h05a.py research_log/H05A/gate
+```
+
+Formula exactly `(z-mu)@(A-mu).T`,computed in existing float32;mu is the mean of the256 anchors,not support/test. No normalization,temperature,whitening,scaling or learned encoder. Gram is `(A-mu)@(A-mu).T`,client0 used only for reporting disagreement. Each arm independently creates a fresh zero-init256->10 head,fullbatch LBFGS lr1,max_iter2000,strong_wolfe,tolerance_grad1e-9,tolerance_change1e-12,no regularizer. Random head construction occurs within fork_rng and initial parameters are zeroed before fitting.
+
+All10 H02-A client/prototype/server/ordinary metric records exactly reproduce. Both arms start identical and preserve client/server parameters/buffers/prototypes,module modes,CPU/CUDA RNG and pre-existing gradients. All anchorfeatures/relations/Grams/losses/logits/parameters/final gradients finite. Exact parent anchor hash `1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125`,support hash `2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073`;prefix indices/hash equal H04-A N256 verbatim. Anchorlabels unused,test evaluation-only. Parent/prefix receipts saved.
+
+
+| Arm | Seen % | Missing % | All % | Macro % | Fit % | CE before/after | grad_inf | grad_l2 | Weight/bias norm | Iter/eval |
+|---|---:|---:|---:|---:|---:|---|---:|---:|---|---|
+| rel256_paired | 56.550001 | 11.025000 | 20.130000 | 20.130000 | 65.900004 | 2.30258393/1.16467738 | 0.0284156315 | 0.255756944 | 68.8054428/1.03762555 | 2000/2116 |
+| rel256_broken | 60.099999 | 4.812500 | 15.870000 | 15.869999 | 76.650006 | 2.30258393/0.855615675 | 0.00924307108 | 0.109551854 | 66.7388916/1.2084285 | 2000/2083 |
+
+R=11.025000%,S=4.812500%,q_rel=0.501421258,delta_rel=6.212500pp. Frozen branch: fit-limited; do not reject representation from weak negative result.
+Historical H04-A N256 Procrustes seen=37.550000% (corrects44.15 in assignment);missing21.9875%.
+
+| Client | Gram relative disagreement | Gram SHA256 |
+|---|---:|---|
+| 0 | 0 | 77ceec3253c61bece612fa02d9b51dbb07a66baefa7baf7b4b551a71b340cc06 |
+| 1 | 0.153230652 | ba1c91208e7f2bb4f01c6203f852745dd1c0b02d0b63cfe3ba1e3a547cef6b21 |
+| 2 | 0.239965186 | a4b7451338a4452ae45705727e2c5dc70c35af8512366f297e62f7591b3e312c |
+| 3 | 0.252810091 | 32eead46577a5ad7458e7ad69a4cdc28928ffd7124b9aea6c7181ef48b96ff79 |
+| 4 | 0.446717262 | 2ae3165605610059c21c45a6cf0d9c72b38a4484a8d31ce445dc4340d9464fa1 |
+| 5 | 0.432853967 | eb85cf17b57605d21221e124b767a5867e55041432bc76fcc55a527a64721a0d |
+| 6 | 0.929122806 | e3aa0b96769a366a850aa6528cb277457e38fea33fc2504a6832d54beac37b5f |
+| 7 | 1.10199749 | 032482f582064e2ea818a6e6a4042a677e498c2066e98edf0e758ab9febe6d76 |
+| 8 | 0.826244652 | c5f3652a1e4dfb7fb55259cead55ffb69532c6fea9a6f34d9bd776a4206c2b98 |
+| 9 | 0.475106955 | 574fa0ea4b20c777c4d35c203227f4ecc9a854022148540ee5d4e4ae1c2bc5b7 |
+
+| Client | Seed | Fixed points | Permutation SHA256 |
+|---|---|---:|---|
+| 0 | None | 256 | be66c2867e103fa00c88539675e5cd95f52ec5e38d9038e6d3710539f6c0aec1 |
+| 1 | 314160 | 1 | 7895f8a7b8620d25b2b6a81e99687710923cf2b4f48f6b61511fe5d05ae0db8d |
+| 2 | 314161 | 0 | 7a1e35d9a2cf823ea7eafacb340e4d8bba42be2ef0516c6e67390109cbcf61e2 |
+| 3 | 314162 | 1 | a6a914cc77eaf8cd986a4616f3a0d36c2cc0de09d5b6995c00acb771eecc1954 |
+| 4 | 314163 | 2 | 62d25aef2bf949197fa7029539d9ea81137c19bfa39226d05bbbb69c4ff8ef6b |
+| 5 | 314164 | 1 | d8d4c6c995c4da41324d0cf9d4b5da25641374228c6a1f320d3f697d55e99947 |
+| 6 | 314165 | 0 | 136cd1c938ff040a04f13703f717e4356eff5177108e1766e9fac9ce5502771f |
+| 7 | 314166 | 2 | 1ac58997a7ab0c004b1466cd62e43a9d7845bd62cb4c96abd9c261ac1c7ff5c1 |
+| 8 | 314167 | 3 | 10e019895cc3e963d13e8d5da9879d378a709b48d0b7d16c6a4da88c36910e46 |
+| 9 | 314168 | 1 | ddc83efc6063357edde23d9887de924e56f8a6ca1300b524fdecc6c8da877683 |
+
+Permutations fixed before execution as314159+i for clients1..9;client0identity. Full permutations saved in rawJSON. Each client's SAME permutation applies to support and test columns;inverse permutation recovers each row bitwise. Raw sample order/labels unchanged. Gram diagnostics identical across arms. Nonreference fixedpoints1,0,1,2,1,0,2,3,1 (all at least253/256 coordinates displaced).
+
+Interpretation: observed paired missing11.025% exceeds broken4.8125% by6.2125pp and retains50.14% of the accepted Procrustes missing accuracy. However paired supportfit65.90% and broken76.65% both fail95%,both hit2000iterations,and final grad_inf .02842/.00924 remain non-negligible. The formal relational gate is therefore unresolved by fitting,not a valid rejection of centered inner-product relations or proof of pairing necessity. Gram disagreements range.1532–1.1020,so actual client spaces do not share identical centered anchor geometry despite the synthetic invariance property. Stop and await lead;no solver extension,normalization,alternative representation or class-relation prototypes implemented.
+
+Historical reference correction: the assignment quoted N256 Procrustes seen44.15%;committed H04-A raw value is37.55%,used as explicitly instructed;missing21.9875% unchanged. Known NVML initialization warnings retained verbatim in train.log;CUDA run completed;no SVD used in this diagnostic and no SVD warning. Ddrive8192bytes shortage repaired by eviction of one verified duplicate ignored checkpoint;remote original and hash receipt retained in progress.md.
+
+Artifacts: `research_log/H05A/gate/` RESULTS.md,verification.json,full per-client support/test correct/counts,head/Gram hashes,permutations,state/RNG/gradient receipts,meta/run/log/tests. Remote originals/checkpoints `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260918-011118-h05a-relation`. No failed run or nonfinite results.

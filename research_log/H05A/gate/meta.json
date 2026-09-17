@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-011118-h05a-relation",
+  "releaseId": "20260918-011059-h05a",
+  "sessionName": "autodl-20260918-011118-h05a-relation",
+  "command": "PPRTP_SOURCE_SHA=de2f60cd10217761345c6416378087159ad88e03 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --relation-probe"
+}

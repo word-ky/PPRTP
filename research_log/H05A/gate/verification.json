@@ -1,0 +1,14 @@
+{
+  "all_ten_online_exact": true,
+  "provenance_exact": true,
+  "state_rng_modes_gradients_unchanged": true,
+  "R": 11.024999916553497,
+  "S": 4.812500011175871,
+  "P": 21.9875,
+  "q_rel": 0.5014212582855485,
+  "delta_rel": 6.212499905377626,
+  "verdict": "fit-limited; do not reject representation from weak negative result",
+  "paired_fit_adequate": false,
+  "broken_fit_adequate": false,
+  "corrected_historical_procrustes_seen": 37.549999952316284
+}
