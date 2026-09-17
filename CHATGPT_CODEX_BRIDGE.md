@@ -194,3 +194,65 @@ Preserve all existing 30 tests and add only minimal tests for the Helmert basis,
 Append `CODEX REPORT H05-C` with STATUS, source SHA, commands/run IDs, tests, provenance, theoretical-null residual/energy diagnostics, 256D-vs-255D singular diagnostics under both tolerance rules, paired/broken fit diagnostics and test metrics, `q_rel_255`, `delta_rel_255`, integrity receipts, warnings, and artifact paths.
 
 Do **not** implement class-relation prototypes, PCA/data-dependent SVD projection, whitening, cosine/RBF kernels, learned encoders, MLPs, OT, hybrid/gating heads, float64 training, more iterations, other anchor counts, or seeds1/2 in H05-C. Await research-lead review.
+
+## CODEX REPORT H05-C — DONE (2026-09-18 03:30 +08)
+
+STATUS: DONE; **still optimization-unresolved** under frozen decision rule. Source `8a6cae2978ade7ecc8f9bcdec9b9ec4db668a3da`;release `20260918-032713-h05c`;run `20260918-032735-h05c-helmert`,exit0. Exactly two seed0round10 Helmert+zscore arms,no solver/dtype/iteration changes.
+
+Files: `pprtp/helmert.py`,optional input-aware spectrum in conditioning.py,optional structural chart in relation.py/run.py,tests/test_helmert.py,scripts/report_h05c.py.32 tests pass locally/remotely;previous30 preserved. Double tests verify Q.T@Q=I,Q.T@ones=0,zero-sum reconstruction,analytic logits equivalence in both directions (tight1e-12/1e-11 tolerance). A known-energy example verifies null residual/energy diagnostics.
+
+Commands (AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h05c
+./scripts/autodl-run.ps1 -Name h05c-helmert -Cmd 'PPRTP_SOURCE_SHA=8a6cae2978ade7ecc8f9bcdec9b9ec4db668a3da bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --helmert-probe'
+D:\anaconda3\python.exe scripts/report_h05c.py research_log/H05C/gate
+```
+
+Q is closed-form,data-independent: column k-1 (k1..255) has firstk entries1/sqrt(k(k+1)),entryk=-k/sqrt(k(k+1)),remainingzero. Constructdouble,castfloat32. Project raw relation asr@Q,then use shared arm-specific supportonlypopulationzscore,strictpositive std,noepsilon/clamp. Broken uses exactly priorpermutation beforeprojection. No data-dependent rankselection or truncation;no added capacity on exact zero-sum space. Tests prove equivalence mathematically within double precision;actualfloat32 residual is quantified below.
+
+Fresh zero-init255->10 heads,fullbatch LBFGS lr1,strong_wolfe,max_iter2000,tolerance_grad1e-9,tolerance_change1e-12,no regularization,float32 inputs/training. Initial CE2.30258393 andsupportaccuracy10% botharms. Support-derived means/stds and allhashes retained;test values never choose transforms.
+
+Exact parentanchorhash `1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125`;supporthash `2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073`;exact N256prefix. Bothrawsupporthashes exactly equalH05-B;historicalGrams/permutations/frozenstate exact. All10H02-A online client/prototype/server/ordinary metric records exact. Botharms identical startingstate and preserveparameters/buffers/prototypes,modulemodes,CPU/CUDA RNG,existinggradients. Anchorlabelsunused,testevaluationonly;allfeatures/basis/statistics/singularvalues/losses/logits/parameters/gradients finite.
+
+
+| Arm | Seen % | Missing % | All % | Macro % | Fit % | CE | grad_inf | grad_l2 | Weight/bias norm | Iter/eval |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
+| rel255_paired_helmert_zscore | 56.199999 | 11.787500 | 20.670000 | 20.670000 | 68.700004 | 1.07979739 | 0.00125634123 | 0.0112194698 | 762.251526/0.915916264 | 2000/2114 |
+| rel255_broken_helmert_zscore | 60.249999 | 4.887500 | 15.960000 | 15.960000 | 76.000005 | 0.853311598 | 0.00191304844 | 0.0230582841 | 819.577148/0.627656102 | 2000/2082 |
+
+R255=11.787500%,S255=4.887500%,q_rel_255=0.536100057,delta_rel_255=6.900000pp. Frozen branch: still optimization-unresolved.
+
+| Arm | Data | Max absolute row sum | RMS row sum | Ones-direction energy / total energy |
+|---|---|---:|---:|---:|
+| rel255_paired_helmert_zscore | support | 0.000535860658 | 9.92043353e-05 | 9.36946282e-16 |
+| rel255_paired_helmert_zscore | test | 0.0019326508 | 0.000241749009 | 5.31122291e-15 |
+| rel255_broken_helmert_zscore | support | 0.000535860658 | 9.92043353e-05 | 9.36946282e-16 |
+| rel255_broken_helmert_zscore | test | 0.0019326508 | 0.000241749009 | 5.31122291e-15 |
+
+| Arm | Stage | Epsilon rule | Rank | smax | Smallest above tolerance | Tolerance | Nonzero condition |
+|---|---|---|---:|---:|---:|---:|---:|
+| rel255_paired_helmert_zscore | raw256 | float64 | 256 | 8651.9041 | 7.56336555e-05 | 3.84221726e-09 | 114392251 |
+| rel255_paired_helmert_zscore | raw256 | float32 | 72 | 8651.9041 | 2.08086298 | 2.06277468 | 4157.84422 |
+| rel255_paired_helmert_zscore | Helmert255 | float64 | 255 | 8651.90412 | 0.221877624 | 3.84221726e-09 | 38994.0362 |
+| rel255_paired_helmert_zscore | Helmert255 | float32 | 72 | 8651.90412 | 2.08086325 | 2.06277469 | 4157.84368 |
+| rel255_paired_helmert_zscore | Helmert255+zscore | float64 | 255 | 617.183665 | 0.0107741077 | 2.74084606e-10 | 57283.9705 |
+| rel255_paired_helmert_zscore | Helmert255+zscore | float32 | 109 | 617.183665 | 0.147470375 | 0.147148052 | 4185.13661 |
+| rel255_broken_helmert_zscore | raw256 | float64 | 256 | 4421.63347 | 7.60112406e-05 | 1.96359971e-09 | 58170784.1 |
+| rel255_broken_helmert_zscore | raw256 | float32 | 220 | 4421.63347 | 1.0663845 | 1.05419957 | 4146.37823 |
+| rel255_broken_helmert_zscore | Helmert255 | float64 | 255 | 4421.63347 | 0.648275172 | 1.96359972e-09 | 6820.61209 |
+| rel255_broken_helmert_zscore | Helmert255 | float32 | 220 | 4421.63347 | 1.066386 | 1.05419957 | 4146.3724 |
+| rel255_broken_helmert_zscore | Helmert255+zscore | float64 | 255 | 325.768851 | 0.0475532008 | 1.44670432e-10 | 6850.61878 |
+| rel255_broken_helmert_zscore | Helmert255+zscore | float32 | 226 | 325.768851 | 0.0778047342 | 0.0776693465 | 4187.00551 |
+
+Tolerance=max(matrix_shape)*eps(dtype)*smax;SVD in double on actual float32 input. No data-dependent projection/truncation. Fixed Helmert basis built by closed form in double and cast to float32;training remains float32.
+
+rel255_paired_helmert_zscore: basis SHA256=b0cf8c0a162fd645fd1f44dd476ac578ab783488a83433efc79cd85132caeefd;support-only conditioning SHA256=23cf357c139b4b334e0183756967808b1c8a832209e3fe3069437003a4f3bd2a.
+
+rel255_broken_helmert_zscore: basis SHA256=b0cf8c0a162fd645fd1f44dd476ac578ab783488a83433efc79cd85132caeefd;support-only conditioning SHA256=5be5a326738c13976d48066cb11fdd728722eaf9f267d7d17d7e02ea6bdf85b9.
+
+Both2000iterationcaps reached;paired/broken supportfit68.70/76.00%,grad_inf.00125634/.00191305. Neither95%fit threshold reached;pairedgradient>1e-5 means optimization unresolved,not stationary underfit. Accepted referenceP21.9875%,seen37.55% unchanged. Allperclientfit/test counts,headnorms/hashes,mean/stdvectors saved.
+
+Interpretation: removed all-ones energy is only9.37e-16 of support energy and5.31e-15 of test energy,consistent with float32 residue in the exact structural null. Removing it changes the eps64-conditioned spectrum drastically (pairedraw~1.14e8 toHelmert~3.90e4) yet leaves supportfit farbelow95%,so this single redundant direction is not sufficient to explain or repair the observed fitting problem. Finalpairedzscore input-aware rank109/255 andcondition4185.14 summarize only singularvalues above the prescribed eps32threshold;the full eps64nonzero condition remains57283.97,so thresholded condition is not a complete conditioning certificate. Positivepairedmissing11.7875% vsbroken4.8875% remains suggestive but cannot close the representation gate while fitting is unresolved. Stop without float64training,moreiterations,whitening or classprototypecompression;await lead.
+
+Known NVMLwarnings retained verbatim in train.log;no SVDwarning/failure or nonfinitevalues thisrun. Evidence `research_log/H05C/gate/` RESULTS.md,verification.json,rawnull/spectral/fit/provenance/state receipts,meta/run/log/tests. Remoteoriginals/checkpoints `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260918-032735-h05c-helmert`.

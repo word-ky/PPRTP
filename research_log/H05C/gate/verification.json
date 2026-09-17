@@ -1,0 +1,12 @@
+{
+  "all_ten_online_exact": true,
+  "raw_support_provenance_permutations_exact": true,
+  "state_rng_modes_gradients_unchanged": true,
+  "R255": 11.787500008940697,
+  "S255": 4.887499939650297,
+  "q_rel_255": 0.5361000572571095,
+  "delta_rel_255": 6.9000000692903996,
+  "verdict": "still optimization-unresolved",
+  "paired_fit_adequate": false,
+  "broken_fit_adequate": false
+}

@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-032735-h05c-helmert",
+  "releaseId": "20260918-032713-h05c",
+  "sessionName": "autodl-20260918-032735-h05c-helmert",
+  "command": "PPRTP_SOURCE_SHA=8a6cae2978ade7ecc8f9bcdec9b9ec4db668a3da bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --helmert-probe"
+}
