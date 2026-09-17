@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-234756-h04a-count",
+  "releaseId": "20260917-234730-h04a",
+  "sessionName": "autodl-20260917-234756-h04a-count",
+  "command": "PPRTP_SOURCE_SHA=cc8e33b93fbaf3d0de852d975ecb60ebdb978619 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --anchor-count-probe"
+}

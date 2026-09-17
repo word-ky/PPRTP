@@ -150,3 +150,48 @@ If the N=1000 reproduction fails, or state/data provenance differs, stop and mar
 Append `CODEX REPORT H04-A` with STATUS, source SHA, exact commands/run IDs, tests, N=1000 reproduction receipt, one table for all five N arms, support fit/final-gradient diagnostics, rank/alignment diagnostics, communication bytes/compression factors, `q_N`, `retention_N`, online/state/RNG receipts, artifact paths, and a concise interpretation following the frozen branch.
 
 Do **not** implement learned transport, affine/nonlinear alignment, CORAL/whitening, optimal transport, random projections, PCA/rank truncation, hybrid/gating heads, new seeds, or publication-scale runs in H04-A. Await research-lead review.
+## CODEX REPORT H04-A — DONE (2026-09-17 23:53 +08)
+
+STATUS: DONE; **strong count compression supported** by frozen N256 criterion. Source `cc8e33b93fbaf3d0de852d975ecb60ebdb978619`; release `20260917-234730-h04a`; run `20260917-234756-h04a-count`, exit0. Exactly five fixed arms,seed0/round10 only. No solver changes,new maps,rank truncation or post-hoc subset selection.
+
+Files: `pprtp/anchor_count.py` fixed prefix orchestration and exact reproduction gate; `pprtp/paired.py` optional rank diagnostics from existing singular values (client0 identity requires diagnostic svdvals),existing-gradient hashes; `pprtp/run.py` opt-in --anchor-count-probe; `tests/test_anchor_count.py`; `scripts/report_h04a.py`.25 tests pass locally/remotely,previous23 preserved. New tests cover nested deterministic prefixes and N1000 full-output equivalence with rank diagnostics plus finite rank statistics on a rank-deficient example.
+
+Exact commands (AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h04a
+./scripts/autodl-run.ps1 -Name h04a-count -Cmd 'PPRTP_SOURCE_SHA=cc8e33b93fbaf3d0de852d975ecb60ebdb978619 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --anchor-count-probe'
+D:\anaconda3\python.exe scripts/report_h04a.py research_log/H04A/gate
+```
+
+N1000 exactly reproduces the entire historical H03-D paired_2000 output after excluding newly added rank/existing-gradient receipt keys. This compares full fit dictionary/head hash/norms/final gradients,all metrics/per-client counts,alignment/transform hashes and state/RNG/modes BEFORE compressed arms run. Every arm starts from the same frozen state and fresh zero-init head,fullbatch LBFGS max_iter2000,strong_wolfe,lr1,tolerance_grad1e-9,tolerance_change1e-12,no regularizer. All10 H02-A online client/prototype/server/ordinary metric records exact. All arms preserve parameters/buffers/prototypes,server,module modes,CPU/CUDA RNG and existing client/server gradients.
+
+Ordered parent anchor hash `1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125`;support hash `2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073`. Complete parent receipt equals H03-D. Each prefix indices/hash saved perarm,exact firstN checked independently. Anchor labels never used;no official-test fitting. All quantities finite.
+
+Accuracy %, all heads100% support fit, initial CE2.30258393/accuracy10%:
+
+| N | Seen | Missing | All | Macro | q_N | retention_N | Final CE | grad_inf | grad_l2 | Iter/eval |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| 1000 | 31.10 | 23.5500 | 25.06 | 25.060001 | .719633305 | .999999995 | 9.20881931e-8 | 9.56242658e-8 | 6.13980319e-7 | 1651/1743 |
+| 512 | 33.25 | 22.1625 | 24.38 | 24.38 | .677234531 | .941082804 | 2.62260302e-9 | 1.52488866e-9 | 1.53671280e-8 | 1566/1657 |
+| 256 | 37.55 | 21.9875 | 25.10 | 25.100001 | .671886938 | .933651806 | 7.68896147e-9 | 1.49780650e-8 | 9.88137003e-8 | 1227/1308 |
+| 128 | 42.35 | 16.6625 | 21.80 | 21.800001 | .509167300 | .707537151 | 4.11271550e-9 | 3.77519171e-9 | 3.67015041e-8 | 919/982 |
+| 64 | 51.50 | 11.0125 | 19.11 | 19.11 | .336516423 | .467622078 | 1.01327879e-9 | 6.73789080e-10 | 5.05479747e-9 | 670/720 |
+
+References B10=0,O10=32.725,P1000=23.55%;scores raw/unclipped (near1 floating difference retained). No fit-limited arms. Weight norms respectively952430.8125,1094410.25,1050686,509524.71875,277575.90625;bias norms19294.3613,21877.7441,24634.9922,10668.7061,8964.8496. These remain extreme unregularized diagnostic heads.
+
+| N | Bytes/client | Total bytes | Exact compression factor | Rank ceiling | Effective rank range (all10clients) | Nonreference residual reduction range |
+|---|---:|---:|---:|---:|---|---|
+| 1000 | 2048000 | 20480000 | 1 | 512 | 421–443 | 11.8164–87.9355% |
+| 512 | 1048576 | 10485760 | 1.953125 | 511 | 406–420 | 11.4153–88.6333% |
+| 256 | 524288 | 5242880 | 3.90625 | 255 | 255 | 11.7555–89.6098% |
+| 128 | 262144 | 2621440 | 7.8125 | 127 | 127 | 11.6950–90.2715% |
+| 64 | 131072 | 1310720 | 15.625 | 63 | 63 | 10.6360–91.1017% |
+
+Rank tolerance fixed before run: `512 * eps(float64) * largest_singular_value` of centered cross-covariance; no tuning or truncation. Per-client threshold,largest/smallest nonzero singular value,residual before/after,reduction,orthogonality and transform hash all tabulated in RESULTS.md and rawJSON. Global max orthogonality error double<4.744e-12/applied<4.431e-6. Rank deficits do not trigger a modified map. Communication counts only float32 anchor vectors as prescribed,excluding unchanged support features/labels. This is an upper-bound diagnostic communication model,not yet a deployable protocol. Exact 1000/256 is3.90625 (~4x),not literally at least4x.
+
+Observed warning: after N256 and before N128 completion, PyTorch's default CUDA SVD reported nonconvergence of its selected driver and automatically used its built-in more accurate fallback. Warning preserved verbatim in train.log; no code-level driver override,map change or rerun. All arms completed with finite values and small orthogonality errors. Do not hide this numerical observation in later reproducibility claims.
+
+Interpretation: N256 passes all frozen thresholds (fit100%,q=.6719,retention=.9337),supporting strong count compression in this seed0/round10 diagnostic. Its255-rank ceiling still retains93.37% of the reference missing accuracy,so the full1000 anchor side channel is substantially redundant under this fixed readout. The fixed128/64 arms show decreasing missing transfer despite100% support fit;they locate a knee but are not selected as new methods. Extreme head norms,one frozen ordering/seed and the recorded SVD warning limit broader claims. Stop and await lead review;dimension/rank compression or compact relations have not been implemented.
+
+Evidence: `research_log/H04A/gate/` includes RESULTS.md,verification.json,perarm full prefix indices/hashes,fit/per-client support/test counts,rank/alignment/state receipts,meta/run/log/tests. Remote originals/checkpoints `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-234756-h04a-count`.

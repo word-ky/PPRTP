@@ -1,0 +1,38 @@
+{
+  "all_ten_online_rounds_exact": true,
+  "n1000_exact": true,
+  "provenance_exact": true,
+  "arms": {
+    "1000": {
+      "q": 0.7196333045901189,
+      "retention": 0.9999999954442309,
+      "fit_adequate": true,
+      "missing": 23.54999989271164
+    },
+    "512": {
+      "q": 0.6772345309042584,
+      "retention": 0.9410828035601638,
+      "fit_adequate": true,
+      "missing": 22.162500023841858
+    },
+    "256": {
+      "q": 0.6718869378677845,
+      "retention": 0.9336518064426009,
+      "fit_adequate": true,
+      "missing": 21.98750004172325
+    },
+    "128": {
+      "q": 0.5091673003707431,
+      "retention": 0.7075371509398118,
+      "fit_adequate": true,
+      "missing": 16.66249990463257
+    },
+    "64": {
+      "q": 0.33651642256606346,
+      "retention": 0.46762207764222613,
+      "fit_adequate": true,
+      "missing": 11.012499928474426
+    }
+  },
+  "verdict": "strong count compression supported"
+}

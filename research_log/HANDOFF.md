@@ -1,3 +1,5 @@
+# Latest state — H04-A complete, 2026-09-17 23:53 +08
+Sourcecc8e33b/run20260917-234756-h04a-count exit0;25tests pass. N1000 entireH03D exact;10round online/state/RNG/modes/existinggrad exact. N1000/512/256/128/64 missing23.55/22.1625/21.9875/16.6625/11.0125%,allfit100%. N256 q.671886938 retention.933651806 => STRONG COUNT COMPRESSION,exactfactor3.90625. Effective ranks421-443/406-420/255/127/63. Torch internal SVD fallback warning during128 preserved;nooverride;finite/ortho pass. Headnorms extreme. Evidence H04A/gate+BRIDGE. Await lead,no newmethods/rankcompression.20min heartbeat active.
 # Latest state — H03-D complete, 2026-09-17 21:20 +08
 Sourced8ac66f/run20260917-211835-h03d-convexity exit0;23tests pass. H03-C paired500 fully exact;all10 H02-A online/state/RNG/modes exact;anchors/support/alignment identical. Fresh paired2000 fit100% eachclient200/200,iter1651/eval1743,CE9.2088e-8,grad_inf9.5624e-8. Missing23.55%,q.719633305,delta23.55pp => FORMAL PERSISTENCE POSITIVE. Head norm952430.8 is material caveat. Evidence H03D/gate+BRIDGE. Await lead,no compression/newmethods/tuning.20min heartbeat active.
 # Latest state — H03-C complete, 2026-09-17 20:35 +08
@@ -60,6 +62,7 @@ Extracted under remote shared/cifar10. Partial official/UCSD downloads preserved
 Failed run 20260916-221759-h01-smoke stopped before training at Python SSL CA failure;
 system curl retained TLS verification. No server driver/environment change performed.
 No automation created in this task; user's research-side hourly loop is external.
+
 
 
 
