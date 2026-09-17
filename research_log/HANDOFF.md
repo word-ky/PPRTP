@@ -1,3 +1,5 @@
+# Latest state — H03-C complete, 2026-09-17 20:35 +08
+Source37f5262/run20260917-203128-h03c-persistence exit0;22tests pass.10rounds online exact;indices/state/RNG/modes exact. Native missing0/fit100%;pairedmissing25.75/fit79.1% at500cap;q.786860195 delta25.75pp => OPTIMIZER-LIMITED. Evidence H03C/gate+BRIDGE. Await lead;no solver tuning/compression/newmethods.20min heartbeat active.
 # Latest state — H03-B complete, 2026-09-17 19:45 +08
 Sourced12a5012a52d2164201c802e7f010acd0ca8e761;run20260917-194253-h03b-pairbreak exit0;21tests pass. Seed0round2. Paired missing28.825%,broken8.2625%;bothsupportfit100%;q_paired=.916301308,q_broken=.260661614,delta20.5625pp => frozen INTERMEDIATE branch (q_broken>.20). Exact H03-A pairedalignment and H02-A online/state/RNG/modes preserved. Exact anchor/support hashes reused. Perm seeds314159+i,fixedpoints1,0,1,3,0,1,0,3,1;bitwise multisets unchanged. Artifacts H03B/gate+BRIDGE. Await lead,no compression/CORAL/newmethods/seed sweep or repeat unchanged ACTIVE. Checkpoints remote,Ddrive constrained,20min heartbeat active.
 # Latest state — H03-A complete, 2026-09-17 19:19 +08
@@ -56,6 +58,7 @@ Extracted under remote shared/cifar10. Partial official/UCSD downloads preserved
 Failed run 20260916-221759-h01-smoke stopped before training at Python SSL CA failure;
 system curl retained TLS verification. No server driver/environment change performed.
 No automation created in this task; user's research-side hourly loop is external.
+
 
 
 

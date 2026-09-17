@@ -134,3 +134,34 @@ If either arm fits owner support below 95%, mark that arm optimizer-limited and 
 Append `CODEX REPORT H03-C` with STATUS, source SHA, exact commands/run IDs, tests, provenance hashes, 10-round online-equivalence receipt, both fit diagnostics and metric tables, paired alignment diagnostics, `B10/P10/O10/q10/delta10`, state/RNG receipts, artifact locations, and a concise interpretation following the frozen branch.
 
 Do **not** implement anchor-count compression, dimensionality reduction, random projections, CORAL/whitening, affine/nonlinear alignment, online transport losses, hybrid/gating heads, seeds1/2, or publication-scale experiments in H03-C. Await research-lead review.
+
+## CODEX REPORT H03-C — DONE (2026-09-17 20:35 +08)
+
+STATUS: DONE; interpretation **optimizer-limited**. Source `37f5262a497886c4df6a0f07dc3ea690cf98d502`; evidence commit `7dc1148`; release `20260917-203108-h03c`; run `20260917-203128-h03c-persistence`, exit0. Seed0,10 rounds; two diagnostic arms at round10 only. No pair-breaking, compression, new maps, online changes or tuning.
+
+Changes: owner_probe exposes max_iter (default100 unchanged); run adds --persistence-probe reusing saved anchors/support; one matched500 fit/state test; report_h03c checks compact evidence.22 tests pass locally/remotely,existing21 preserved.
+
+Commands (project root; AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h03c
+./scripts/autodl-run.ps1 -Name h03c-persistence -Cmd 'PPRTP_SOURCE_SHA=37f5262a497886c4df6a0f07dc3ea690cf98d502 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --persistence-probe'
+D:\anaconda3\python.exe scripts/report_h03c.py research_log/H03C/gate
+```
+
+Both fresh zero-init512->10 heads use full-batch LBFGS lr1,strong_wolfe,max_iter500,tolerance_grad1e-9,tolerance_change1e-12,no regularizer. Native features are pooled without centering/rotation; paired features use unchanged centered orthogonal Procrustes to client0. Anchor hash `1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125`;support hash `2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073`;entire provenance receipt exactly matches H03-A. No anchor labels or test fitting.
+
+All10 H02-A ordinary metrics/client model/prototype bank/server records exactly reproduce. Both arms start from identical state and preserve client parameters/buffers,prototypes,server,module modes,CPU/CUDA RNG. All features/SVD/transforms/losses/gradients/logits/parameters finite. Full per-client correct/count,head/transform hashes,state receipts in rounds.jsonl/final.json.
+
+| Arm | Seen % | Missing % | All % | Macro % | Fit CE before -> after | Support fit | Iter/eval |
+|---|---:|---:|---:|---:|---|---:|---|
+| no_align_500 | 70.80 | 0 | 14.16 | 14.16 | 2.30258393 -> 1.50203121e-8 | 100% | 320/360 |
+| paired_500 | 34.60 | 25.75 | 27.52 | 27.52 | 2.30258393 -> .628464222 | 79.10% | 500/518 |
+
+B10=0%,P10=25.75%,O10=32.725%;raw q10=.786860195,delta10=25.75pp. Paired fit below95% at500cap => **optimizer-limited**, not a completed persistent/degraded causal gate. Native fit adequate.
+
+Nonreference centered residual before130.5607–148.6300,after15.7515–130.3321;reductions11.8164–87.9355%,versus round2's44.7481–53.9998%. Client7 reduction11.82% and residual130.33 illustrate increased heterogeneity. Max orthogonality error double<4.398e-12/applied<4.257e-6;client0identity. Per-client diagnostics/transform hashes in RESULTS.md.
+
+Interpretation: paired alignment still demonstrates substantial positive missing-class recognition at round10 despite incomplete support fitting. Adequately fitting native owner support leaves missing accuracy zero, so the old native zero is not rescued by the authorized stronger solver. However the paired arm fails the95% fit threshold, so the formal persistence gate is optimizer-limited; q10 does not override that requirement. This is not a negative causal conclusion or proof that more iterations will succeed. Stop at500 and await lead review without compression,solver changes or new methods.
+
+Evidence: `research_log/H03C/gate/` includes RESULTS.md,verification.json,raw artifacts and meta/run/log receipts. Remote originals/checkpoints: `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-203128-h03c-persistence`. Experiment had no execution failures/nonfinite values. Local report append initially failed due Windows default GBK decoding; repaired with explicit UTF8, experiment artifacts unaffected.
