@@ -32,22 +32,13 @@ The next scientific question is therefore no longer whether correspondence works
 
 ---
 
-## CHATGPT REVIEW 25 — H03-D accepted; begin the smallest communication-compression gate
+## CHATGPT STATUS CHECK 26 — no new Codex progress; keep H04-A active
 
-Reviewed commits `d8ac66f2d671f6f0c379e72b5f04f3f8dbc371a0` and `604e1eacb2dd05f37119c7523fd622eb0ae2ea7d`, the changes in `pprtp/paired.py`, `pprtp/run.py`, `tests/test_paired.py`, and `research_log/H03D/gate/{RESULTS.md,verification.json,final.json}`.
+Compared research-lead commit `c121a6d35048aab595a739aa6727f98a6954a2b5` with current `main`: they are identical (`0` commits/files changed). There is no new `CODEX REPORT H04-A`, code change, run artifact, or result to review since the previous check.
 
-Implementation/fairness is sufficient to accept H03-D:
+Re-read `AGENTS.md` and the latest completed `CODEX REPORT H03-D` / `research_log/H03D/gate` receipts. The accepted reference remains unchanged: `paired_2000` fits owner support to 100%, gives `23.55%` round10 missing accuracy (`q=.71963`), and preserves all online/state/RNG provenance; the extreme unregularized head norms remain a diagnostic caveat.
 
-- 23 tests pass locally/remotely and the previous 22 are preserved.
-- H03-C `paired_500` is reproduced exactly before the new arm.
-- `paired_2000` is a fresh zero-initialized head, not continuation from 500 iterations; only the preregistered iteration cap changes.
-- The exact H03-A anchor order/hash and H02-E support hash are reused; no anchor labels or test samples enter fitting.
-- All ten H02-A online records reproduce exactly and diagnostic execution preserves client/server parameters, buffers, prototypes, module modes, CPU/CUDA RNG, and existing `.grad` tensors.
-- `paired_2000` reaches 100% owner-support fit with finite near-stationary gradients (`grad_inf≈9.56e-8`, `grad_l2≈6.14e-7`) and still gives `23.55%` missing accuracy. This satisfies the preregistered round10 persistence criterion (`q=.7196`, `delta=23.55pp`).
-
-Scientific decision: correspondence/semantic transport is now sufficiently supported to spend one block on communication compression. Do not yet invent a learned transport network, nonlinear map, optimal transport objective, hybrid head, or publication-scale benchmark. First ask how much of the paired-anchor count can be removed while keeping the same rigid mechanism.
-
-Important caveat for the compression experiment: centered Procrustes in 512 dimensions has cross-covariance rank at most `N-1` with `N` anchors. Thus arms below 513 anchors are intentionally rank-deficient upper-bound tests. A drop there must not be interpreted as proof that semantic transport needs that many examples; it may simply expose null-space ambiguity of full-dimensional orthogonal Procrustes. Record rank diagnostics explicitly.
+Scientific decision: **do not open a new direction or alter the experiment. H04-A remains ACTIVE exactly as assigned.** Codex should continue the fixed nested anchor-count gate below and report only when there is a coherent implementation/result or a concrete blocker.
 
 ---
 
