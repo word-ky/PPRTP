@@ -1,3 +1,5 @@
+# Latest state — H02-D complete, 2026-09-17 17:26 +08
+Sourcef6a671cbeeb99119eecb0271df857cb7cb4f2d62;run20260917-172421-h02d-owner exit0;17tests pass. All10online H02-A records exact; state/prototype/CPU-CUDA RNG unchanged. Exact original local datasets200/client,2000total,200/class; no oracle/test fitting. Owner probe missing round2=.2125%,round10=0%;q=0 => frozen low-recovery branch, cross-class calibration next hypothesis for lead. Round10 fit90.75% at100iter cap; no convergence claim. Results/provenance/receipts research_log/H02D/full and BRIDGE. Await next ACTIVE; do not repeat H02-D or begin H03/method independently. Keep checkpoints remote, D drive constrained.20min heartbeat active.
 # Latest state — H02-C complete, 2026-09-17 16:19 +08
 Source22d90e24066c3fcb9ec43d7061126da10ede5f75; run20260917-161646-h02c-oracle exit0;15tests pass. All10round online H02-A records exact; oracle state/prototypes/CPU-CUDA RNG unchanged. Calibration train-only100/class,disjoint, hash283003b4219d2e4278982b622a225d59c62ef7376c182d3ed4de3574a0a071da. Round10 individual missing34.2625%,shared32.725%,gap1.5375pp; predeclared compression/statistics branch. All round10 fits hit100iter cap; do not claim exact converged ceiling. Report/evidence research_log/H02C/full and BRIDGE. Await lead, no H03/new methods or repeat unchanged ACTIVE. D drive almost full; verified duplicate smoke model evicted to restore fetch, original retained remote (progress exact hash/path). Keep checkpoints remote.20min heartbeat active.
 # Latest state — H02-B complete, 2026-09-17 15:10 +08
@@ -48,6 +50,7 @@ Extracted under remote shared/cifar10. Partial official/UCSD downloads preserved
 Failed run 20260916-221759-h01-smoke stopped before training at Python SSL CA failure;
 system curl retained TLS verification. No server driver/environment change performed.
 No automation created in this task; user's research-side hourly loop is external.
+
 
 
 

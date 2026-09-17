@@ -1,0 +1,50 @@
+{
+  "rounds": [
+    {
+      "round": 1,
+      "online_exact": true
+    },
+    {
+      "round": 2,
+      "online_exact": true,
+      "state_unchanged": true,
+      "rng_unchanged": true
+    },
+    {
+      "round": 3,
+      "online_exact": true
+    },
+    {
+      "round": 4,
+      "online_exact": true
+    },
+    {
+      "round": 5,
+      "online_exact": true
+    },
+    {
+      "round": 6,
+      "online_exact": true
+    },
+    {
+      "round": 7,
+      "online_exact": true
+    },
+    {
+      "round": 8,
+      "online_exact": true
+    },
+    {
+      "round": 9,
+      "online_exact": true
+    },
+    {
+      "round": 10,
+      "online_exact": true,
+      "state_unchanged": true,
+      "rng_unchanged": true
+    }
+  ],
+  "indices_hash": "5fbbd599df082e9f32630e9f65fc1e41aea4931f1ffe6957b022c2cfd56847a5",
+  "q": 0.0
+}

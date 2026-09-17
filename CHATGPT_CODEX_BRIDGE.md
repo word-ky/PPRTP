@@ -170,3 +170,34 @@ Stop and report rather than tuning if:
 Append `CODEX REPORT H02-D` with STATUS, source SHA, exact commands/run IDs, tests, owner-sample provenance/count receipts, online-equivalence/side-effect checks, round2/round10 `owner_sample_probe` metrics and fit diagnostics, the fixed mean/oracle references, computed `q`, per-client artifact location, and a short interpretation following the frozen branch above.
 
 Do **not** independently start H03, add multi-prototype/relational modules, or tune the probe after the result. Await research-lead review.
+
+## CODEX REPORT H02-D — DONE (2026-09-17 17:26 +08)
+
+STATUS: DONE. Source `f6a671cbeeb99119eecb0271df857cb7cb4f2d62`; run `20260917-172421-h02d-owner`, release `20260917-172347-h02d`, exit0. Seed0,10 rounds; diagnostic only2/10. No H03, richer-prototype method, relational module or tuning started.
+
+Files: `pprtp/owner_probe.py`, minimal selectable `--owner-sample-probe` integration in `pprtp/run.py`, `tests/test_owner_probe.py`, `scripts/report_h02d.py`. Reused original PFLlib online models and existing frozen-feature/LBFGS routines. One zero-initialized copied head, pooled local features only, full-batch LBFGS default lr1,max_iter100,strong_wolfe,tolerance_grad1e-9,tolerance_change1e-12,no regularizer. Existing online path unchanged.
+
+Exact commands (project root; AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h02d
+./scripts/autodl-run.ps1 -Name h02d-owner -Cmd 'PPRTP_SOURCE_SHA=f6a671cbeeb99119eecb0271df857cb7cb4f2d62 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --owner-sample-probe'
+D:\anaconda3\python.exe scripts/report_h02d.py research_log/H02D/full
+```
+
+17 tests pass locally/remotely. New checks cover exact receipt indices, balanced original local labels/counts, rejecting oracle overlap, state/buffer/RNG preservation, and identical fitted head/fit diagnostics after changing only evaluation labels. Runtime uses the exact `datasets` returned by frozen `prepare()` for online local training, in unchanged client order,200/client,2000total,200/global class. Train-index SHA256 `5fbbd599df082e9f32630e9f65fc1e41aea4931f1ffe6957b022c2cfd56847a5`. `owner_samples.json` saves every index; reporting verifies equality to frozen split and zero overlap with H02-C oracle indices. Official test data are passed only to evaluation after fitting. No missing-local-class image or oracle image is used for fitting.
+
+All10 ordinary H02-A model/prototype/server hashes and metrics reproduce exactly. At2/10, probe records and verifies unchanged full client state (parameters+buffers), per-client prototypes, persistent server head and CPU/CUDA RNG. Temporary eval restores prior module modes. Extracted features, fit losses/gradients/parameters/logits finite. Per-client results, head norms/hashes, before/after state and optimizer counts: `research_log/H02D/full/artifacts/experiment/fedgh_seed0/rounds.jsonl`; provenance `owner_samples.json`; summary/independent checks `research_log/H02D/full/RESULTS.md` and `verification.json`.
+
+Seed0 accuracy %, mean across10 clients:
+
+| Round | Readout | Seen | Missing | All | Macro | Fit CE before→after | Fit accuracy before→after | LBFGS iter/eval |
+|---|---|---:|---:|---:|---:|---|---|---|
+| 2 | owner_sample_probe | 72.55 | .2125 | 14.68 | 14.68 | 2.30258393→9.41750677e-9 | 10%→100% | 86/104 |
+| 10 | owner_sample_probe | 71.90 | 0 | 14.38 | 14.38 | 2.30258393→.216422439 | 10%→90.75% | 100/106 |
+
+Fixed references reused without rerun: mean-probe missing round2=.0125%,round10=0%; shared all-class oracle round2=31.45%,round10=32.725%. At round10 M=0,O=32.725,R=0, so **q=(R−M)/(O−M)=0**, entering the predeclared q≤.20 branch. Under this frozen diagnostic, removing mean compression recovers none of the demonstrated oracle gap. Higher all accuracy comes from seen classes. Mean compression is not supported as the dominant explanation; cross-class calibration/correspondence across client spaces is the next hypothesis authorized for research-lead consideration. No method has been implemented.
+
+Limits: round10 fit reaches100iter cap and90.75% training accuracy, so this is not a certified optimum. Round2 reaches100% training accuracy but still only.2125% missing test accuracy. H02-B online means and H02-D current eval-mode raw features also differ in collection timing, as required by the protocol; H02-C further differs in all-class support and sample count. These data do not by themselves prove a specific calibration mechanism or guarantee a relational method will work. Preserved frozen settings and single-seed scope; await lead review.
+
+No failed experiment or nonfinite values in this block. Compact JSON/logs retained locally, full remote originals under `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-172421-h02d-owner`; D drive remains constrained.

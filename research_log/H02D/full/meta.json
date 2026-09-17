@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-172421-h02d-owner",
+  "releaseId": "20260917-172347-h02d",
+  "sessionName": "autodl-20260917-172421-h02d-owner",
+  "command": "PPRTP_SOURCE_SHA=f6a671cbeeb99119eecb0271df857cb7cb4f2d62 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --owner-sample-probe"
+}
