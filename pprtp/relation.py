@@ -28,7 +28,7 @@ def permute_relations(r,values):
     return out
 
 
-def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,broken=False,conditioned=False):
+def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,broken=False,conditioned=False,structural_null=False):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(server.state_dict().values()),
@@ -54,6 +54,15 @@ def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,bro
                 r=permute_relations(r,values);tr=permute_relations(tr,values)
                 receipt['support_test_multisets_bitwise_unchanged']=True;perms.append(receipt)
             zz.append(r);yy.append(y);tt.append(tr);ty.append(tlabels)
+        if structural_null:
+            from pprtp.helmert import basis,null_diagnostics
+            from pprtp.conditioning import matrix_diagnostics
+            raw=torch.cat(zz);q=basis(raw.shape[1],device=raw.device,dtype=raw.dtype)
+            structural=dict(support=null_diagnostics(raw),test=null_diagnostics(torch.cat(tt)),
+                raw_support_hash=tensor_hash([raw]),basis_hash=tensor_hash([q]),
+                raw_spectrum=matrix_diagnostics(raw,input_aware=True))
+            zz=[z@q for z in zz];tt=[z@q for z in tt]
+            assert all(torch.isfinite(z).all() for z in zz+tt)
         if conditioned:
             from pprtp.conditioning import statistics,apply_condition,matrix_diagnostics
             pooled=torch.cat(zz)
@@ -62,9 +71,9 @@ def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,bro
             tt=[apply_condition(z,mean,std) for z in tt]
             conditioning=dict(mean=mean.cpu().tolist(),std=std.cpu().tolist(),
                 statistics_hash=tensor_hash([mean,std]),raw_support_hash=tensor_hash([pooled]),
-                before=matrix_diagnostics(pooled),after=matrix_diagnostics(torch.cat(zz)),
+                before=matrix_diagnostics(pooled,input_aware=structural_null),after=matrix_diagnostics(torch.cat(zz),input_aware=structural_null),
                 labels_used=False,test_used=False,input_dtype=str(zz[0].dtype))
-        template=torch.nn.Linear(len(anchors),10,device=zz[0].device,dtype=zz[0].dtype)
+        template=torch.nn.Linear(zz[0].shape[1],10,device=zz[0].device,dtype=zz[0].dtype)
         probe,fit=fit_linear(template,torch.cat(zz),torch.cat(yy),zero=True,max_iter=2000)
         fit['head_hash']=tensor_hash(probe.state_dict().values());fit['final_support']=support_gradient(probe,zz,yy)
         values=[]
@@ -80,6 +89,7 @@ def analyze_relation(clients,server,anchors,support,test,tensor_hash,metrics,bro
         per_client=values,fit=fit,gram=gram,state_before=before,state_after=state(),
         rng_cpu_unchanged=True,rng_cuda_unchanged=True,module_modes_unchanged=True,existing_gradients_unchanged=True,
         anchor_labels_used=False)
+    if structural_null: result['structural_null']=structural
     if conditioned: result['conditioning']=conditioning
     if broken: result['permutations']=perms
     return result

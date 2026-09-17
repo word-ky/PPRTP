@@ -84,3 +84,5 @@ Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round onl
 [2026-09-18T02:19:29.7435939+08:00] H05-B assigned72042fc;sharedsupport-only float32 zscore eacharm,positive std strict,noeps. SVDdiagnosticfloat64 max(shape)*eps64*smax.30tests pass mandatory affine-logit equivalence included. Training remainsfloat32 LBFGS2000. Historicalprefix/permutations/Grams/state exact checks;no extra capacity.
 
 [2026-09-18T02:23:04.1862117+08:00] H05-B DONE sourcec8c5c2e/run20260918-021953-h05b-conditioning exit0;30tests pass;allonline/state/RNG/modes/grad/provenance exact. Paired/broken fit68.65/76.45 missing12.0125/4.925 grad_inf.0022269/.0014738,both2000cap=>optimizationunresolved. q.546333148 delta7.0875;conditions1.095e8/6.018e7. NVMLwarningonly;H05B/gate+BRIDGE;awaitlead,norescue.
+
+[2026-09-18T03:27:13.3321185+08:00] H05-C assigned1a5c2f1;closedformdataindependentHelmert256x255 float64construction/castfloat32,then supportonlyzscore.32tests pass orthogonality/null/reconstruction/logitequivalence/nullenergy. Raw256/Helmert255/zscore spectra both eps64+eps32tolerances;rawsupporthash mustexactH05B. No solver/dtypechange.
