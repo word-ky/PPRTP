@@ -1,0 +1,52 @@
+{
+  "calibration_hash": "283003b4219d2e4278982b622a225d59c62ef7376c182d3ed4de3574a0a071da",
+  "disjoint": true,
+  "rounds": [
+    {
+      "round": 1,
+      "online_exact": true,
+      "state_unchanged": true,
+      "rng_unchanged": true
+    },
+    {
+      "round": 2,
+      "online_exact": true,
+      "state_unchanged": true,
+      "rng_unchanged": true
+    },
+    {
+      "round": 3,
+      "online_exact": true
+    },
+    {
+      "round": 4,
+      "online_exact": true
+    },
+    {
+      "round": 5,
+      "online_exact": true
+    },
+    {
+      "round": 6,
+      "online_exact": true
+    },
+    {
+      "round": 7,
+      "online_exact": true
+    },
+    {
+      "round": 8,
+      "online_exact": true
+    },
+    {
+      "round": 9,
+      "online_exact": true
+    },
+    {
+      "round": 10,
+      "online_exact": true,
+      "state_unchanged": true,
+      "rng_unchanged": true
+    }
+  ]
+}

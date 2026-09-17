@@ -158,3 +158,48 @@ Stop and report rather than tuning if:
 ## Deliverable
 
 Append `CODEX REPORT H02-C` with STATUS, source SHA, exact commands/run IDs, test results, calibration-index hash/disjointness proof, side-effect/online-equivalence receipts, the round1/2/10 individual-vs-shared oracle table, per-client artifact location, and a short interpretation that follows the frozen rules above. Do **not** independently begin H03 or implement a relational method after the result; await research-lead review.
+
+## CODEX REPORT H02-C — DONE (2026-09-17 16:19 +08)
+
+STATUS: DONE. Source `22d90e24066c3fcb9ec43d7061126da10ede5f75`. Run `20260917-161646-h02c-oracle`, release `20260917-161629-h02c`, exit0. Seed0 only,10 online rounds; oracle analysis only rounds1/2/10. No H03/new method started.
+
+Implementation: `pprtp/oracle.py` constructs train-only calibration, extracts frozen-base features and fits individual/shared zero-initialized copied heads. `pprtp/fedgh.py` reuses the same LBFGS fit routine; existing20-mean probe unchanged. `pprtp/run.py --oracle-head` is a side channel; `tests/test_oracle.py` and `scripts/report_h02c.py` verify/report it. Full-batch LBFGS lr1(default), max_iter100, strong_wolfe, tolerance_grad1e-9/tolerance_change1e-12, no regularization. No tuning or extra seeds.
+
+Exact commands (project root; AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h02c
+./scripts/autodl-run.ps1 -Name h02c-oracle -Cmd 'PPRTP_SOURCE_SHA=22d90e24066c3fcb9ec43d7061126da10ede5f75 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --oracle-head'
+D:\anaconda3\python.exe scripts/report_h02c.py research_log/H02C/full
+```
+
+15 tests pass locally/remotely. Calibration is deterministic,100/class, RNG314159, excluded union of all seed0 local training indices. Index SHA256 `283003b4219d2e4278982b622a225d59c62ef7376c182d3ed4de3574a0a071da`; index list and source provenance in `research_log/H02C/full/artifacts/experiment/fedgh_seed0/oracle_calibration.json`. Constructed exclusively from CIFAR10(train=True); official test features/labels only used for evaluation. A focused test changes test labels while holding calibration fixed and verifies identical fitted heads/fit records. Calibration disjointness/hash independently checked in reporting.
+
+All ten ordinary online metric/model/prototype/server records reproduce H02-A exactly. Each analyzed round records full client state hashes (parameters+buffers), per-client prototype hashes, server hashes before/after; all unchanged. Temporary evaluation restores module training flags; torch.random.fork_rng restores CPU and all CUDA RNG states, checked exactly. Individual and shared losses/features/logits/gradients/parameters finite. All per-client metrics, fit CE/accuracy before/after, norms/hashes and optimizer counts retained in `research_log/H02C/full/artifacts/experiment/fedgh_seed0/rounds.jsonl`; summary and independent checks in RESULTS.md/verification.json.
+
+Accuracy %, mean across10 clients (single seed, no seed SD):
+
+| Round | Readout | Seen | Missing | All | Macro |
+|---|---|---:|---:|---:|---:|
+| 1 | oracle_individual | 31.40 | 32.20 | 32.04 | 32.04 |
+| 1 | oracle_shared | 31.60 | 32.10 | 32.00 | 32.00 |
+| 2 | oracle_individual | 31.75 | 31.95 | 31.91 | 31.91 |
+| 2 | oracle_shared | 31.10 | 31.45 | 31.38 | 31.38 |
+| 10 | oracle_individual | 33.60 | 34.2625 | 34.13 | 34.13 |
+| 10 | oracle_shared | 31.95 | 32.7250 | 32.57 | 32.57 |
+
+Calibration fit accuracy/CE below are fractions/raw loss:
+
+| Round | Individual accuracy mean/min/max | Individual CE mean/min/max | Shared accuracy / CE | Owner cosine mean/min/max |
+|---|---|---|---|---|
+| 1 | 1 / 1 / 1 | .000113562 / 6.67572e-9 / .000613477 | .9525 / .140831 | .989057 / .987981 / .991554 |
+| 2 | .9955 / .985 / 1 | .0253351 / 1.81685e-6 / .0813877 | .9284 / .195183 | .907416 / .885563 / .924862 |
+| 10 | .6541 / .627 / .693 | 1.001857 / .847816 / 1.086116 | .5331 / 1.329544 | .606158 / .497890 / .723193 |
+
+H02-B20-mean adequately fit probe reused unchanged: missing round2=.0125%, round10=0%, not rerun. Round10 individual client missing accuracies span31.0–37.625%; shared28.5–35.625%, so the aggregate is not driven by one or two clients.
+
+Frozen decision: I=34.2625%≥20%, S=32.725%, I−S=1.5375pp≤5pp. A shared linear decoder can decode substantial missing-class information with raw all-class calibration features, despite falling owner-prototype cosine and failed20-mean probe. This follows the predeclared third branch: class-mean compression/insufficient server statistics is the main suspect to test next, rather than proceeding directly to relational geometry. Oracle access includes forbidden all-class labels and is strictly an analysis upper-bound diagnostic, not an FL result. Ten-way10% chance is a reference only, no significance claim.
+
+Limitation: all round10 individual/shared optimizers reach the fixed100-iteration cap; calibration fit remains imperfect (above). Therefore do not claim certified converged optima or a mathematically exact representation ceiling. Settings were not changed. The demonstrated shared decoder already achieves32.725% missing accuracy; attributing the20-mean gap specifically to compression, all-class label coverage, or other server-statistics differences still needs the next controlled experiment. No independent H03 started; await research-lead review.
+
+Operational issue: D drive reached0 free bytes and initially blocked git fetch. Removed only an ignored duplicate smoke checkpoint after confirming SHA256 equality against its retained remote original; exact path/hash logged in progress. Compact JSON/logs fetched; full model originals remain under `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-161646-h02c-oracle`. No unique artifacts deleted.

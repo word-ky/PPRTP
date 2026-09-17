@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-161646-h02c-oracle",
+  "releaseId": "20260917-161629-h02c",
+  "sessionName": "autodl-20260917-161646-h02c-oracle",
+  "command": "PPRTP_SOURCE_SHA=22d90e24066c3fcb9ec43d7061126da10ede5f75 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --oracle-head"
+}
