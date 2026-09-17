@@ -2,11 +2,21 @@ import unittest
 from types import SimpleNamespace
 import torch
 from torch.utils.data import TensorDataset
-from pprtp.paired import procrustes,transform,select_anchors,analyze_paired
+from pprtp.paired import procrustes,transform,select_anchors,analyze_paired,break_pairs
 from pprtp.run import tensor_hash,metrics
 
 
 class PairedTest(unittest.TestCase):
+    def test_pair_breaking_preserves_multiset(self):
+        a=torch.arange(4000,dtype=torch.float32).reshape(1000,4)
+        broken,r=break_pairs(a,1)
+        perm=torch.tensor(r['permutation'])
+        self.assertEqual(sorted(r['permutation']),list(range(1000)))
+        self.assertTrue(torch.equal(broken[torch.argsort(perm)],a))
+        self.assertFalse(torch.equal(broken,a))
+        self.assertLessEqual(r['fixed_points'],10)
+        self.assertEqual(r,break_pairs(a,1)[1])
+
     def test_known_rotation_translation(self):
         torch.manual_seed(16)
         x=torch.randn(100,8,dtype=torch.double)

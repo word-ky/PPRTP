@@ -15,7 +15,7 @@ def fit_probe(head, clients):
     return fit_linear(head,x,y)
 
 
-def fit_linear(head,x,y,zero=False):
+def fit_linear(head,x,y,zero=False,max_iter=100):
     probe=copy.deepcopy(head)
     x=x.detach()
     if zero:
@@ -23,7 +23,7 @@ def fit_linear(head,x,y,zero=False):
             probe.weight.zero_()
             probe.bias.zero_()
     optimizer=torch.optim.LBFGS(probe.parameters(),line_search_fn='strong_wolfe',
-        max_iter=100,tolerance_grad=1e-9,tolerance_change=1e-12)
+        max_iter=max_iter,tolerance_grad=1e-9,tolerance_change=1e-12)
     def score():
         with torch.no_grad():
             logits=probe(x)
@@ -40,7 +40,7 @@ def fit_linear(head,x,y,zero=False):
     after=score()
     state=optimizer.state[next(iter(probe.parameters()))]
     info=dict(before=before,after=after,n_iter=state['n_iter'],func_evals=state['func_evals'],
-        max_iter=100,line_search_fn='strong_wolfe',tolerance_grad=1e-9,tolerance_change=1e-12,
+        max_iter=max_iter,line_search_fn='strong_wolfe',tolerance_grad=1e-9,tolerance_change=1e-12,
         lr=1.,weight_norm=probe.weight.norm().item(),bias_norm=probe.bias.norm().item(),
         termination_note='PyTorch exposes iteration/evaluation counts, not an explicit termination reason.')
     assert all(torch.isfinite(p).all() for p in probe.parameters())

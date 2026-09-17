@@ -14,11 +14,11 @@ def select_anchors(size,excluded):
     return np.random.default_rng(161803).permutation(pool)[:1000].tolist()
 
 
-def prepare_paired(root,split,oracle_indices,support_indices):
+def prepare_paired(root,split,oracle_indices,support_indices,anchor_indices=None):
     ds=CIFAR10(root,train=True,download=False)
     assert ds.train
     excluded=set(sum(split['train_indices'],[]))|set(oracle_indices)|set(sum(support_indices,[]))
-    indices=select_anchors(len(ds.data),excluded)
+    indices=select_anchors(len(ds.data),excluded) if anchor_indices is None else anchor_indices
     assert len(set(indices))==1000 and not excluded.intersection(indices)
     def images(ii):
         x=torch.from_numpy(ds.data[ii].copy()).permute(0,3,1,2).float()/255
@@ -60,7 +60,20 @@ def transform(z,t):
     return out
 
 
-def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics):
+def break_pairs(a,client_id):
+    permutation=np.random.default_rng(314159+client_id).permutation(len(a))
+    perm=torch.tensor(permutation,device=a.device)
+    broken=a[perm]
+    assert torch.equal(broken[torch.argsort(perm)],a)
+    fixed=int((permutation==np.arange(len(a))).sum())
+    assert fixed<=.01*len(a)
+    values=permutation.tolist()
+    return broken,dict(seed=314159+client_id,permutation=values,fixed_points=fixed,
+        permutation_sha256=hashlib.sha256(json.dumps(values,separators=(',',':')).encode()).hexdigest(),
+        multiset_bitwise_unchanged=True)
+
+
+def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=False,max_iter=100,expected_alignment=None):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(head.state_dict().values()),
@@ -70,12 +83,18 @@ def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics):
     cuda=torch.cuda.get_rng_state_all() if devices else []
     with torch.random.fork_rng(devices=devices):
         anchor_features=[features(c,anchors)[0] for c in clients] # second tensor never used
-        transforms=[]; diagnostics=[]; zz=[]; yy=[]
+        transforms=[]; diagnostics=[]; zz=[]; yy=[]; permutations=[]
         for i,c in enumerate(clients):
-            t,d=procrustes(anchor_features[i],anchor_features[0],identity=i==0)
+            a=anchor_features[i]
+            if broken and i:
+                a,receipt=break_pairs(a,i)
+                permutations.append(dict(client=i,**receipt))
+            t,d=procrustes(a,anchor_features[0],identity=i==0)
             d['transform_hash']=tensor_hash(t); transforms.append(t); diagnostics.append(d)
             z,y=features(c,support[i]); zz.append(transform(z,t)); yy.append(y)
-        probe,fit=fit_linear(head,torch.cat(zz),torch.cat(yy),zero=True)
+        if expected_alignment is not None:
+            assert diagnostics==expected_alignment, 'H03-A paired alignment mismatch'
+        probe,fit=fit_linear(head,torch.cat(zz),torch.cat(yy),zero=True,max_iter=max_iter)
         fit['head_hash']=tensor_hash(probe.state_dict().values())
         values=[]
         for c,t in zip(clients,transforms):
@@ -87,6 +106,9 @@ def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics):
     assert modes==[[m.training for m in c.model.modules()] for c in clients]
     assert torch.equal(cpu,torch.get_rng_state())
     assert all(torch.equal(a,b) for a,b in zip(cuda,torch.cuda.get_rng_state_all() if devices else []))
-    return dict(metrics={k:sum(v[k] for v in values)/len(values) for k in ('seen','missing','all','macro')},
+    result=dict(metrics={k:sum(v[k] for v in values)/len(values) for k in ('seen','missing','all','macro')},
         per_client=values,fit=fit,alignment=diagnostics,state_before=before,state_after=state(),
         rng_cpu_unchanged=True,rng_cuda_unchanged=True,module_modes_unchanged=True,anchor_labels_used=False)
+    if broken:
+        result['permutations']=permutations
+    return result

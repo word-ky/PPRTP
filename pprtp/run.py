@@ -109,10 +109,14 @@ def run(cfg, mode, seed):
         initial_state_sha256=initial_hash,split_sha256=hashlib.sha256((out/'split.json').read_bytes()).hexdigest())
     (out/'metadata.json').write_text(json.dumps(metadata,indent=2))
     testloader=DataLoader(test,batch_size=128,shuffle=False)
-    if cfg.paired_anchor_probe:
+    if cfg.paired_anchor_probe or cfg.pair_breaking_probe:
         oracle_indices=json.loads(Path('research_log/H02C/full/artifacts/experiment/fedgh_seed0/oracle_calibration.json').read_text())['indices']
         saved_support=json.loads(Path('research_log/H02E/full/artifacts/experiment/fedgh_seed0/heldout_owner_support.json').read_text())
-        anchors,paired_support,paired_receipt=prepare_paired(cfg.data,split,oracle_indices,saved_support['indices'])
+        saved_anchors=json.loads(Path('research_log/H03A/gate/artifacts/experiment/fedgh_seed0/paired_anchors.json').read_text()) if cfg.pair_breaking_probe else None
+        anchors,paired_support,paired_receipt=prepare_paired(cfg.data,split,oracle_indices,saved_support['indices'],
+            anchor_indices=saved_anchors['indices'] if saved_anchors else None)
+        if saved_anchors:
+            assert paired_receipt['indices_sha256']==saved_anchors['indices_sha256']
         assert paired_receipt['support_indices_sha256']==saved_support['indices_sha256']
         (out/'paired_anchors.json').write_text(json.dumps(paired_receipt,indent=2))
     if cfg.heldout_owner_probe:
@@ -195,12 +199,22 @@ def run(cfg, mode, seed):
                     communication_bytes=dict(upload_vectors=20*512*4,upload_labels=20*8,
                         downloaded_head_per_client=sum(p.numel()*p.element_size() for p in server_head.parameters()),
                         downloaded_head_all_clients=len(clients)*sum(p.numel()*p.element_size() for p in server_head.parameters())))
-            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe or cfg.paired_anchor_probe):
+            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe or cfg.paired_anchor_probe or cfg.pair_breaking_probe):
                 historical=Path('research_log/H02A/full/artifacts/experiment')/f'fedgh_seed{seed}'/'rounds.jsonl'
                 old=json.loads(historical.read_text().splitlines()[r])
                 for key in ('client_model_hashes','prototype_bank_hash','metrics','server_head'):
                     assert json.loads(json.dumps(record[key]))==old[key], f'H02-A online mismatch: round {r+1}, {key}'
                 record['historical_online_exact']=True
+            if mode == 'fedgh' and cfg.pair_breaking_probe and r+1==2:
+                historical=json.loads(Path('research_log/H03A/gate/artifacts/experiment/fedgh_seed0/final.json').read_text())
+                paired=analyze_paired(clients,server_head,anchors,paired_support,test,tensor_hash,metrics,
+                    max_iter=500,expected_alignment=historical['paired_anchor_procrustes_probe']['alignment'])
+                record['pair_breaking_probe']=dict(paired=paired,paired_alignment_reproduced=True)
+                if paired['fit']['after']['accuracy']<.95:
+                    stream.write(json.dumps(record)+'\n'); stream.flush()
+                    raise RuntimeError('H03-B stop: paired support fit below95%; optimizer-limited')
+                record['pair_breaking_probe']['pair_broken']=analyze_paired(clients,server_head,anchors,paired_support,test,
+                    tensor_hash,metrics,broken=True,max_iter=500)
             if mode == 'fedgh' and cfg.paired_anchor_probe and r+1==2:
                 record['paired_anchor_procrustes_probe']=analyze_paired(clients,server_head,anchors,paired_support,test,tensor_hash,metrics)
             if mode == 'fedgh' and cfg.heldout_owner_probe and r+1 in (2,10):
@@ -272,6 +286,7 @@ def main():
     parser.add_argument('--owner-sample-probe',action='store_true')
     parser.add_argument('--heldout-owner-probe',action='store_true')
     parser.add_argument('--paired-anchor-probe',action='store_true')
+    parser.add_argument('--pair-breaking-probe',action='store_true')
     cfg=parser.parse_args()
     torch.set_num_threads(1)
     torch.backends.cudnn.benchmark=False
