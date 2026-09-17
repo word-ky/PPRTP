@@ -17,3 +17,9 @@
 
 ## 2026-09-17 13:14 +08 — H02-A implementation
 Fetched research-lead 4f75e07; H02-A is active. Added shared linear server head atop existing PFLlib H01 client/model. Frozen SGD .01, one pass, batch size 1, ascending client then class order (20 detached means). Historical H01-B round-one hashes asserted in real runs. Broadcast and server-base immutability receipts emitted each round. Local disk pressure: retain checkpoints remotely and fetch JSON/logs only. No H01 reruns or parameter sweep.
+
+## 2026-09-17 13:17 +08 — H02-A integrity gate passed
+Source dca8d79f885c4eea7872944ad71799f4f691085d. All 12 local/remote tests pass. Remote gate 20260917-131604-h02a-gate exit 0; historical round-one model/prototype hash pairing, server-head update, base immutability, exact round2 broadcast, distinct personalized bases and server persistence all pass. Gate seed0 round2 fresh-head missing=0, all=10.59%. No accuracy gate imposed. Started 20260917-131658-h02a-full: seeds 0/1/2, 10 rounds, fedgh only; source/release unchanged. Compact gate evidence in research_log/H02A/gate; full checkpoints retained on server.
+
+## 2026-09-17 13:19 +08 — H02-A full complete
+Three seeds x10 rounds exit0; all integrity receipts pass. Fresh shared-head missing0% and all10.81±.7184% at round10; local-head all12.32±.5027%. Owner cosine~.61-.62, but late one-pass server CE rises; report explicitly limits interpretation and keeps frozen settings. Full compact JSON/logs + RESULTS and verification stored under research_log/H02A/full. BRIDGE updated DONE; awaiting lead, no H02-B.

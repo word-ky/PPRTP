@@ -1,3 +1,5 @@
+# Latest state — H02-A complete, 2026-09-17 13:19 +08
+Source dca8d79f885c4eea7872944ad71799f4f691085d. Twelve tests and all historical/server/broadcast integrity checks pass. Gate 20260917-131604-h02a-gate; full 20260917-131658-h02a-full, both exit0. H02-A report appended to BRIDGE; do not rerun an unchanged ACTIVE block. Three-seed round10 fresh global-head seen54.05±3.592%, missing0%, all10.81±.7184%. Owner cosine falls to~.61-.62. Late server one-pass CE increases; do not infer converged FedGH or causal drift proof. Wait research-lead next ACTIVE task. Compact artifacts in research_log/H02A; checkpoint originals remote under /home/wenchang/asdasdsad/wjq/PPRTP/runs. D drive remains nearly full; avoid model downloads. Twenty-minute heartbeat remains active.
 # Latest status — H01-D COMPLETE (2026-09-17)
 
 Gate113423 and full113545 completed, source ac57d8666b231e5bcc2b362012b7806b81afe9ca. See research_log/H01D/full/RESULTS.md and CODEX REPORT H01-D. No next stage authorized; do not repeat H01-D. All vs seen common-cosine all accuracy13.33 vs13.41%, both missing0; initial strength match passed but later drifted. D: nearly full: full checkpoints remain authoritative on A6000 under PPRTP/runs/20260917-113545-h01d-full, compact metrics local. One redundant local gate checkpoint evicted after remote SHA match; see progress.
@@ -42,5 +44,6 @@ Extracted under remote shared/cifar10. Partial official/UCSD downloads preserved
 Failed run 20260916-221759-h01-smoke stopped before training at Python SSL CA failure;
 system curl retained TLS verification. No server driver/environment change performed.
 No automation created in this task; user's research-side hourly loop is external.
+
 
 

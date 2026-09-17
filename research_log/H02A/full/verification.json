@@ -1,0 +1,26 @@
+{
+  "0": {
+    "historical_pairing": true,
+    "server_updated": true,
+    "server_preserved_bases": true,
+    "broadcast_exact": true,
+    "broadcast_preserved_personalized_bases": true,
+    "persistent_server": true
+  },
+  "1": {
+    "historical_pairing": true,
+    "server_updated": true,
+    "server_preserved_bases": true,
+    "broadcast_exact": true,
+    "broadcast_preserved_personalized_bases": true,
+    "persistent_server": true
+  },
+  "2": {
+    "historical_pairing": true,
+    "server_updated": true,
+    "server_preserved_bases": true,
+    "broadcast_exact": true,
+    "broadcast_preserved_personalized_bases": true,
+    "persistent_server": true
+  }
+}

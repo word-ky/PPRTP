@@ -169,3 +169,37 @@ No commits, `CODEX REPORT H02-A`, or experiment artifacts have appeared after re
 Execute **H02-A exactly as specified above**. The next useful evidence is the seed0 two-round integrity gate: historical round-1 pairing, a server head that demonstrably updates while client bases remain unchanged during server optimization, and exact broadcast of the round-1 global-head hash into every client before round-2 local training. If that gate passes, continue immediately to the frozen three-seed, ten-round FedGH control and append `CODEX REPORT H02-A` with the requested head readouts and diagnostics.
 
 Do not start H02-B, relational geometry, FedRE, adapters, or any hyperparameter sweep before this control is committed. If runtime is blocked, append the exact blocker and reproducible command rather than opening a new direction.
+## CODEX REPORT H02-A — DONE (2026-09-17 13:19 +08)
+
+- STATUS: DONE. Source SHA `dca8d79f885c4eea7872944ad71799f4f691085d`; upstream PFLlib unchanged. No H02-B started.
+- Files: `pprtp/fedgh.py`, minimal `pprtp/client.py` / `pprtp/run.py` integration, `tests/test_fedgh.py`, `scripts/report_h02a.py`, provenance and project-local receipts.
+- Server protocol: persistent initial common linear 512→10 head; dedicated SGD lr .01, momentum=0, weight_decay=0. Exactly one pass, batch size **1** (20 updates), ascending client ID then class ID. All 20 separate owner means detached. Exact per-round order, head hashes/norms, loss/accuracy, broadcast/base hashes and byte payloads in receipts.
+- Tests: all 12 pass locally and remotely, including existing upstream two-round parity. New test proves server optimizer ownership/update, detached means, unchanged client bases, identical all-class head broadcast and finite outputs/gradients. Real gate/full runs assert historical H01-B round-one client-model/prototype hashes for each seed, finite server loss/gradients/parameters, actual head update and base preservation. Reporting verifies server persistence and previous-round exact broadcast while ten personalized base hashes remain distinct.
+- Gate `20260917-131604-h02a-gate`, full `20260917-131658-h02a-full`; both exit 0, release `20260917-131515-h02a` under `/home/wenchang/asdasdsad/wjq/PPRTP`. Gate all integrity checks passed. Seed0 round2 server CE 2.182737→2.179087, uploaded-sample accuracy .55→.60; fresh head missing=0%, all=10.59%. Continued without accuracy threshold.
+
+Exact commands (project root; AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h02a
+./scripts/autodl-run.ps1 -Name h02a-gate -Cmd 'PPRTP_SOURCE_SHA=dca8d79f885c4eea7872944ad71799f4f691085d bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 2'
+./scripts/autodl-run.ps1 -Name h02a-full -Cmd 'PPRTP_SOURCE_SHA=dca8d79f885c4eea7872944ad71799f4f691085d bash scripts/run_h01.sh --modes fedgh --seeds 0 1 2 --rounds 10'
+D:\anaconda3\python.exe scripts/report_h02a.py research_log/H02A/gate
+D:\anaconda3\python.exe scripts/report_h02a.py research_log/H02A/full
+```
+
+Three-seed mean ± sample SD, percent:
+
+| Round | Readout | Seen | Missing | All | Macro |
+|---|---|---:|---:|---:|---:|
+| 2 | local_head_pre_server | 52.2833 ± 1.0251 | 0 ± 0 | 10.4567 ± .2050 | 10.4567 ± .2050 |
+| 2 | global_head_post_server | 53.1667 ± 1.4373 | 0 ± 0 | 10.6333 ± .2875 | 10.6333 ± .2875 |
+| 10 | local_head_pre_server | 61.6000 ± 2.5135 | 0 ± 0 | 12.3200 ± .5027 | 12.3200 ± .5027 |
+| 10 | global_head_post_server | 54.0500 ± 3.5920 | 0 ± 0 | 10.8100 ± .7184 | 10.8100 ± .7184 |
+
+H01-D reused unchanged: round10 common-cosine all accuracy FedProto 13.3700 ±1.1145%, GPC-all 13.3333 ±1.2832%, GPC-seen 13.4100 ±1.1268%; all missing=0. FedGH global head is lower in all accuracy and also zero missing. This is a **mechanism/method control**, not a same-information causal ablation: the head is learned and keeps separate owner samples.
+
+Owner cosine means, rounds1/2/5/10: seed0 .989057/.907416/.652488/.606158; seed1 .988952/.906560/.649672/.622408; seed2 .987619/.896210/.647478/.618202. Per-class and min/max values and every-round server CE/accuracy trajectories are in `research_log/H02A/full/RESULTS.md` and its raw receipts. Common cosine/L2 and per-client class counts are preserved there.
+
+Observed limitation: late-round one-pass sequential SGD can **increase** total server sample CE (seed0 round10 .803890→.916398; seed1 .691362→.780736; seed2 .687513→.816429); all finish at 50% uploaded-sample accuracy. This is the frozen one-pass schedule, not evidence of a converged server optimum. No retuning performed. Round1 transient missing predictions vanish by round2; neither requested round2 nor round10 supports useful missing-class transfer. Shared-head control alone is insufficient here, with declining owner compatibility, but coordinate drift is not causally isolated and server optimization adequacy remains a limitation. Research lead should decide the next diagnostic; no claim that relational geometry is proven necessary.
+
+Remote checkpoint originals and all raw runs retained. Local disk pressure required JSON/log-only fetch, via `tar --exclude="*.pt"` into project-local `research_log/H02A/{gate,full}`. No run was lost. Client0 missing-probability optional diagnostic was omitted; all mandatory head/prototype accuracy and training diagnostics recorded. Next action: research-lead review of H02-A, including the one-pass optimization caveat; await a new ACTIVE task.

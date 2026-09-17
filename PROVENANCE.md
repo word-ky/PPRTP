@@ -18,3 +18,9 @@ Dataset partition/evaluation adaptations are documented in research_log/H01_plan
 Remote-control PowerShell scripts copied unchanged from the user's existing
 `D:/work/claude-autodl/autodl-workflow-clean/scripts` workflow, except fetch output
 is directed into project-local research_log/remote_runs.
+
+H02-A adds `pprtp/fedgh.py` as a minimal shared-head control around the same
+PFLlib CNN, client SGD and online per-class feature means. Dedicated server
+SGD (.01, no momentum/decay) performs 20 batch-size-one steps, sorted by client
+ID and class ID, per round. This protocol implements the research lead's
+FedGH-style mechanism; it is not a reproduction of FedGH's published benchmark.

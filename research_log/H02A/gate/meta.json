@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-131604-h02a-gate",
+  "releaseId": "20260917-131515-h02a",
+  "sessionName": "autodl-20260917-131604-h02a-gate",
+  "command": "PPRTP_SOURCE_SHA=dca8d79f885c4eea7872944ad71799f4f691085d bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 2"
+}

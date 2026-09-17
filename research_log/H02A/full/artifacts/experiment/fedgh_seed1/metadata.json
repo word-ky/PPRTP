@@ -1,0 +1,36 @@
+{
+  "data": "/home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar10",
+  "output": "/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-131658-h02a-full/artifacts/experiment",
+  "modes": [
+    "fedgh"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "device": "cuda:0",
+  "clients": 10,
+  "k": 2,
+  "train_per_class": 100,
+  "test_per_class": 100,
+  "rounds": 10,
+  "batch_size": 32,
+  "local_epochs": 1,
+  "lr": 0.01,
+  "lamda": 1.0,
+  "seen_lamda": 0.002,
+  "scale": 10.0,
+  "mode": "fedgh",
+  "seed": 1,
+  "source_sha": "dca8d79f885c4eea7872944ad71799f4f691085d",
+  "upstream_sha": "0169ba7e412c9856a08bb3faefab1e35f538a3c1",
+  "torch": "2.4.0+cu121",
+  "cuda": "12.1",
+  "gpu": "NVIDIA RTX A6000",
+  "model": "PFLlib FedAvgCNN 512D",
+  "optimizer": "SGD, no momentum/decay",
+  "prototype_rule": "sample-count-weighted online raw feature means; no EMA",
+  "initial_state_sha256": "bf1710117b696a6790ce1ec8abdbb367b5eb8f76e36fdd07a615a9fac797c67b",
+  "split_sha256": "28d540db5aac080e640a70417a677b93ab279baac23b808f5c2e865b7b14ec06"
+}
