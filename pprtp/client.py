@@ -22,7 +22,7 @@ def knowledge_loss(z, y, bank, valid, mode, scale=10., class_set=None):
         seen = torch.zeros_like(valid)
         seen[class_set] = True
         valid = valid & seen
-    if mode == "local" or not valid.any():
+    if mode in ("local", "fedgh") or not valid.any():
         return z.sum() * 0
     assert ((y >= 0) & (y < len(bank))).all()
     eligible = valid[y]

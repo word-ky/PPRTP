@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from flcore.trainmodel.models import FedAvgCNN, BaseHeadSplit
 from pprtp.client import H01Client, aggregate, prototype_bank
 from pprtp.data import prepare
+from pprtp.fedgh import broadcast, train_server
 
 
 def tensor_hash(tensors):
@@ -104,9 +105,23 @@ def run(cfg, mode, seed):
         initial_state_sha256=initial_hash,split_sha256=hashlib.sha256((out/'split.json').read_bytes()).hexdigest())
     (out/'metadata.json').write_text(json.dumps(metadata,indent=2))
     testloader=DataLoader(test,batch_size=128,shuffle=False)
+    if mode == 'fedgh':
+        server_head=copy.deepcopy(args.model.head)
+        server_optimizer=torch.optim.SGD(server_head.parameters(),lr=.01)
     started=time.time()
     with (out/'rounds.jsonl').open('w') as stream:
         for r in range(cfg.rounds):
+            broadcast_receipt=None
+            if mode == 'fedgh' and r > 0:
+                bases_before=[tensor_hash(c.model.base.state_dict().values()) for c in clients]
+                broadcast(server_head,clients)
+                head_hash=tensor_hash(server_head.state_dict().values())
+                broadcast_receipt=dict(server_head_hash=head_hash,
+                    client_head_hashes=[tensor_hash(c.model.head.state_dict().values()) for c in clients],
+                    base_hashes=bases_before,
+                    bases_unchanged=bases_before==[tensor_hash(c.model.base.state_dict().values()) for c in clients])
+                assert broadcast_receipt['bases_unchanged']
+                assert all(h==head_hash for h in broadcast_receipt['client_head_hashes'])
             for i,client in enumerate(clients):
                 gen=torch.Generator().manual_seed(seed*100000+r*100+i)
                 loader=DataLoader(datasets[i],batch_size=cfg.batch_size,shuffle=True,drop_last=False,generator=gen)
@@ -135,6 +150,30 @@ def run(cfg, mode, seed):
                 prototype_payload_bytes=dict(upload_vectors=sum(len(c.protos)*512*4 for c in clients),
                     upload_counts=sum(len(c.protos)*8 for c in clients),download_vectors=cfg.clients*10*512*4),
                 elapsed_seconds=time.time()-started)
+            if mode == 'fedgh':
+                if r == 0:
+                    historical=Path('research_log/H01B/receipts')/f'fedproto_seed{seed}'/'rounds.jsonl'
+                    check_round_one([json.loads(historical.read_text().splitlines()[0]),record])
+                before=[tensor_hash(c.model.base.state_dict().values()) for c in clients]
+                head_before=tensor_hash(server_head.state_dict().values())
+                server=train_server(server_head,server_optimizer,clients)
+                server.update(hash_before=head_before,hash_after=tensor_hash(server_head.state_dict().values()),
+                    bases_unchanged=before==[tensor_hash(c.model.base.state_dict().values()) for c in clients])
+                assert server['bases_unchanged'] and server['hash_before']!=server['hash_after']
+                for c,values in zip(clients,per_client):
+                    values['local_head_pre_server']=values.pop('head')
+                    local_head=c.model.head
+                    c.model.head=server_head
+                    values['global_head_post_server']=evaluate(c,testloader,protos)['head']
+                    c.model.head=local_head
+                summary['local_head_pre_server']=summary.pop('head')
+                summary['global_head_post_server']={k:float(np.mean([v['global_head_post_server'][k] for v in per_client]))
+                                                  for k in ('seen','missing','all','macro')}
+                record.update(server_head=server,broadcast=broadcast_receipt,
+                    historical_round_one_paired=True if r==0 else None,
+                    communication_bytes=dict(upload_vectors=20*512*4,upload_labels=20*8,
+                        downloaded_head_per_client=sum(p.numel()*p.element_size() for p in server_head.parameters()),
+                        downloaded_head_all_clients=len(clients)*sum(p.numel()*p.element_size() for p in server_head.parameters())))
             stream.write(json.dumps(record)+'\n'); stream.flush()
             if r == 0:
                 prior = []
@@ -145,7 +184,9 @@ def run(cfg, mode, seed):
                 check_round_one(prior)
             print(json.dumps(dict(mode=mode,seed=seed,round=r+1,metrics=summary,elapsed=record['elapsed_seconds'])),flush=True)
             for client in clients:
-                client.set_protos(protos if mode!='local' else None)
+                client.set_protos(protos if mode not in ('local','fedgh') else None)
+    if mode == 'fedgh':
+        torch.save(server_head.state_dict(),out/'server_head.pt')
     torch.save(dict(model=clients[0].model.state_dict(),global_protos={k:v.cpu() for k,v in protos.items()},
                     client=0,class_set=clients[0].class_set),out/'client0.pt')
     (out/'final.json').write_text(json.dumps(record,indent=2))
