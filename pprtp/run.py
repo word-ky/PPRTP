@@ -19,6 +19,7 @@ from pprtp.fedgh import broadcast, train_server, fit_probe
 from pprtp.oracle import calibration, analyze
 from pprtp.owner_probe import provenance, analyze_owner
 from pprtp.heldout import prepare_heldout
+from pprtp.paired import prepare_paired, analyze_paired
 
 
 def tensor_hash(tensors):
@@ -108,6 +109,12 @@ def run(cfg, mode, seed):
         initial_state_sha256=initial_hash,split_sha256=hashlib.sha256((out/'split.json').read_bytes()).hexdigest())
     (out/'metadata.json').write_text(json.dumps(metadata,indent=2))
     testloader=DataLoader(test,batch_size=128,shuffle=False)
+    if cfg.paired_anchor_probe:
+        oracle_indices=json.loads(Path('research_log/H02C/full/artifacts/experiment/fedgh_seed0/oracle_calibration.json').read_text())['indices']
+        saved_support=json.loads(Path('research_log/H02E/full/artifacts/experiment/fedgh_seed0/heldout_owner_support.json').read_text())
+        anchors,paired_support,paired_receipt=prepare_paired(cfg.data,split,oracle_indices,saved_support['indices'])
+        assert paired_receipt['support_indices_sha256']==saved_support['indices_sha256']
+        (out/'paired_anchors.json').write_text(json.dumps(paired_receipt,indent=2))
     if cfg.heldout_owner_probe:
         oracle_indices=json.loads(Path('research_log/H02C/full/artifacts/experiment/fedgh_seed0/oracle_calibration.json').read_text())['indices']
         heldout_data,heldout_receipt=prepare_heldout(cfg.data,split,oracle_indices)
@@ -188,12 +195,14 @@ def run(cfg, mode, seed):
                     communication_bytes=dict(upload_vectors=20*512*4,upload_labels=20*8,
                         downloaded_head_per_client=sum(p.numel()*p.element_size() for p in server_head.parameters()),
                         downloaded_head_all_clients=len(clients)*sum(p.numel()*p.element_size() for p in server_head.parameters())))
-            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe):
+            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe or cfg.paired_anchor_probe):
                 historical=Path('research_log/H02A/full/artifacts/experiment')/f'fedgh_seed{seed}'/'rounds.jsonl'
                 old=json.loads(historical.read_text().splitlines()[r])
                 for key in ('client_model_hashes','prototype_bank_hash','metrics','server_head'):
                     assert json.loads(json.dumps(record[key]))==old[key], f'H02-A online mismatch: round {r+1}, {key}'
                 record['historical_online_exact']=True
+            if mode == 'fedgh' and cfg.paired_anchor_probe and r+1==2:
+                record['paired_anchor_procrustes_probe']=analyze_paired(clients,server_head,anchors,paired_support,test,tensor_hash,metrics)
             if mode == 'fedgh' and cfg.heldout_owner_probe and r+1 in (2,10):
                 record['heldout_owner_probe']=analyze_owner(clients,server_head,heldout_data,test,tensor_hash,metrics)
             if mode == 'fedgh' and cfg.owner_sample_probe and r+1 in (2,10):
@@ -262,6 +271,7 @@ def main():
     parser.add_argument('--oracle-head',action='store_true')
     parser.add_argument('--owner-sample-probe',action='store_true')
     parser.add_argument('--heldout-owner-probe',action='store_true')
+    parser.add_argument('--paired-anchor-probe',action='store_true')
     cfg=parser.parse_args()
     torch.set_num_threads(1)
     torch.backends.cudnn.benchmark=False
