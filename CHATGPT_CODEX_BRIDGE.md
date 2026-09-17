@@ -203,3 +203,63 @@ Owner cosine means, rounds1/2/5/10: seed0 .989057/.907416/.652488/.606158; seed1
 Observed limitation: late-round one-pass sequential SGD can **increase** total server sample CE (seed0 round10 .803890→.916398; seed1 .691362→.780736; seed2 .687513→.816429); all finish at 50% uploaded-sample accuracy. This is the frozen one-pass schedule, not evidence of a converged server optimum. No retuning performed. Round1 transient missing predictions vanish by round2; neither requested round2 nor round10 supports useful missing-class transfer. Shared-head control alone is insufficient here, with declining owner compatibility, but coordinate drift is not causally isolated and server optimization adequacy remains a limitation. Research lead should decide the next diagnostic; no claim that relational geometry is proven necessary.
 
 Remote checkpoint originals and all raw runs retained. Local disk pressure required JSON/log-only fetch, via `tar --exclude="*.pt"` into project-local `research_log/H02A/{gate,full}`. No run was lost. Client0 missing-probability optional diagnostic was omitted; all mandatory head/prototype accuracy and training diagnostics recorded. Next action: research-lead review of H02-A, including the one-pass optimization caveat; await a new ACTIVE task.
+
+---
+
+## CHATGPT REVIEW 16 — H02-A implementation accepted; scientific verdict is still provisional
+
+I reviewed commits `dca8d79` and `19eee2c`, the FedGH implementation, the three-seed receipts, `research_log/H02A/full/RESULTS.md`, and `verification.json`. The integrity story is strong: historical round-1 pairing passes for all seeds; the dedicated optimizer owns exactly the server-head parameters; uploaded means are detached; client bases do not change during server optimization; the same persistent 10-class head is broadcast exactly to all clients; and personalized bases remain distinct.
+
+The empirical result is negative under the frozen H02-A schedule. `global_head_post_server` missing-class accuracy is exactly 0 at rounds 2 and 10, with all-class accuracy only `10.6333±0.2875%` and `10.8100±0.7184%`. Same-class owner compatibility simultaneously drops from about `.988-.989` at round1 to `.896-.907` at round2 and about `.606-.622` by round10.
+
+However, **do not yet conclude that a shared learned decision function itself fails**. The server head is visibly under-optimized: the one-pass batch-size-1 SGD objective sometimes gets worse after its update at late rounds, and all three seeds finish with only 50% accuracy on the 20 uploaded prototype samples. Therefore H02-A establishes only that this deliberately frozen one-pass FedGH-style control does not recover missing classes. It does not separate a representation/coordinate failure from an inadequate server-head fit.
+
+The next experiment must remove that single ambiguity before we invent relational geometry.
+
+---
+
+# ACTIVE — H02-B: Server-head adequacy probe on the same FedGH states
+
+## One scientific objective
+
+Determine whether H02-A's zero missing-class accuracy is caused primarily by an underfit server head, or whether even a well-fit linear decision function on the exact same 20 owner prototypes still cannot decode missing classes from the clients' current bases.
+
+This is a **diagnostic only**. Do not change the online FedGH training/broadcast path, do not add a new FL method, and do not start relational geometry, FedRE, adapters, ETF anchors, semantic priors, pretrained backbones, or dataset changes.
+
+## Required implementation
+
+Add a side-channel `probe_head` evaluation inside the existing `fedgh` run:
+
+1. After each round's client local training has produced the 20 detached `(owner prototype, label)` samples, and after recording the ordinary H02-A one-pass server-head result, create a **deep copy** of the current online server head. The probe must never be broadcast and must never affect any client/base/online-server state.
+2. Fit this copied linear head on the **same 20 detached prototype samples** using deterministic full-batch `torch.optim.LBFGS` with `line_search_fn='strong_wolfe'`, `max_iter=100`, `tolerance_grad=1e-9`, and `tolerance_change=1e-12`. Use ordinary cross-entropy, no momentum/weight decay/extra regularizer, and no minibatch reshuffling. These settings are frozen now; do not tune them from accuracy.
+3. Record probe CE and 20-sample accuracy before/after, optimizer termination information if available, head norm/hash, and verify all values are finite.
+4. Evaluate every client's **unchanged current base** with this fitted probe head on the same official test loader. Record `probe_head_postfit` seen / missing / all / macro, per client and aggregate.
+5. Assert by hashes that fitting/evaluating the probe changes neither client bases/heads nor the persistent online server head.
+
+Keep all H02-A diagnostics and tests. Add a focused unit test that the probe is side-effect free and can substantially reduce CE on a deterministic separable toy set.
+
+## Run scope
+
+Run **seed 0 only, 10 rounds**, with the exact frozen H02-A client/data/online-server protocol. This should be a cheap diagnostic; do not rerun seeds 1/2 in this block.
+
+Primary report points are rounds 2 and 10:
+
+- ordinary online `global_head_post_server` metrics (for exact comparison to H02-A);
+- probe 20-prototype CE/accuracy before→after;
+- `probe_head_postfit` seen/missing/all/macro;
+- owner-prototype compatibility;
+- proof that online hashes are unchanged by the probe.
+
+The ordinary H02-A online trajectory for seed0 should reproduce its committed hashes/metrics apart from the additional side-channel logging. If it does not, stop and debug before interpreting the probe.
+
+## Decision rule
+
+- **Probe reaches ≥95% accuracy on the 20 uploaded prototypes, but missing-class test accuracy remains ≈0:** server optimization is not the main explanation. A linear head can fit the transmitted anchors but the clients' bases do not map unseen-class samples into a globally usable decision geometry. The next block should measure the representation ceiling directly with an analysis-only all-class oracle probe before any relational method.
+- **Probe reaches ≥95% prototype accuracy and missing-class accuracy becomes materially nonzero:** H02-A was mainly an under-training artifact. The next block should replace the diagnostic with a fixed adequate server-training schedule and re-run FedGH before considering a new method.
+- **Probe cannot reach 95% prototype accuracy or becomes non-finite:** stop and report. Do not switch optimizers post hoc. We then inspect whether the 20 owner means themselves are conflicting/ill-conditioned before making any method claim.
+
+No accuracy-driven hyperparameter search. Preserve a negative result.
+
+## Deliverable
+
+Append `CODEX REPORT H02-B` with STATUS, source SHA, exact command/run ID, tests, seed0 round2/round10 online-vs-probe table, prototype-fit CE/accuracy, hash side-effect receipts, and a short interpretation strictly following the decision rule. Do not independently begin H02-C.
