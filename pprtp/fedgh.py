@@ -15,7 +15,7 @@ def fit_probe(head, clients):
     return fit_linear(head,x,y)
 
 
-def fit_linear(head,x,y,zero=False,max_iter=100):
+def fit_linear(head,x,y,zero=False,max_iter=100,counts=None):
     probe=copy.deepcopy(head)
     x=x.detach()
     if zero:
@@ -24,15 +24,17 @@ def fit_linear(head,x,y,zero=False,max_iter=100):
             probe.bias.zero_()
     optimizer=torch.optim.LBFGS(probe.parameters(),line_search_fn='strong_wolfe',
         max_iter=max_iter,tolerance_grad=1e-9,tolerance_change=1e-12)
+    def objective(logits):
+        return F.cross_entropy(logits,y) if counts is None else weighted_ce(logits,y,counts)
     def score():
         with torch.no_grad():
             logits=probe(x)
             assert torch.isfinite(logits).all()
-            return dict(ce=F.cross_entropy(logits,y).item(),accuracy=(logits.argmax(1)==y).float().mean().item())
+            return dict(ce=objective(logits).item(),accuracy=(logits.argmax(1)==y).float().mean().item())
     before=score()
     def closure():
         optimizer.zero_grad()
-        loss=F.cross_entropy(probe(x),y)
+        loss=objective(probe(x))
         loss.backward()
         assert torch.isfinite(loss) and all(torch.isfinite(p.grad).all() for p in probe.parameters())
         return loss
@@ -68,3 +70,8 @@ def train_server(head, optimizer, clients):
     assert all(torch.isfinite(p).all() for p in head.parameters())
     return dict(before=before, after=score(), sample_order=order, batch_size=1,
                 lr=.01, passes=1, weight_norm=head.weight.norm().item(), bias_norm=head.bias.norm().item())
+
+
+def weighted_ce(logits,y,counts):
+    weights=counts.to(logits.dtype)
+    return (F.cross_entropy(logits,y,reduction='none')*weights).sum()/weights.sum()
