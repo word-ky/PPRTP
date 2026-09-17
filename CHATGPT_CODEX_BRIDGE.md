@@ -173,3 +173,74 @@ Otherwise report intermediate sensitivity with the full arm table. Do not tune c
 Append `CODEX REPORT H06-A` with STATUS, source SHA, exact commands/run IDs, tests, exact H04-A canonical reproduction, rank/singular-value receipt, the four arm table, per-client anchor-equivalence checks, completion seeds/hashes, integrity receipts, warnings, interpretation under the fixed gate, and artifact paths.
 
 Do **not** implement class-level prototypes, N512/N1000 reruns, new relation kernels, learned transport, PCA/truncation, regularization, another optimizer, more iterations, OT, hybrid heads, or seeds1/2 in H06-A. Await research-lead review.
+
+
+## CODEX REPORT H06-A — DONE (2026-09-18 06:38 +08)
+
+STATUS: DONE; **A: completion-robust** under the preregistered seed0round10 gate. Source `491d252055bd4d9dc2ae0792d2a135bd51bcde18`;release `20260918-063433-h06a`;run `20260918-063454-h06a-completion`,exit0,finished06:36:34+08.
+
+Changed pprtp/completion.py,pprtp/paired.py,pprtp/run.py,tests/test_completion.py,scripts/report_h06a.py.35 tests pass locally/remotely;allprior34preserved. New synthetic rank-deficient test verifies canonical and3random rotationsorthogonal,same mappedanchors/objective,different action on source-nullspace vectors,determinism,and unchanged globalRNG. No failedtest/run.
+
+Commands (AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h06a
+./scripts/autodl-run.ps1 -Name h06a-completion -Cmd 'PPRTP_SOURCE_SHA=491d252055bd4d9dc2ae0792d2a135bd51bcde18 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --completion-probe'
+D:\anaconda3\python.exe scripts/report_h06a.py research_log/H06A/gate
+```
+
+Exact H04-A N256 canonical reproduction was asserted before running anyalternative: entire result including alignmentdiagnostics/appliedtransformhashes,allrankreceipts,headhash/fit/gradient/testmetrics/state receipts. Prefixanchorreceipt and parentanchor/supportindices matchhistorical. Canonicalmissing21.9875%,fit100% exact. All10 H02-A online metrics/model/prototype/server records exact. Frozen PFLlib0169ba7,CIFAR10subset,10clients2classes,100train/class/client,test100/class,CNN512features,SGD.01,1epoch,batch32,seed0round10 unchanged. Supporthash2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073,parentanchors1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125,N256prefix exact.
+
+For nonreferenceclients, reusedfloat64SVD ofcenteredcrosscovariance;fixedrank255,nullity257. Existingtol512*eps64*smax:eachfirst255s>tol,remaining257s<=tol. No rankadjustment. R=UrVr.T+U0QV0.T;client0identity unchanged. Means/translation untouched. Q generatedonCPU withlocaltorch.Generator,independentfixedseed602000+100*arm+client (arms1/2/3,clients1..9),double iidGaussianQR,columns multipliedby sign(diagR) forHaarO(257). No determinant+1restriction,labels/test/gobalRNG use. Qhash,determinants,orthogonality,canonical/alternativedoubleRhashes and appliedfloat32transformhashes recorded. Float64checks atol=rtol1e-9 for mappedanchors/objective,orthogonalityFro<1e-9;actualworst mappedmax1.713e-12,Fro2.101e-11,residualdiff7.106e-15,rotationorthogonality4.863e-12. Features transformedfloat32 ashistorical.
+
+Eacharm fitsfreshzero512->10float32head,fullbatchLBFGS lr1,strong_wolfe,max_iter2000,tolerance_grad1e-9,tolerance_change1e-12,noregularization. Noheadreuse. Allperclientsupportcounts/classcounts/testcounts retained. Fullarmtable and perclientanchorchecks:
+
+# H06-A nullspace completion audit
+
+| Arm | Seen % | Missing % | All % | Macro % | Fit % | CE | grad_inf | grad_l2 | Weight/bias norm | Iter/eval | Retention |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|---:|
+| n256_completion_canonical | 37.550000 | 21.987500 | 25.100000 | 25.100001 | 100.000000 | 7.68896147e-09 | 1.4978065e-08 | 9.88137003e-08 | 1050686/24634.9922 | 1227/1308 | 1 |
+| n256_completion_random1 | 37.150000 | 21.487500 | 24.620000 | 24.620000 | 100.000000 | 1.19209281e-10 | 1.41106529e-10 | 1.37522504e-09 | 804524.25/17040.666 | 1104/1152 | 0.977259808 |
+| n256_completion_random2 | 39.500000 | 20.700000 | 24.460000 | 24.460000 | 100.000000 | 2.98023189e-10 | 3.93034022e-10 | 2.64499556e-09 | 650951.625/13986.8301 | 1026/1088 | 0.941443997 |
+| n256_completion_random3 | 39.350000 | 21.425000 | 25.010000 | 25.010001 | 100.000000 | 2.87888611e-08 | 3.58144305e-08 | 2.28881845e-07 | 644151.812/13449.6943 | 1041/1104 | 0.97441728 |
+
+Frozen verdict: A: completion-robust; range all arms=1.287500pp.
+
+| Arm/client | Seed | Det sign | Orthogonality | Anchor max diff | Anchor Fro diff | Residual diff | Rank min / null max / tolerance |
+|---|---:|---:|---:|---:|---:|---:|---|
+| n256_completion_random1/1 | 602101 | -1.0 | 4.31017325e-12 | 4.0456527e-13 | 1.08246515e-11 | 1.77635684e-15 | 0.00278473998/4.48201482e-13/4.74614494e-10 |
+| n256_completion_random1/2 | 602102 | 1.0 | 4.21900621e-12 | 2.28390928e-13 | 7.35300891e-12 | 0 | 0.00304896015/1.5281145e-13/4.17880695e-10 |
+| n256_completion_random1/3 | 602103 | 1.0 | 4.57518259e-12 | 2.48023824e-13 | 8.37773406e-12 | 1.77635684e-15 | 0.00285511066/2.61784281e-13/4.04598158e-10 |
+| n256_completion_random1/4 | 602104 | 1.0 | 4.59193945e-12 | 2.04578216e-13 | 7.65883012e-12 | 0 | 0.00288938625/1.53788534e-13/3.81563096e-10 |
+| n256_completion_random1/5 | 602105 | 1.0 | 4.78614944e-12 | 3.41668534e-13 | 9.38811048e-12 | 0 | 0.00379574406/2.62806324e-13/3.79077241e-10 |
+| n256_completion_random1/6 | 602106 | -1.0 | 4.54578571e-12 | 1.656765e-13 | 5.82169557e-12 | 0 | 0.0037992814/9.65563444e-14/1.92314991e-10 |
+| n256_completion_random1/7 | 602107 | -1.0 | 4.73257897e-12 | 4.97709512e-14 | 1.48907092e-12 | 0 | 0.00338144573/2.00538675e-14/7.27793482e-11 |
+| n256_completion_random1/8 | 602108 | -1.0 | 4.85736927e-12 | 3.34819412e-13 | 8.37150764e-12 | 0 | 0.0040372009/3.4708583e-13/2.5072815e-10 |
+| n256_completion_random1/9 | 602109 | 1.0 | 4.55097319e-12 | 1.71236915e-12 | 2.06442039e-11 | 0 | 0.00365052043/2.4913173e-13/5.01886917e-10 |
+| n256_completion_random2/1 | 602201 | -1.0 | 4.30713368e-12 | 4.37649916e-13 | 1.07942759e-11 | 1.77635684e-15 | 0.00278473998/4.48201482e-13/4.74614494e-10 |
+| n256_completion_random2/2 | 602202 | 1.0 | 4.21878817e-12 | 2.10920691e-13 | 7.28539101e-12 | 0 | 0.00304896015/1.5281145e-13/4.17880695e-10 |
+| n256_completion_random2/3 | 602203 | -1.0 | 4.57663273e-12 | 2.39366686e-13 | 8.16303442e-12 | 1.77635684e-15 | 0.00285511066/2.61784281e-13/4.04598158e-10 |
+| n256_completion_random2/4 | 602204 | -1.0 | 4.59405484e-12 | 2.16657421e-13 | 7.58633556e-12 | 0 | 0.00288938625/1.53788534e-13/3.81563096e-10 |
+| n256_completion_random2/5 | 602205 | -1.0 | 4.78393501e-12 | 3.16752917e-13 | 9.58655368e-12 | 3.55271368e-15 | 0.00379574406/2.62806324e-13/3.79077241e-10 |
+| n256_completion_random2/6 | 602206 | -1.0 | 4.54831306e-12 | 2.14153998e-13 | 5.81091807e-12 | 0 | 0.0037992814/9.65563444e-14/1.92314991e-10 |
+| n256_completion_random2/7 | 602207 | 1.0 | 4.73014765e-12 | 4.60577756e-14 | 1.4864152e-12 | 0 | 0.00338144573/2.00538675e-14/7.27793482e-11 |
+| n256_completion_random2/8 | 602208 | 1.0 | 4.85999998e-12 | 3.42355918e-13 | 8.1005848e-12 | 0 | 0.0040372009/3.4708583e-13/2.5072815e-10 |
+| n256_completion_random2/9 | 602209 | -1.0 | 4.54677147e-12 | 1.47950015e-12 | 2.04396933e-11 | 0 | 0.00365052043/2.4913173e-13/5.01886917e-10 |
+| n256_completion_random3/1 | 602301 | 1.0 | 4.3098916e-12 | 3.79484638e-13 | 1.05080941e-11 | 1.77635684e-15 | 0.00278473998/4.48201482e-13/4.74614494e-10 |
+| n256_completion_random3/2 | 602302 | -1.0 | 4.21517099e-12 | 2.03560909e-13 | 7.25734394e-12 | 0 | 0.00304896015/1.5281145e-13/4.17880695e-10 |
+| n256_completion_random3/3 | 602303 | 1.0 | 4.5759066e-12 | 2.93098879e-13 | 8.64073466e-12 | 1.77635684e-15 | 0.00285511066/2.61784281e-13/4.04598158e-10 |
+| n256_completion_random3/4 | 602304 | -1.0 | 4.59417507e-12 | 2.12061697e-13 | 7.51358324e-12 | 0 | 0.00288938625/1.53788534e-13/3.81563096e-10 |
+| n256_completion_random3/5 | 602305 | -1.0 | 4.78638552e-12 | 2.85082721e-13 | 9.50899774e-12 | 0 | 0.00379574406/2.62806324e-13/3.79077241e-10 |
+| n256_completion_random3/6 | 602306 | -1.0 | 4.54622636e-12 | 1.61473482e-13 | 5.79517867e-12 | 0 | 0.0037992814/9.65563444e-14/1.92314991e-10 |
+| n256_completion_random3/7 | 602307 | 1.0 | 4.73041534e-12 | 6.35502935e-14 | 1.4975344e-12 | 0 | 0.00338144573/2.00538675e-14/7.27793482e-11 |
+| n256_completion_random3/8 | 602308 | 1.0 | 4.86264523e-12 | 3.05734604e-13 | 8.51303367e-12 | 7.10542736e-15 | 0.0040372009/3.4708583e-13/2.5072815e-10 |
+| n256_completion_random3/9 | 602309 | 1.0 | 4.55069127e-12 | 1.10102477e-12 | 2.10085315e-11 | 0 | 0.00365052043/2.4913173e-13/5.01886917e-10 |
+
+Q: CPU local torch.Generator seed=602000+100*arm+client, iid double Gaussian QR with diagonal-R sign correction; independent nonreference clients; client0 identity. Q hashes/determinants/errors and all512 singular values saved perclient in final.json. Applied rotation remainsfloat32; equality checks above usefloat64 as preregistered.
+
+
+Interpretation: all3randomfits100%>=95%,retentions.977259808/.941443997/.974417280 all>=.80;allarmrange1.2875pp<=5. Thus branchA passes: this seed0round10N256 transfer is not materially dependent on the canonical arbitrarycompletion among the3fixedtestedalternatives. This is empirical robustness,not mathematical uniqueness of a512Dmap from256anchors,not proof allpossiblecompletions performequally,and not a new relationrepresentation. Largeheadnorms~644k–1051k remain a caveat. No bestcompletionselection orseedtuning. Nextalignedclassprototypecompression requires leadassignment;notimplementedhere.
+
+Integrity: allparameters/buffers/prototypes,modulemodes,CPU/CUDA RNG,preexistinggradients unchanged;allarms samefrozenstate;anchorlabelsunused;officialtestevaluationonly. SVDfactors,Q,rotations,features,losses,logits,parameters,gradients finite. KnownNVMLinitialization warnings retained;noSVDwarning/failure. Localartifactdownload initiallyfailedbecauseDfree0;onlyanignoredduplicate H01Bseed1FedProtocheckpointwas evictedafterexactlocal/remoteSHA256match (progressreceipt),serveroriginalretained,then samecompactdownload succeeded. Noexperimentrerun.
+
+Evidence `research_log/H06A/gate/`:RESULTS.md,verification.json,rawfinal/rounds/anchor/support/splitreceipts,tests,meta/run/log,compacttar. Remoteoriginals/checkpoints `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260918-063454-h06a-completion`. Stopawaitresearchlead;noN512/N1000reruns,classprototypes,newmap,regularizer,optimizer,iterations,orotherseeds.

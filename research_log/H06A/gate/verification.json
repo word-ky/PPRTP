@@ -1,0 +1,19 @@
+{
+  "canonical_entire_h04a_exact": true,
+  "all_ten_online_exact": true,
+  "provenance_exact": true,
+  "state_rng_modes_gradients_unchanged": true,
+  "missing_values": [
+    21.98750004172325,
+    21.487500071525574,
+    20.699999928474426,
+    21.424999982118607
+  ],
+  "adequately_fit_random_missing": [
+    21.487500071525574,
+    20.699999928474426,
+    21.424999982118607
+  ],
+  "range_all_pp": 1.287500113248825,
+  "verdict": "A: completion-robust"
+}

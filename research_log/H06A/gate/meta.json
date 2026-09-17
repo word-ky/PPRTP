@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-063454-h06a-completion",
+  "releaseId": "20260918-063433-h06a",
+  "sessionName": "autodl-20260918-063454-h06a-completion",
+  "command": "PPRTP_SOURCE_SHA=491d252055bd4d9dc2ae0792d2a135bd51bcde18 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --completion-probe"
+}
