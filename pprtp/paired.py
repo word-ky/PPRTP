@@ -33,7 +33,7 @@ def prepare_paired(root,split,oracle_indices,support_indices,anchor_indices=None
     return anchors,support,receipt
 
 
-def procrustes(a,reference,identity=False,rank_diagnostics=False):
+def procrustes(a,reference,identity=False,rank_diagnostics=False,completion_seed=None):
     # Double precision SVD; mapped features retain the original float32 dtype.
     x=a.detach().double(); y=reference.detach().double()
     mx=x.mean(0); my=y.mean(0); xc=x-mx; yc=y-my
@@ -43,6 +43,9 @@ def procrustes(a,reference,identity=False,rank_diagnostics=False):
         u,s,vh=torch.linalg.svd(xc.T@yc,full_matrices=False)
         assert all(torch.isfinite(t).all() for t in (u,s,vh))
         rotation=u@vh
+        if completion_seed is not None:
+            from pprtp.completion import complete
+            rotation,completion=complete(xc,yc,u,s,vh,completion_seed)
     before=(xc-yc).norm(); after=(xc@rotation-yc).norm()
     ortho=(rotation.T@rotation-torch.eye(rotation.shape[0],device=x.device,dtype=x.dtype)).norm()
     transform=(mx.to(a.dtype),rotation.to(a.dtype),my.to(a.dtype))
@@ -60,6 +63,7 @@ def procrustes(a,reference,identity=False,rank_diagnostics=False):
             effective_rank=len(nonzero),tolerance=tolerance.item(),
             tolerance_rule='feature_dim * float64_epsilon * largest_singular_value',
             largest_singular_value=s.max().item(),smallest_nonzero_singular_value=nonzero.min().item() if len(nonzero) else 0.)
+    if completion_seed is not None and not identity: info['completion']=completion
     return transform,info
 
 
@@ -83,7 +87,7 @@ def break_pairs(a,client_id):
         multiset_bitwise_unchanged=True)
 
 
-def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=False,max_iter=100,expected_alignment=None,audit=False,rank_diagnostics=False):
+def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=False,max_iter=100,expected_alignment=None,audit=False,rank_diagnostics=False,completion_arm=None):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(head.state_dict().values()),
@@ -92,7 +96,7 @@ def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=
         return [[None if p.grad is None else tensor_hash([p.grad]) for p in module.parameters()]
                 for module in [head]+[c.model for c in clients]]
     gradients_before=gradient_state() if rank_diagnostics else None
-    ranks=[]
+    ranks=[];completions=[]
     before=state(); modes=[[m.training for m in c.model.modules()] for c in clients]
     cpu=torch.get_rng_state().clone(); devices=list(range(torch.cuda.device_count())) if torch.cuda.is_available() else []
     cuda=torch.cuda.get_rng_state_all() if devices else []
@@ -104,7 +108,10 @@ def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=
             if broken and i:
                 a,receipt=break_pairs(a,i)
                 permutations.append(dict(client=i,**receipt))
-            t,d=procrustes(a,anchor_features[0],identity=i==0,rank_diagnostics=rank_diagnostics)
+            t,d=procrustes(a,anchor_features[0],identity=i==0,rank_diagnostics=rank_diagnostics,
+                completion_seed=602000+100*completion_arm+i if completion_arm is not None and i else None)
+            if completion_arm is not None:
+                completions.append(dict(client=i,**d.pop('completion')) if i else dict(client=0,identity=True))
             if rank_diagnostics:
                 ranks.append(d.pop('rank'))
             d['transform_hash']=tensor_hash(t); transforms.append(t); diagnostics.append(d)
@@ -132,6 +139,7 @@ def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=
         assert gradient_state()==gradients_before
         result['rank_diagnostics']=ranks
         result['existing_gradients_unchanged']=True
+    if completion_arm is not None: result['completions']=completions
     if broken:
         result['permutations']=permutations
     return result

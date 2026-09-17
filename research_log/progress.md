@@ -100,3 +100,5 @@ Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round onl
 [2026-09-18T05:27:25.7849663+08:00] H05-E launched sourcea8999c935c138dd9993c31bdea9d162db77fa8ed release20260918-052650-h05e run20260918-052707-h05e-precondition.
 
 [2026-09-18T05:29:37.760514] H05-E DONE sourcea8999c9/run20260918-052707-h05e-precondition exit0;34tests pass. ExactH05Dinputhashes,all10online/state/RNG/modes/grad. Condition~1,reconstruction<1.47e-13. Pairedfit100 grad_inf9.23e-10 missing12.3375;brokenfit83.5 grad_inf5.845e-8 missing6.5125;q.561114266 delta5.825 => adequatelyfitintermediate. H05E/gate+BRIDGE;awaitlead,noextensions.
+
+[2026-09-18T06:34:32.6263767+08:00] H06-A assigned95a94c9;35tests pass. Canonical entireH04A N256 output equality beforealternatives. Rank255 fixed,tol512eps64smax. Q Haar CPUlocalGaussianQR signs corrected,seeds602000+100*arm+client,arms1/2/3 nonrefclients1..9;no globalRNGchange. Double anchor/objective equality atol/rtol1e-9;no rankchange allowed.
