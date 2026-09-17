@@ -25,6 +25,7 @@ def make_args(device="cpu"):
 def fixture(client_class=clientProto, device="cpu"):
     args = make_args(device)
     client = client_class(args, 0, 8, 8, train_slow=False, send_slow=False)
+    client.class_set = [0, 1]
     torch.manual_seed(29)
     ds = TensorDataset(torch.randn(8, 3, 32, 32), torch.tensor([0, 1]*4))
     client.load_train_data = lambda: DataLoader(ds, batch_size=4, shuffle=False)

@@ -85,7 +85,8 @@ def run(cfg, mode, seed):
         save_folder_name='items',num_classes=10,batch_size=cfg.batch_size,
         local_learning_rate=cfg.lr,local_epochs=cfg.local_epochs,few_shot=0,
         learning_rate_decay_gamma=1.,learning_rate_decay=False,
-        lamda=.002 if mode in ('gpc_all_match','gpc_seen_match') else cfg.lamda)
+        lamda=(cfg.seen_lamda if mode=='gpc_seen_match' else
+               .002 if mode=='gpc_all_match' else cfg.lamda))
     clients=[]
     for i, ds in enumerate(datasets):
         client=H01Client(args,i,len(ds),len(test),train_slow=False,send_slow=False)
@@ -167,6 +168,7 @@ def main():
     parser.add_argument('--local-epochs',type=int,default=1)
     parser.add_argument('--lr',type=float,default=.01)
     parser.add_argument('--lamda',type=float,default=1.)
+    parser.add_argument('--seen-lamda',type=float,default=.002)
     parser.add_argument('--scale',type=float,default=10.)
     cfg=parser.parse_args()
     torch.set_num_threads(1)

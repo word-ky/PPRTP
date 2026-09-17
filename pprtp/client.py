@@ -50,6 +50,17 @@ def aggregate(clients):
     return {c: (total / counts[c]).detach() for c, total in totals.items()}
 
 
+def denominator_direction(z, y, bank, valid, scale, class_set):
+    """Both derivatives on the exact same pre-update feature tensor and bank."""
+    gradients = [torch.autograd.grad(knowledge_loss(z, y, bank, valid, mode, scale, class_set),
+                                     z, retain_graph=True)[0].flatten()
+                 for mode in ('gpc_all_match', 'gpc_seen_match')]
+    all_grad, seen_grad = gradients
+    return dict(cosine=F.cosine_similarity(all_grad[None], seen_grad[None]).item(),
+                all_norm=all_grad.norm().item(), seen_norm=seen_grad.norm().item(),
+                unscaled_all_seen_norm_ratio=(all_grad.norm()/seen_grad.norm()).item())
+
+
 class H01Client(clientProto):
     def __init__(self, args, *a, **kw):
         super().__init__(args, *a, **kw)
@@ -90,6 +101,9 @@ class H01Client(clientProto):
                         local_grad_norm=local_norm.item(), scaled_knowledge_grad_norm=scaled_norm.item(),
                         knowledge_local_grad_ratio=(scaled_norm/local_norm).item() if local_norm.item() else None,
                         missing_probability_on_seen=mass, valid_mask=valid.tolist())
+                    if valid.any():
+                        self.diagnostic['denominator_feature_gradients'] = denominator_direction(
+                            z, y, bank, valid, self.scale, self.class_set)
                 for j, label in enumerate(y.tolist()):
                     protos[label].append(z[j].detach())
                 self.optimizer.zero_grad()
