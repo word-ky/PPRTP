@@ -23,3 +23,6 @@ Source dca8d79f885c4eea7872944ad71799f4f691085d. All 12 local/remote tests pass.
 
 ## 2026-09-17 13:19 +08 — H02-A full complete
 Three seeds x10 rounds exit0; all integrity receipts pass. Fresh shared-head missing0% and all10.81±.7184% at round10; local-head all12.32±.5027%. Owner cosine~.61-.62, but late one-pass server CE rises; report explicitly limits interpretation and keeps frozen settings. Full compact JSON/logs + RESULTS and verification stored under research_log/H02A/full. BRIDGE updated DONE; awaiting lead, no H02-B.
+
+## 2026-09-17 14:20 +08 — H02-B assigned
+Synced ff7384d and read review16/H02-B. Added opt-in copied-head full-batch LBFGS diagnostic with frozen strong_wolfe/max_iter100/tolerances1e-9,1e-12; no online broadcast changes. Historical H02-A online model/prototype/metrics/server records checked exactly each round before probe. Full client and server hashes checked after probe fit/evaluation. Stop if prototype fit <95% or nonfinite; no optimizer fallback. Seed0 only,10 rounds; retain remote models due local disk pressure.

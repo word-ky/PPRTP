@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from flcore.trainmodel.models import FedAvgCNN, BaseHeadSplit
 from pprtp.client import H01Client, aggregate, prototype_bank
 from pprtp.data import prepare
-from pprtp.fedgh import broadcast, train_server
+from pprtp.fedgh import broadcast, train_server, fit_probe
 
 
 def tensor_hash(tensors):
@@ -174,7 +174,32 @@ def run(cfg, mode, seed):
                     communication_bytes=dict(upload_vectors=20*512*4,upload_labels=20*8,
                         downloaded_head_per_client=sum(p.numel()*p.element_size() for p in server_head.parameters()),
                         downloaded_head_all_clients=len(clients)*sum(p.numel()*p.element_size() for p in server_head.parameters())))
+            if mode == 'fedgh' and cfg.probe_head:
+                historical=Path('research_log/H02A/full/artifacts/experiment')/f'fedgh_seed{seed}'/'rounds.jsonl'
+                old=json.loads(historical.read_text().splitlines()[r])
+                for key in ('client_model_hashes','prototype_bank_hash','metrics','server_head'):
+                    assert record[key]==old[key], f'H02-A online mismatch: round {r+1}, {key}'
+                online_before=[tensor_hash(c.model.state_dict().values()) for c in clients]
+                server_before=tensor_hash(server_head.state_dict().values())
+                probe,info=fit_probe(server_head,clients)
+                info['head_hash']=tensor_hash(probe.state_dict().values())
+                for c,values in zip(clients,per_client):
+                    local_head=c.model.head
+                    c.model.head=probe
+                    values['probe_head_postfit']=evaluate(c,testloader,protos)['head']
+                    c.model.head=local_head
+                summary['probe_head_postfit']={k:float(np.mean([v['probe_head_postfit'][k] for v in per_client]))
+                                             for k in ('seen','missing','all','macro')}
+                info.update(client_hashes_before=online_before,
+                    client_hashes_after=[tensor_hash(c.model.state_dict().values()) for c in clients],
+                    server_hash_before=server_before,server_hash_after=tensor_hash(server_head.state_dict().values()),
+                    historical_online_exact=True)
+                assert info['client_hashes_before']==info['client_hashes_after']
+                assert info['server_hash_before']==info['server_hash_after']
+                record['probe']=info
             stream.write(json.dumps(record)+'\n'); stream.flush()
+            if mode == 'fedgh' and cfg.probe_head and record['probe']['after']['accuracy'] < .95:
+                raise RuntimeError('H02-B stop: probe prototype accuracy below 95%; preserve negative result')
             if r == 0:
                 prior = []
                 for other in cfg.modes:
@@ -211,6 +236,7 @@ def main():
     parser.add_argument('--lamda',type=float,default=1.)
     parser.add_argument('--seen-lamda',type=float,default=.002)
     parser.add_argument('--scale',type=float,default=10.)
+    parser.add_argument('--probe-head',action='store_true')
     cfg=parser.parse_args()
     torch.set_num_threads(1)
     torch.backends.cudnn.benchmark=False
