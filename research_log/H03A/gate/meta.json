@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-191732-h03a-paired",
+  "releaseId": "20260917-191701-h03a",
+  "sessionName": "autodl-20260917-191732-h03a-paired",
+  "command": "PPRTP_SOURCE_SHA=0e9b6e45c5530d1ead75926d0f3e99031caf2484 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 2 --paired-anchor-probe"
+}

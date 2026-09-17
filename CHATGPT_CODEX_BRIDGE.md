@@ -170,3 +170,37 @@ A negative branch is scientifically interpretable only if the aligned owner-supp
 Append `CODEX REPORT H03-A` with STATUS, source SHA, exact commands/run IDs, tests, anchor provenance/disjointness, alignment residual/orthogonality diagnostics, online/state/RNG equivalence, aligned-head fit diagnostics, round2 metrics, fixed H02-C/E references, computed `q_align`, artifact locations, and a 3–5 sentence interpretation following the frozen branch.
 
 Do **not** implement an affine map, nonlinear relational module, optimal transport loss, new online objective, multi-prototype method, or seeds1/2 in this block. Await research-lead review.
+
+## CODEX REPORT H03-A — DONE (2026-09-17 19:19 +08)
+
+STATUS: DONE; positive transfer observed, **optimizer-limited fit (89% <95%)**, no solver retuning. Source `0e9b6e45c5530d1ead75926d0f3e99031caf2484`; run `20260917-191732-h03a-paired`, release `20260917-191701-h03a`, exit0. Seed0,2 online rounds, alignment diagnostic at round2 only. No round10/seeds1/2, affine/nonlinear map, online loss or next method implemented.
+
+Files: `pprtp/paired.py`, minimal `--paired-anchor-probe` integration in `pprtp/run.py`, `tests/test_paired.py`, `scripts/report_h03a.py`. Reuses PFLlib bases and existing frozen-feature/linear-fit helpers. Centered Procrustes uses SVD of centered A_i^T A_0, R=U Vh with reflections allowed; client0 identity; no scale/ridge/nonlinear component. SVD in float64, transform cast to float32 for original feature/head arithmetic. Classifier uses zero initialization/full-batch LBFGS lr1(default),strong_wolfe,max_iter100,tolerance_grad1e-9,tolerance_change1e-12,no regularizer.
+
+Exact commands (project root; AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h03a
+./scripts/autodl-run.ps1 -Name h03a-paired -Cmd 'PPRTP_SOURCE_SHA=0e9b6e45c5530d1ead75926d0f3e99031caf2484 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 2 --paired-anchor-probe'
+D:\anaconda3\python.exe scripts/report_h03a.py research_log/H03A/gate
+```
+
+20 tests pass locally/remotely. Synthetic known rotation/translation recovered within1e-10; replacing anchor labels arbitrarily produces exactly identical transforms, fitted-head hash/fit diagnostics and results. Anchor selector accepts only dataset size/excluded indices, not labels. Actual anchor dataset uses dummy zero labels; true anchor labels are never accessed, even for a histogram. Exactly1000 train=True indices selected seed161803, excluding all local train/H02-C oracle/H02-E support. Anchor hash `1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125`. Same ordered anchor images passed through every base intentionally. Test split never used for alignment/fitting.
+
+H02-E support indices are loaded verbatim, not resampled; hash remains `2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073`. The2000 legitimate owner labels alone train the aligned head. All indices and exclusions recorded in `research_log/H03A/gate/artifacts/experiment/fedgh_seed0/paired_anchors.json`; reporting independently verifies hashes/disjointness/exact support reuse.
+
+Both online rounds exactly match committed H02-A client/prototype/server hashes and all ordinary metrics. Probe asserts unchanged full client parameter/buffer state, per-client prototypes, persistent server state, module modes, CPU/CUDA RNG. Features/SVD factors/transforms/losses/gradients/logits/parameters finite. Transform hashes, head norms/hash and per-client class counts/correct counts retained in `research_log/H03A/gate/artifacts/experiment/fedgh_seed0/rounds.jsonl`. Independent verification and full alignment table in `research_log/H03A/gate/verification.json` and `RESULTS.md`.
+
+Round2 mean over10clients, accuracy %:
+
+| Readout | Seen | Missing | All | Macro |
+|---|---:|---:|---:|---:|
+| paired_anchor_procrustes_probe | 31.65 | 29.3875 | 29.84 | 29.84 |
+
+Head training CE2.30258393→.338887542, accuracy10%→89%; LBFGS100iterations/106evaluations. Fit adequacy≥95% is **not** met, so this remains optimizer-limited. Fixed references reused unchanged: H02-E missing.0875%, H02-C shared oracle31.45%. Raw **q_align=(29.3875−.0875)/(31.45−.0875)=.934236747**, unclipped.
+
+Alignment Frobenius residuals (centered before→after): client0=0→0;1=10.285769→5.545592;2=13.964132→6.423527;3=13.496728→6.272633;4=13.887874→6.584146;5=15.409214→7.413269;6=13.938389→7.175690;7=12.787637→7.065411;8=14.696076→7.649792;9=10.687821→5.503722. Nonreference relative reductions44.7481–53.9998%. Orthogonality error ||R^TR−I||_F≤4.724e-12 in double and≤4.337e-6 for applied float32; client0 identity. Raw uncentered before-residuals and per-client reductions are also in RESULTS/raw JSON.
+
+Interpretation (frozen rule): q_align=.9342 exceeds the predeclared positive branch, with missing recognition rising29.30pp using unlabeled same-image correspondence and unchanged owner labels. This is strong positive diagnostic evidence that cross-space correspondence can make owner supervision transfer, despite the head being optimizer-limited at89% training accuracy. The <95% adequacy caveat is retained and this result is not used to reject correspondence or claim a converged optimum. The experiment is an expensive paired-image upper bound on one seed/round, not a deployable FL method or evidence that a particular relational architecture will work. Stop here and await lead review on replacing the paired-image side channel with an economical representation; no such implementation started.
+
+No failed experiment/nonfinite values in this block. Full run/checkpoints remain under `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-191732-h03a-paired`; compact JSON/logs retained locally.

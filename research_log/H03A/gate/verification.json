@@ -1,0 +1,9 @@
+{
+  "online_exact": true,
+  "state_rng_modes_unchanged": true,
+  "anchor_disjoint": true,
+  "support_exact": true,
+  "anchor_hash": "1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125",
+  "q_align": 0.9342367473281489,
+  "head_fit_adequate": false
+}
