@@ -22,7 +22,7 @@ def provenance(datasets,split,oracle_indices):
         oracle_overlap=0,test_used_for_fitting=False)
 
 
-def analyze_owner(clients,head,datasets,test,tensor_hash,metrics):
+def analyze_owner(clients,head,datasets,test,tensor_hash,metrics,max_iter=100):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(head.state_dict().values()),
@@ -35,7 +35,7 @@ def analyze_owner(clients,head,datasets,test,tensor_hash,metrics):
     with torch.random.fork_rng(devices=devices):
         pairs=[features(c,ds) for c,ds in zip(clients,datasets)]
         z=torch.cat([z for z,y in pairs]); y=torch.cat([y for z,y in pairs])
-        probe,fit=fit_linear(head,z,y,zero=True)
+        probe,fit=fit_linear(head,z,y,zero=True,max_iter=max_iter)
         fit['head_hash']=tensor_hash(probe.state_dict().values())
         values=[]
         for c in clients:

@@ -56,3 +56,5 @@ Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round onl
 [2026-09-17T19:42:34.0898582+08:00] H03-B assignedfbf8e47; paired vs independent row-permuted maps from identical round2 states; exact saved H03-A anchors/H02-E support reused. Pair seeds314159+i, truepermutation/multiset/displacement checks. Both heads fixed500LBFGS; paired alignment exact historical check before fitting; stop if pairedfit<95. No new images or online changes.
 
 [2026-09-17T19:45:37.1199802+08:00] H03-B DONE sourced12a501/run20260917-194253-h03b-pairbreak exit0;21tests pass. Pairedalignment historical exact,online/state/RNG exact. Bothheadfit100%;pairedmissing28.825,broken8.2625,q.916301308/.260661614,delta20.5625pp => INTERMEDIATE frozenbranch;no overclaim pairing necessary. Permutations/index/state receipts H03B/gate;BRIDGE report. Await lead,no next method.
+
+[2026-09-17T20:31:07.5106192+08:00] H03-C assigned52bc578; new round10 matched native/paired diagnostics reuse saved anchors/support. Both max_iter500; all10 H02-A online comparisons active;22 tests pass including matched500 state/fit test. No other arms or tuning.

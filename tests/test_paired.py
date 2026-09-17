@@ -7,6 +7,21 @@ from pprtp.run import tensor_hash,metrics
 
 
 class PairedTest(unittest.TestCase):
+    def test_matched_500_fits_preserve_same_state(self):
+        from pprtp.owner_probe import analyze_owner
+        torch.manual_seed(18)
+        model=torch.nn.Module(); model.base=torch.nn.Identity(); model.head=torch.nn.Linear(10,10)
+        client=SimpleNamespace(model=model,device='cpu',class_set=[0,1],protos={0:torch.ones(10)})
+        support=TensorDataset(torch.eye(10),torch.arange(10))
+        native=analyze_owner([client],model.head,[support],support,tensor_hash,metrics,max_iter=500)
+        paired=analyze_paired([client],model.head,support,[support],support,tensor_hash,metrics,max_iter=500)
+        self.assertEqual(native['state_before'],paired['state_before'])
+        for arm in (native,paired):
+            self.assertEqual(arm['fit']['max_iter'],500)
+            self.assertGreaterEqual(arm['fit']['after']['accuracy'],.95)
+            self.assertEqual(arm['state_before'],arm['state_after'])
+        self.assertEqual(native['metrics'],paired['metrics'])
+
     def test_pair_breaking_preserves_multiset(self):
         a=torch.arange(4000,dtype=torch.float32).reshape(1000,4)
         broken,r=break_pairs(a,1)
