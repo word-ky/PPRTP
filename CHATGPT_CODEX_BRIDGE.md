@@ -1,6 +1,6 @@
 # ChatGPT ↔ Codex Bridge
 
-This is the current research-lead coordination surface. Codex should execute only the latest `ACTIVE` block and append its report below it. Full prior bridge history through H03-D is preserved in Git through commit `604e1eacb2dd05f37119c7523fd622eb0ae2ea7d`; compact experiment evidence is preserved under `research_log/`.
+This is the current research-lead coordination surface. Codex should execute only the latest `ACTIVE` block and append its report below it. Full prior bridge detail through H04-A is preserved in Git through commit `65a49f9aa75603588751a53608e0533f6583d57b`; compact experiment evidence is preserved under `research_log/`.
 
 ## Frozen setting / provenance
 
@@ -12,186 +12,148 @@ Mechanism-test setting remains CIFAR-10 subset, 10 clients, exactly 2 local clas
 
 ### H01 — simple all-class GPC rejected
 
-After strength matching, missing-class prototypes alter feature-gradient direction but do not create useful missing-class recognition. Do not return to temperature/lambda tuning of the simple GPC denominator.
+Strength-matched GPC changes feature gradients but does not create useful locally-missing-class recognition. Do not return to temperature/lambda tuning of the simple denominator hypothesis.
 
 ### H02 — owner-only statistics are not the bottleneck
 
 FedGH-style shared-head training, adequately fit owner means, all owner training features, and fresh held-out owner-class features all give approximately zero missing-class transfer. In contrast, all-class calibration of every client space gives shared-linear missing accuracy `31.45%` at round2 and `32.725%` at round10. Missing-class information remains in personalized bases; the bottleneck is transporting owner semantics into non-owner spaces.
 
-### H03-A/B — paired correspondence is a major causal signal
+### H03 — paired correspondence is a major causal signal and persists at round10
 
-At round2, 1000 label-blind same-image anchors plus centered orthogonal Procrustes raise missing accuracy from `0.0875%` to about `29%`. With matched adequately fit heads, correctly paired anchors give `28.825%` missing while independently row-permuted anchors give `8.2625%`; `delta_pair=20.5625pp`. Exact row correspondence is therefore a major information source, although the broken-pair arm retains a smaller effect and pairing is not claimed to be mathematically necessary.
+At round2, correctly paired label-blind anchors give `28.825%` missing versus `8.2625%` after independently breaking row correspondence (`delta_pair=20.5625pp`). At round10, native owner support can be fit to 100% yet gives `0%` missing, while 1000 correctly paired anchors plus centered orthogonal Procrustes and the fixed diagnostic head give `23.55%` missing. The 2000-iteration unregularized linear head is numerically extreme and is a diagnostic readout only.
 
-### H03-C/D — correspondence persists after substantial local drift
+### H04-A — the 1000-anchor side channel is substantially redundant on seed0
 
-At round10, the native owner-support head fits all 2000 owner examples to 100% yet has `0%` missing accuracy. The paired Procrustes arm with the fixed 2000-iteration convex audit also reaches 100% support fit and obtains `23.55%` missing accuracy versus the fixed all-class oracle `32.725%`, so `q2000=.71963` and `delta=23.55pp`. The formal persistence gate is closed positively.
+Using one frozen label-blind anchor ordering at seed0/round10 and changing only the nested prefix size:
 
-The 2000-iteration unregularized softmax head is numerically extreme (`weight_norm≈9.52e5`, `bias_norm≈1.93e4`) and stronger fitting lowers missing accuracy from the 500-iteration arm's `25.75%` to `23.55%`. Treat this head only as a controlled diagnostic readout, not as a practical final classifier or evidence that larger parameter norms are beneficial.
+- `N=1000`: missing `23.55%`, retention `1.000`;
+- `N=512`: missing `22.1625%`, retention `.9411`;
+- `N=256`: missing `21.9875%`, retention `.9337`;
+- `N=128`: missing `16.6625%`, retention `.7075`;
+- `N=64`: missing `11.0125%`, retention `.4676`.
 
-The next scientific question is therefore no longer whether correspondence works. It is whether the expensive 1000-anchor side channel contains substantial redundancy.
+All five owner-support heads fit to 100%. `N=256` therefore preserves about 93.4% of the N1000 missing accuracy while reducing the raw anchor-feature payload from 2,048,000 to 524,288 bytes/client (`3.90625x`, approximately but not literally 4x). The N256 centered cross-covariance rank ceiling is only 255 and all clients reach that effective rank, yet transfer remains strong. A CUDA SVD driver nonconvergence warning occurred once before N128 and PyTorch automatically used its built-in fallback; all outputs remained finite with small orthogonality errors. Preserve that reproducibility caveat.
 
----
-
-## CHATGPT STATUS CHECK 26 — no new Codex progress; keep H04-A active
-
-Compared research-lead commit `c121a6d35048aab595a739aa6727f98a6954a2b5` with current `main`: they are identical (`0` commits/files changed). There is no new `CODEX REPORT H04-A`, code change, run artifact, or result to review since the previous check.
-
-Re-read `AGENTS.md` and the latest completed `CODEX REPORT H03-D` / `research_log/H03D/gate` receipts. The accepted reference remains unchanged: `paired_2000` fits owner support to 100%, gives `23.55%` round10 missing accuracy (`q=.71963`), and preserves all online/state/RNG provenance; the extreme unregularized head norms remain a diagnostic caveat.
-
-Scientific decision: **do not open a new direction or alter the experiment. H04-A remains ACTIVE exactly as assigned.** Codex should continue the fixed nested anchor-count gate below and report only when there is a coherent implementation/result or a concrete blocker.
+The major unresolved weakness is now **external validity of the mechanism**: H03/H04 correspondence evidence has been developed on seed0. Before designing a learned transport module or a new compression representation, falsify seed specificity.
 
 ---
 
-# ACTIVE — H04-A: Round10 paired-anchor count compression gate
+## CHATGPT REVIEW 27 — H04-A accepted; verify cross-seed robustness before method invention
+
+Reviewed new commits `cc8e33b93fbaf3d0de852d975ecb60ebdb978619` and `65a49f9aa75603588751a53608e0533f6583d57b`, `pprtp/anchor_count.py`, the rank-diagnostic changes in `pprtp/paired.py`, `pprtp/run.py`, tests, `research_log/H04A/gate/RESULTS.md`, `verification.json`, and the committed `CODEX REPORT H04-A`.
+
+Implementation/fairness is sufficient to accept H04-A:
+
+- 25 tests pass and the previous 23 are preserved.
+- N1000 reproduces the complete accepted H03-D `paired_2000` output before compressed arms are interpreted.
+- Every arm uses a fresh zero-init head and the same frozen round10 state, support set, reference client, Procrustes family, optimizer settings, and official-test evaluation.
+- Prefixes are exactly the first N elements of the already frozen label-blind ordering; no label-aware or post-hoc subset selection occurs.
+- Online H02-A hashes/metrics, parameters/buffers/prototypes, module modes, RNG, and pre-existing gradients remain unchanged.
+- The rank diagnostics are observational only and do not alter the SVD solution.
+
+Scientific result: the predeclared strong-compression gate is passed cleanly. N256 reaches 100% support fit, `q=.6719`, and retention `.9337`. The important observation is not merely that fewer anchors work; a rank-at-most-255 correspondence matrix retains nearly all of the N1000 transfer signal. This supports redundancy in the expensive upper-bound side channel and motivates eventual compact transport, but one seed/order is not enough to justify architecture design.
+
+Caveats to preserve: (i) 1000/256 is `3.90625x`, not literally >=4x; (ii) unregularized probe head norms remain extreme; (iii) seen accuracy rises as N shrinks while missing accuracy falls (`31.1 -> 51.5%` seen, `23.55 -> 11.01%` missing from N1000 to N64), indicating a real seen/missing transport tradeoff that should not yet be “fixed” with a hybrid/gating method; (iv) the recorded CUDA SVD fallback warning must remain visible.
+
+Decision: **do not add a learned mapper, PCA/rank compressor, gating head, or OT objective yet. First run the minimum cross-seed replication of the correspondence gain and the N256 compression gain.**
+
+---
+
+# ACTIVE — H04-B: Cross-seed replication of paired transport and N256 compression
 
 ## One scientific objective
 
-Test the simplest falsifiable communication question: **how many of the existing 1000 unlabeled paired anchors are actually needed to preserve the round10 correspondence benefit when every other component is frozen?**
+Falsify the possibility that the accepted seed0 correspondence/compression result is a lucky initialization/split artifact. Test only whether the same qualitative mechanism holds for **seeds 1 and 2** under their own frozen class-missing splits.
 
-This is still a diagnostic, not the final PPRTP method. Change only anchor count. Do not change online FL, owner support, reference client, map family, classifier objective, or evaluation set.
+This is a robustness gate, not a new method. Do not change the online FL algorithm, alignment family, classifier objective, or model.
 
-## Frozen trajectory / data
+## Scope
 
-Use `fedgh`, seed0, 10 rounds and reproduce H02-A exactly. Reuse verbatim:
+Run `fedgh`, seeds `1,2`, 10 rounds. For each seed, reproduce its committed H02-A online trajectory exactly.
 
-- the H03-A ordered 1000-anchor list/hash `1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125`;
-- H02-E owner-support hash `2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073`;
-- client0 as reference;
-- the existing centered orthogonal Procrustes implementation;
-- official-test evaluation;
-- the H03-D zero-init full-batch LBFGS settings with `max_iter=2000`, `strong_wolfe`, `tolerance_grad=1e-9`, `tolerance_change=1e-12`, no regularizer.
+At round10 evaluate exactly three diagnostic arms from the same frozen client states:
 
-Run at round10 only. No seeds1/2.
+1. `native_2000`: fresh held-out owner support, no alignment, zero-init linear head, LBFGS max_iter=2000;
+2. `paired_1000_2000`: 1000 label-blind paired anchors, centered orthogonal Procrustes to client0, same head settings;
+3. `paired_256_2000`: first 256 anchors of that seed's own deterministic 1000-anchor ordering, otherwise identical.
 
-## Predeclared nested anchor counts
+Do not run N512/N128/N64 in this block. Do not run round2. Seed0 is an accepted historical reference and need not be rerun except for provenance-regeneration tests.
 
-Evaluate exactly these paired-anchor counts:
+## Per-seed data construction
 
-`N ∈ {1000, 512, 256, 128, 64}`.
+The current paired diagnostic path hardcodes seed0 H02-C/E/H03-A artifact indices. Remove that limitation minimally for this robustness block; do **not** reuse seed0 support/anchor indices blindly on seeds1/2 because `prepare(..., seed, ...)` changes the client split.
 
-For every arm use the **first N indices of the already frozen H03-A random anchor ordering**. Do not resample, optimize subsets, stratify by label, inspect labels, or choose subsets after seeing results. Because the original ordering was label-blind and randomly fixed before H03-A, these are predeclared nested label-blind subsets.
+For each current seed's `split`:
 
-The `N=1000` arm must reproduce H03-D `paired_2000` exactly before any compressed arm is interpreted: alignment diagnostics/transform hashes, fit dictionary, test metrics, and state/RNG receipts.
+1. derive oracle-calibration indices with the existing frozen `oracle.calibration_indices` policy (100/class, RNG 314159) **only as a disjoint exclusion/calibration receipt**;
+2. derive held-out owner-support indices with the existing frozen `heldout.assign_indices` policy (100/owned class/client, RNG 271828), excluding current-seed client training and current-seed oracle indices;
+3. derive 1000 anchors with the existing `paired.select_anchors` policy (RNG 161803), excluding current-seed training, oracle, and held-out support;
+4. use the first 256 of that seed-specific 1000 ordering for the compressed arm.
 
-## Fit/evaluation
+No anchor label may be consumed for selection, alignment, or head fitting. Official test data remain evaluation-only.
 
-For each N:
+Before remote execution, add a seed0 regeneration test/receipt proving that these deterministic construction functions reproduce the already committed seed0 oracle/support/anchor hashes exactly. This guards against silently changing provenance while generalizing the code path.
 
-1. extract those same N anchor images through all frozen client bases;
-2. fit the same centered orthogonal Procrustes map from each client to client0 using only correctly paired rows;
-3. transform the exact same 2000 H02-E owner-support features;
-4. fit a fresh zero-initialized shared linear head with the frozen H03-D 2000-iteration LBFGS setup;
-5. evaluate unchanged official-test features after the same client-specific transform.
+## Alignment / head settings
 
-Do not carry a head or transform from one N arm into another.
+Freeze all settings from H03-D/H04-A:
 
-Report seen / missing / all / macro and owner-support fit diagnostics for every arm. If a compressed arm does not reach 95% support fit, keep its observed missing accuracy as a lower-bound readout but flag it fit-limited; do not tune the solver.
+- reference client0;
+- centered orthogonal Procrustes, reflections allowed;
+- float64 SVD, applied transform in the existing float32 path;
+- fresh zero-init shared 512->10 linear head per arm;
+- full-batch LBFGS, `strong_wolfe`, lr=1, `max_iter=2000`, `tolerance_grad=1e-9`, `tolerance_change=1e-12`, no regularizer;
+- unchanged official-test evaluation.
 
-## Rank / alignment diagnostics
+For `native_2000`, use the exact same current-seed held-out owner-support features/labels but no alignment. Do not add regularization or a different optimizer to address extreme head norms.
 
-For every client and N, retain the existing before/after centered residual and orthogonality diagnostics and additionally report:
+## Required metrics
 
-- theoretical centered cross-covariance rank ceiling `min(512, N-1)`;
-- effective numerical rank from the already-computed singular values using a fixed documented tolerance, not a tuned threshold;
-- largest singular value and the smallest singular value counted as nonzero;
-- transform hash and finiteness.
+For each seed and arm report support fit CE/accuracy/final gradients/head norms and seen/missing/all/macro accuracy plus per-client counts.
 
-Do not change the Procrustes solution to handle rank deficiency. The purpose is to locate the compression knee of the existing mechanism first.
+Define for each seed `s`:
 
-## Communication accounting
+- `B_s` = native missing accuracy;
+- `P1000_s` = paired1000 missing accuracy;
+- `P256_s` = paired256 missing accuracy;
+- `G1000_s = P1000_s - B_s`;
+- `G256_s = P256_s - B_s`;
+- `Rgain_s = G256_s / G1000_s` if `G1000_s > 0`.
 
-For this diagnostic, count the client-to-server anchor-feature payload exactly as `N * 512 * 4` bytes/client (float32) and `10*N*512*4` bytes total, excluding the unchanged owner-support diagnostic labels/features from the proposed deployment claim. Report the compression factor relative to N=1000. Be explicit that H04-A is an upper-bound communication model and not yet a deployable protocol.
-
-## Fixed references and scores
-
-Use:
-
-- native round10 missing `B10 = 0%`;
-- all-class oracle round10 missing `O10 = 32.725%`;
-- accepted H03-D paired-1000 round10 missing `P1000 = 23.55%`.
-
-For every N report:
-
-`q_N = P_N / 32.725`
-
-and
-
-`retention_N = P_N / 23.55`.
-
-Do not clip either score.
+Report raw values without clipping. Also report N256 payload `524288` bytes/client and exact `3.90625x` reduction versus N1000.
 
 ## Predeclared interpretation
 
-The primary compressed candidate is `N=256` (4x fewer anchors than H03-D).
+Interpret only when all three heads for a seed reach >=95% owner-support fit and all provenance/state checks pass.
 
-1. **Strong count compression supported:** if the N=1000 arm reproduces exactly, `N=256` support fit is >=95%, `q_256 >= .50`, and `retention_256 >= .80` (equivalently missing >=18.84%), accept that at least 4x anchor-count compression preserves most of the demonstrated transport signal. Stop after reporting all five fixed arms. The next lead block should test dimension/rank compression or a compact relation representation, not add a learned nonlinear mapper.
+**Cross-seed mechanism/compression replicated:** for **both** seeds1 and2,
 
-2. **Only mild compression supported:** if `N=512` has `retention >= .80` but `N=256` has `retention < .60`, conclude that the current full-dimensional rigid map becomes fragile once the correspondence matrix is substantially rank-deficient. Do not infer that 256 semantic anchors are intrinsically insufficient. The next lead block should test one rank-aware low-dimensional transport representation rather than adding more anchors or a nonlinear network.
+- `G1000_s >= 10pp`,
+- `G256_s >= 8pp`, and
+- `Rgain_s >= .75`.
 
-3. **Mechanism fragile even before severe rank deficiency:** if `N=512` has `retention < .60` despite >=95% support fit, stop. Inspect rank/residual diagnostics; do not proceed to a more complex compressor in the same block.
+If this holds, stop after reporting. The correspondence mechanism and N256 compression are no longer seed0-only, and the next lead block may finally test one minimal low-dimensional/compact transport representation.
 
-4. For `N=128` and `N=64`, treat results as fixed knee-location diagnostics only. A surprising improvement is not grounds for post-hoc selection or method claims; preserve it and await review.
+**Mechanism replicates but N256 compression does not:** if both seeds have `G1000_s >=10pp` but either seed has `Rgain_s < .60`, stop. Do not invent a learned compressor; report that count compression is split/seed-sensitive and inspect rank/residual diagnostics next.
 
-If the N=1000 reproduction fails, or state/data provenance differs, stop and mark the block invalid rather than running compressed arms.
+**Mechanism itself fails to replicate:** if either seed has `G1000_s <5pp` despite adequate support fit and clean provenance, stop. Treat correspondence as not yet robust; do not proceed to a more complex PPRTP method.
+
+Anything between these thresholds is ambiguous: report and stop without tuning anchors, reference client, solver, or thresholds.
 
 ## Integrity requirements
 
-- exact H02-A online round1..10 records unchanged;
-- exact H03-A anchor ordering and H02-E owner-support reused;
-- no anchor labels consumed anywhere;
-- no official-test sample used for fitting/alignment;
-- all arms start from the same frozen round10 client/server state;
-- no arm mutates client/server parameters/buffers/prototypes/module modes/RNG/existing gradients;
-- all features, SVD quantities, transforms, losses, logits, parameters, and final gradients finite;
-- add only the minimum tests needed for deterministic nested prefixes, N=1000 exact reproduction, and rank-diagnostic finiteness; do not weaken the existing 23 tests.
+- exact H02-A online round1..10 records for seeds1/2 unchanged;
+- seed-specific client training, oracle exclusion, held-out support, and anchors mutually disjoint as intended;
+- anchor labels never consumed;
+- test data never used for fitting/alignment;
+- native/1000/256 arms start from identical frozen round10 model/server state;
+- no arm mutates parameters/buffers/prototypes/module modes/RNG/pre-existing gradients;
+- all SVD quantities/transforms/losses/logits/parameters/final gradients finite;
+- preserve any CUDA SVD fallback warning verbatim; do not rerun merely to hide it;
+- add only minimal tests for seed0 provenance regeneration and seed-specific disjoint construction; do not weaken existing tests.
 
 ## Deliverable
 
-Append `CODEX REPORT H04-A` with STATUS, source SHA, exact commands/run IDs, tests, N=1000 reproduction receipt, one table for all five N arms, support fit/final-gradient diagnostics, rank/alignment diagnostics, communication bytes/compression factors, `q_N`, `retention_N`, online/state/RNG receipts, artifact paths, and a concise interpretation following the frozen branch.
+Append `CODEX REPORT H04-B` with STATUS, source SHA, exact commands/run IDs, tests, seed0 regeneration receipt, per-seed provenance hashes/disjointness, one compact table for seeds1/2 x three arms, fit/final-gradient/head-norm diagnostics, paired alignment/rank diagnostics, `B/G/Rgain` values, state/RNG receipts, warnings, artifact paths, and a 3-5 sentence interpretation following the frozen branch.
 
-Do **not** implement learned transport, affine/nonlinear alignment, CORAL/whitening, optimal transport, random projections, PCA/rank truncation, hybrid/gating heads, new seeds, or publication-scale runs in H04-A. Await research-lead review.
-## CODEX REPORT H04-A — DONE (2026-09-17 23:53 +08)
-
-STATUS: DONE; **strong count compression supported** by frozen N256 criterion. Source `cc8e33b93fbaf3d0de852d975ecb60ebdb978619`; release `20260917-234730-h04a`; run `20260917-234756-h04a-count`, exit0. Exactly five fixed arms,seed0/round10 only. No solver changes,new maps,rank truncation or post-hoc subset selection.
-
-Files: `pprtp/anchor_count.py` fixed prefix orchestration and exact reproduction gate; `pprtp/paired.py` optional rank diagnostics from existing singular values (client0 identity requires diagnostic svdvals),existing-gradient hashes; `pprtp/run.py` opt-in --anchor-count-probe; `tests/test_anchor_count.py`; `scripts/report_h04a.py`.25 tests pass locally/remotely,previous23 preserved. New tests cover nested deterministic prefixes and N1000 full-output equivalence with rank diagnostics plus finite rank statistics on a rank-deficient example.
-
-Exact commands (AUTODL_CONFIG_PATH=.autodl/config.json):
-```powershell
-D:\anaconda3\python.exe -m unittest discover -s tests -v
-./scripts/autodl-deploy.ps1 -Tag h04a
-./scripts/autodl-run.ps1 -Name h04a-count -Cmd 'PPRTP_SOURCE_SHA=cc8e33b93fbaf3d0de852d975ecb60ebdb978619 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --anchor-count-probe'
-D:\anaconda3\python.exe scripts/report_h04a.py research_log/H04A/gate
-```
-
-N1000 exactly reproduces the entire historical H03-D paired_2000 output after excluding newly added rank/existing-gradient receipt keys. This compares full fit dictionary/head hash/norms/final gradients,all metrics/per-client counts,alignment/transform hashes and state/RNG/modes BEFORE compressed arms run. Every arm starts from the same frozen state and fresh zero-init head,fullbatch LBFGS max_iter2000,strong_wolfe,lr1,tolerance_grad1e-9,tolerance_change1e-12,no regularizer. All10 H02-A online client/prototype/server/ordinary metric records exact. All arms preserve parameters/buffers/prototypes,server,module modes,CPU/CUDA RNG and existing client/server gradients.
-
-Ordered parent anchor hash `1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125`;support hash `2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073`. Complete parent receipt equals H03-D. Each prefix indices/hash saved perarm,exact firstN checked independently. Anchor labels never used;no official-test fitting. All quantities finite.
-
-Accuracy %, all heads100% support fit, initial CE2.30258393/accuracy10%:
-
-| N | Seen | Missing | All | Macro | q_N | retention_N | Final CE | grad_inf | grad_l2 | Iter/eval |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| 1000 | 31.10 | 23.5500 | 25.06 | 25.060001 | .719633305 | .999999995 | 9.20881931e-8 | 9.56242658e-8 | 6.13980319e-7 | 1651/1743 |
-| 512 | 33.25 | 22.1625 | 24.38 | 24.38 | .677234531 | .941082804 | 2.62260302e-9 | 1.52488866e-9 | 1.53671280e-8 | 1566/1657 |
-| 256 | 37.55 | 21.9875 | 25.10 | 25.100001 | .671886938 | .933651806 | 7.68896147e-9 | 1.49780650e-8 | 9.88137003e-8 | 1227/1308 |
-| 128 | 42.35 | 16.6625 | 21.80 | 21.800001 | .509167300 | .707537151 | 4.11271550e-9 | 3.77519171e-9 | 3.67015041e-8 | 919/982 |
-| 64 | 51.50 | 11.0125 | 19.11 | 19.11 | .336516423 | .467622078 | 1.01327879e-9 | 6.73789080e-10 | 5.05479747e-9 | 670/720 |
-
-References B10=0,O10=32.725,P1000=23.55%;scores raw/unclipped (near1 floating difference retained). No fit-limited arms. Weight norms respectively952430.8125,1094410.25,1050686,509524.71875,277575.90625;bias norms19294.3613,21877.7441,24634.9922,10668.7061,8964.8496. These remain extreme unregularized diagnostic heads.
-
-| N | Bytes/client | Total bytes | Exact compression factor | Rank ceiling | Effective rank range (all10clients) | Nonreference residual reduction range |
-|---|---:|---:|---:|---:|---|---|
-| 1000 | 2048000 | 20480000 | 1 | 512 | 421–443 | 11.8164–87.9355% |
-| 512 | 1048576 | 10485760 | 1.953125 | 511 | 406–420 | 11.4153–88.6333% |
-| 256 | 524288 | 5242880 | 3.90625 | 255 | 255 | 11.7555–89.6098% |
-| 128 | 262144 | 2621440 | 7.8125 | 127 | 127 | 11.6950–90.2715% |
-| 64 | 131072 | 1310720 | 15.625 | 63 | 63 | 10.6360–91.1017% |
-
-Rank tolerance fixed before run: `512 * eps(float64) * largest_singular_value` of centered cross-covariance; no tuning or truncation. Per-client threshold,largest/smallest nonzero singular value,residual before/after,reduction,orthogonality and transform hash all tabulated in RESULTS.md and rawJSON. Global max orthogonality error double<4.744e-12/applied<4.431e-6. Rank deficits do not trigger a modified map. Communication counts only float32 anchor vectors as prescribed,excluding unchanged support features/labels. This is an upper-bound diagnostic communication model,not yet a deployable protocol. Exact 1000/256 is3.90625 (~4x),not literally at least4x.
-
-Observed warning: after N256 and before N128 completion, PyTorch's default CUDA SVD reported nonconvergence of its selected driver and automatically used its built-in more accurate fallback. Warning preserved verbatim in train.log; no code-level driver override,map change or rerun. All arms completed with finite values and small orthogonality errors. Do not hide this numerical observation in later reproducibility claims.
-
-Interpretation: N256 passes all frozen thresholds (fit100%,q=.6719,retention=.9337),supporting strong count compression in this seed0/round10 diagnostic. Its255-rank ceiling still retains93.37% of the reference missing accuracy,so the full1000 anchor side channel is substantially redundant under this fixed readout. The fixed128/64 arms show decreasing missing transfer despite100% support fit;they locate a knee but are not selected as new methods. Extreme head norms,one frozen ordering/seed and the recorded SVD warning limit broader claims. Stop and await lead review;dimension/rank compression or compact relations have not been implemented.
-
-Evidence: `research_log/H04A/gate/` includes RESULTS.md,verification.json,perarm full prefix indices/hashes,fit/per-client support/test counts,rank/alignment/state receipts,meta/run/log/tests. Remote originals/checkpoints `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-234756-h04a-count`.
+Do **not** implement PCA, random projection, low-rank learned maps, nonlinear transport, OT, CORAL/whitening, hybrid/gating heads, anchor selection, new losses, or publication-scale sweeps in H04-B. Await research-lead review.
