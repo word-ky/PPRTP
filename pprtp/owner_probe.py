@@ -28,6 +28,7 @@ def analyze_owner(clients,head,datasets,test,tensor_hash,metrics):
             server=tensor_hash(head.state_dict().values()),
             prototypes=[tensor_hash([c.protos[k] for k in sorted(c.protos)]) for c in clients])
     before=state()
+    modes=[[m.training for m in c.model.modules()] for c in clients]
     cpu=torch.get_rng_state().clone()
     devices=list(range(torch.cuda.device_count())) if torch.cuda.is_available() else []
     cuda=torch.cuda.get_rng_state_all() if devices else []
@@ -46,6 +47,7 @@ def analyze_owner(clients,head,datasets,test,tensor_hash,metrics):
         assert state()==before
     assert torch.equal(cpu,torch.get_rng_state())
     assert all(torch.equal(a,b) for a,b in zip(cuda,torch.cuda.get_rng_state_all() if devices else []))
+    assert modes==[[m.training for m in c.model.modules()] for c in clients]
     return dict(metrics={k:sum(v[k] for v in values)/len(values) for k in ('seen','missing','all','macro')},
         per_client=values,fit=fit,state_before=before,state_after=state(),
-        rng_cpu_unchanged=True,rng_cuda_unchanged=True)
+        rng_cpu_unchanged=True,rng_cuda_unchanged=True,module_modes_unchanged=True)

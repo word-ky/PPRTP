@@ -42,3 +42,7 @@ Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round onl
 [2026-09-17T17:23:46.8750522+08:00] Synced ed259cf; H02-D owner-sample diagnostic implemented using exact original prepare() local datasets.200/client,2000total,200/class; zero oracle overlap asserted. Fits frozen zero-initialized full-batch LBFGS, rounds2/10 only, no online/state/RNG changes; H02-A exact checks each round. No reference reruns or new method.
 
 [2026-09-17T17:26:06.6243805+08:00] H02-D DONE sourcef6a671c/run20260917-172421-h02d-owner exit0;17tests pass;exact H02-A trajectory/state/RNG preserved. Owner sample missing r2=.2125%,r10=0%;q=0. Fit r2=100%,r10=90.75% at100iter cap. Exact local indices receipts and compact artifacts H02D/full;BRIDGE report appended. Await lead; no new method.
+
+[2026-09-17T18:28:35.1057437+08:00] D:full blocked fetch again. Evicted ignored duplicate remote_runs/20260917-000608-h01b-smoke/artifacts/experiment/gpc_seed0/client0.pt only after exact local/remote SHA256 afe4648ce88aa36556833fccf588d72d942a7a4eaaada36953ebc070d9036b0b verified. Original retained /home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-000608-h01b-smoke/artifacts/experiment/gpc_seed0/client0.pt. No unique evidence deleted.
+
+[2026-09-17T18:30:06.1956091+08:00] H02-E assigned at5e84f48. Implemented deterministic held-out support RNG271828,100/owned class, exclude all local train+oracle, unique across allclients. Reuse H02-D state/RNG-safe fit/evaluation, additionally assert module modes. Seed0 rounds2/10 only; frozen LBFGS and H02-A exact online checks.
