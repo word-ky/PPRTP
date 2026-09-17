@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-203128-h03c-persistence",
+  "releaseId": "20260917-203108-h03c",
+  "sessionName": "autodl-20260917-203128-h03c-persistence",
+  "command": "PPRTP_SOURCE_SHA=37f5262a497886c4df6a0f07dc3ea690cf98d502 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --persistence-probe"
+}

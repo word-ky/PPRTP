@@ -1,0 +1,18 @@
+{
+  "all_ten_online_rounds_exact": true,
+  "exact_anchor_support_reuse": true,
+  "no_align_500": {
+    "state_rng_modes_unchanged": true,
+    "fit_adequate": true
+  },
+  "paired_500": {
+    "state_rng_modes_unchanged": true,
+    "fit_adequate": false
+  },
+  "B10": 0.0,
+  "P10": 25.749999880790707,
+  "O10": 32.725,
+  "q10": 0.7868601949821453,
+  "delta10": 25.749999880790707,
+  "verdict": "optimizer-limited"
+}

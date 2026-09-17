@@ -1,0 +1,47 @@
+[autodl] run_id=20260917-203128-h03c-persistence
+[autodl] started_at=2026-09-17T20:31:32+08:00
+test_unmodified_upstream_two_rounds (test_baseline.BaselineTest.test_unmodified_upstream_two_rounds) ... ok
+test_known_metrics (test_data_metrics.DataMetricTests.test_known_metrics) ... ok
+test_partition_disjoint_complete_and_reproducible (test_data_metrics.DataMetricTests.test_partition_disjoint_complete_and_reproducible) ... ok
+test_probe_separable_and_side_effect_free (test_fedgh.FedGHTest.test_probe_separable_and_side_effect_free) ... ok
+test_server_update_detach_broadcast_and_all_classes (test_fedgh.FedGHTest.test_server_update_detach_broadcast_and_all_classes) ... ok
+test_denominator_and_detachment (test_h01c.H01CTests.test_denominator_and_detachment) ... ok
+test_owner_cosine (test_h01c.H01CTests.test_owner_cosine) ... ok
+test_same_tensor_direction_matches_direct_autograd (test_h01c.H01CTests.test_same_tensor_direction_matches_direct_autograd) ... ok
+test_assignment_counts_support_disjoint_and_deterministic (test_heldout.HeldoutTest.test_assignment_counts_support_disjoint_and_deterministic) ... ok
+test_missing_class_changes_gpc_loss_and_gradient_only (test_mechanism.MechanismTests.test_missing_class_changes_gpc_loss_and_gradient_only) ... ok
+test_round_one_pairing_all_modes_and_grad_ratio (test_mechanism.MechanismTests.test_round_one_pairing_all_modes_and_grad_ratio) ... ok
+test_sample_weighted_aggregation (test_mechanism.MechanismTests.test_sample_weighted_aggregation) ... ok
+test_training_parity_with_unmodified_upstream (test_mechanism.MechanismTests.test_training_parity_with_unmodified_upstream) ... ok
+test_validity_and_noncontiguous_labels (test_mechanism.MechanismTests.test_validity_and_noncontiguous_labels) ... ok
+test_balanced_deterministic_disjoint (test_oracle.OracleTest.test_balanced_deterministic_disjoint) ... ok
+test_oracle_state_rng_buffers_and_test_label_isolation (test_oracle.OracleTest.test_oracle_state_rng_buffers_and_test_label_isolation) ... /home/wenchang/anaconda3/envs/python3.12-tk2-2.3/lib/python3.12/site-packages/torch/cuda/__init__.py:654: UserWarning: Can't initialize NVML
+  warnings.warn("Can't initialize NVML")
+ok
+test_original_indices_counts_and_exclusion (test_owner_probe.OwnerProbeTest.test_original_indices_counts_and_exclusion) ... ok
+test_owner_fit_state_and_test_label_isolation (test_owner_probe.OwnerProbeTest.test_owner_fit_state_and_test_label_isolation) ... ok
+test_known_rotation_translation (test_paired.PairedTest.test_known_rotation_translation) ... ok
+test_label_blind_selection_and_fit (test_paired.PairedTest.test_label_blind_selection_and_fit) ... ok
+test_matched_500_fits_preserve_same_state (test_paired.PairedTest.test_matched_500_fits_preserve_same_state) ... ok
+test_pair_breaking_preserves_multiset (test_paired.PairedTest.test_pair_breaking_preserves_multiset) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.812s
+
+OK
+/home/wenchang/anaconda3/envs/python3.12-tk2-2.3/lib/python3.12/site-packages/torch/cuda/__init__.py:654: UserWarning: Can't initialize NVML
+  warnings.warn("Can't initialize NVML")
+Files already downloaded and verified
+Files already downloaded and verified
+{"mode": "fedgh", "seed": 0, "round": 1, "metrics": {"cosine": {"seen": 0.6325000107288361, "missing": 0.11837500035762787, "all": 0.22119999825954437, "macro": 0.22119999676942825}, "l2": {"seen": 0.6129999935626984, "missing": 0.14624999985098838, "all": 0.23959999829530715, "macro": 0.23959999829530715}, "local_head_pre_server": {"seen": 0.503999999165535, "missing": 0.0, "all": 0.10080000013113022, "macro": 0.1008000023663044}, "global_head_post_server": {"seen": 0.4425000011920929, "missing": 0.01212499972898513, "all": 0.09819999933242798, "macro": 0.09819999933242798}}, "elapsed": 0.9140563011169434}
+{"mode": "fedgh", "seed": 0, "round": 2, "metrics": {"cosine": {"seen": 0.6350000023841857, "missing": 0.00012499999720603228, "all": 0.12710000053048134, "macro": 0.12709999606013297}, "l2": {"seen": 0.6224999964237213, "missing": 0.0004999999888241291, "all": 0.12490000054240227, "macro": 0.12490000277757644}, "local_head_pre_server": {"seen": 0.5284999966621399, "missing": 0.0, "all": 0.10570000112056732, "macro": 0.10569999888539314}, "global_head_post_server": {"seen": 0.529499989748001, "missing": 0.0, "all": 0.1059000015258789, "macro": 0.10589999854564666}}, "elapsed": 1.7886066436767578}
+{"mode": "fedgh", "seed": 0, "round": 3, "metrics": {"cosine": {"seen": 0.6055000066757202, "missing": 0.0, "all": 0.12110000178217888, "macro": 0.12109999880194663}, "l2": {"seen": 0.5740000069141388, "missing": 0.0, "all": 0.11480000168085099, "macro": 0.11480000019073486}, "local_head_pre_server": {"seen": 0.5324999958276748, "missing": 0.0, "all": 0.10650000050663948, "macro": 0.10649999752640724}, "global_head_post_server": {"seen": 0.5344999939203262, "missing": 0.0, "all": 0.10690000131726266, "macro": 0.10689999982714653}}, "elapsed": 2.630765676498413}
+{"mode": "fedgh", "seed": 0, "round": 4, "metrics": {"cosine": {"seen": 0.5515000015497208, "missing": 0.0, "all": 0.11030000075697899, "macro": 0.11030000075697899}, "l2": {"seen": 0.5535000056028366, "missing": 0.0, "all": 0.11070000007748604, "macro": 0.1107000008225441}, "local_head_pre_server": {"seen": 0.5189999997615814, "missing": 0.0, "all": 0.10380000099539757, "macro": 0.10380000099539757}, "global_head_post_server": {"seen": 0.5059999972581863, "missing": 0.0, "all": 0.10120000094175338, "macro": 0.10120000094175338}}, "elapsed": 3.4790239334106445}
+{"mode": "fedgh", "seed": 0, "round": 5, "metrics": {"cosine": {"seen": 0.5299999982118606, "missing": 0.0, "all": 0.10600000023841857, "macro": 0.10600000023841857}, "l2": {"seen": 0.5830000013113021, "missing": 0.0, "all": 0.11659999936819077, "macro": 0.11660000160336495}, "local_head_pre_server": {"seen": 0.5060000002384186, "missing": 0.0, "all": 0.10120000094175338, "macro": 0.10120000094175338}, "global_head_post_server": {"seen": 0.527999997138977, "missing": 0.0, "all": 0.10560000017285347, "macro": 0.10559999942779541}}, "elapsed": 4.319574594497681}
+{"mode": "fedgh", "seed": 0, "round": 6, "metrics": {"cosine": {"seen": 0.5419999957084656, "missing": 0.0, "all": 0.1084000013768673, "macro": 0.10839999914169311}, "l2": {"seen": 0.5879999935626984, "missing": 0.0, "all": 0.11759999990463257, "macro": 0.11759999990463257}, "local_head_pre_server": {"seen": 0.5295000016689301, "missing": 0.0, "all": 0.1059000015258789, "macro": 0.10590000227093696}, "global_head_post_server": {"seen": 0.5389999985694885, "missing": 0.0, "all": 0.10780000165104867, "macro": 0.10780000016093254}}, "elapsed": 5.164412260055542}
+{"mode": "fedgh", "seed": 0, "round": 7, "metrics": {"cosine": {"seen": 0.5424999952316284, "missing": 0.0, "all": 0.10850000083446502, "macro": 0.10849999859929085}, "l2": {"seen": 0.5895000040531159, "missing": 0.0, "all": 0.11790000125765801, "macro": 0.11790000125765801}, "local_head_pre_server": {"seen": 0.5305000007152557, "missing": 0.0, "all": 0.10610000118613243, "macro": 0.10609999895095826}, "global_head_post_server": {"seen": 0.5230000019073486, "missing": 0.0, "all": 0.10460000112652779, "macro": 0.10460000112652779}}, "elapsed": 6.0062432289123535}
+{"mode": "fedgh", "seed": 0, "round": 8, "metrics": {"cosine": {"seen": 0.5704999983310699, "missing": 0.0, "all": 0.11410000026226044, "macro": 0.11410000175237656}, "l2": {"seen": 0.6124999910593033, "missing": 0.0, "all": 0.1225000001490116, "macro": 0.12249999865889549}, "local_head_pre_server": {"seen": 0.5925000011920929, "missing": 0.0, "all": 0.11850000098347664, "macro": 0.11850000247359276}, "global_head_post_server": {"seen": 0.5209999978542328, "missing": 0.0, "all": 0.10420000106096268, "macro": 0.10420000106096268}}, "elapsed": 6.853105306625366}
+{"mode": "fedgh", "seed": 0, "round": 9, "metrics": {"cosine": {"seen": 0.5684999942779541, "missing": 0.0, "all": 0.11370000094175339, "macro": 0.11369999945163727}, "l2": {"seen": 0.5969999998807907, "missing": 0.0, "all": 0.1194000005722046, "macro": 0.11939999908208847}, "local_head_pre_server": {"seen": 0.5485000014305115, "missing": 0.0, "all": 0.10970000103116036, "macro": 0.10970000103116036}, "global_head_post_server": {"seen": 0.5055000007152557, "missing": 0.0, "all": 0.10110000148415565, "macro": 0.10110000148415565}}, "elapsed": 7.695950269699097}
+{"mode": "fedgh", "seed": 0, "round": 10, "metrics": {"cosine": {"seen": 0.5309999942779541, "missing": 0.0, "all": 0.10620000138878823, "macro": 0.10620000064373017}, "l2": {"seen": 0.5599999964237213, "missing": 0.0, "all": 0.11200000047683716, "macro": 0.11200000122189521}, "local_head_pre_server": {"seen": 0.6129999995231629, "missing": 0.0, "all": 0.12260000258684159, "macro": 0.12260000109672546}, "global_head_post_server": {"seen": 0.5, "missing": 0.0, "all": 0.10000000149011612, "macro": 0.10000000149011612}}, "elapsed": 8.552342653274536}
+[autodl] finished_at=2026-09-17T20:32:03+08:00
+[autodl] exit_code=0
