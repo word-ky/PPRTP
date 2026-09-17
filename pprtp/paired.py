@@ -73,7 +73,7 @@ def break_pairs(a,client_id):
         multiset_bitwise_unchanged=True)
 
 
-def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=False,max_iter=100,expected_alignment=None):
+def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=False,max_iter=100,expected_alignment=None,audit=False):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(head.state_dict().values()),
@@ -96,6 +96,8 @@ def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=
             assert diagnostics==expected_alignment, 'H03-A paired alignment mismatch'
         probe,fit=fit_linear(head,torch.cat(zz),torch.cat(yy),zero=True,max_iter=max_iter)
         fit['head_hash']=tensor_hash(probe.state_dict().values())
+        if audit:
+            fit['final_support']=support_gradient(probe,zz,yy)
         values=[]
         for c,t in zip(clients,transforms):
             z,y=features(c,test)
@@ -112,3 +114,23 @@ def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=
     if broken:
         result['permutations']=permutations
     return result
+
+
+def support_gradient(probe,zz,yy):
+    """Evaluate the final full-batch objective without accumulating .grad."""
+    x=torch.cat(zz).detach(); y=torch.cat(yy)
+    logits=probe(x)
+    loss=torch.nn.functional.cross_entropy(logits,y)
+    grads=torch.autograd.grad(loss,tuple(probe.parameters()))
+    flat=torch.cat([g.detach().reshape(-1) for g in grads])
+    assert torch.isfinite(loss) and torch.isfinite(flat).all()
+    predictions=logits.detach().argmax(1).split([len(v) for v in yy])
+    per_client=[]
+    for pred,labels in zip(predictions,yy):
+        correct=(pred==labels)
+        per_client.append(dict(accuracy=correct.float().mean().item(),correct=correct.sum().item(),count=len(labels),
+            class_correct=torch.bincount(labels[correct],minlength=10).tolist(),
+            class_count=torch.bincount(labels,minlength=10).tolist()))
+    return dict(ce=loss.item(),accuracy=(logits.detach().argmax(1)==y).float().mean().item(),
+        grad_inf=flat.abs().max().item(),grad_l2=flat.norm().item(),
+        weight_norm=probe.weight.norm().item(),bias_norm=probe.bias.norm().item(),per_client=per_client)

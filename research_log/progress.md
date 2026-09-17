@@ -60,3 +60,5 @@ Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round onl
 [2026-09-17T20:31:07.5106192+08:00] H03-C assigned52bc578; new round10 matched native/paired diagnostics reuse saved anchors/support. Both max_iter500; all10 H02-A online comparisons active;22 tests pass including matched500 state/fit test. No other arms or tuning.
 
 [2026-09-17T20:33:26.1185336+08:00] H03-C DONE source37f5262/run20260917-203128-h03c-persistence exit0;22tests pass;10round online/state/RNG/modes exact. Native missing0 fit100%;pairedmissing25.75 fit79.1% at500cap; q.786860195 delta25.75pp => optimizer-limited. Evidence H03C/gate,BRIDGE;stop per lead,no tuning.
+
+[2026-09-17T21:18:13.2825495+08:00] D: only64KB; evicted ignored duplicate remote_runs/20260917-000608-h01b-smoke/artifacts/experiment/local_seed0/client0.pt after local/remote SHA256 3c58f3014170b50310985bff80d3c96a04195a754a429a77349e9af99537fe1c exact. Server original retained under PPRTP/runs. H03-D assigneda6c0373;paired500 exact reproduction before freshpaired2000, final autograd.grad diagnostics and perclient support counts.23tests pass, no solver alternatives.

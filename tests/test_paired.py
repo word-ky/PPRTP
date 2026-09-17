@@ -22,6 +22,25 @@ class PairedTest(unittest.TestCase):
             self.assertEqual(arm['state_before'],arm['state_after'])
         self.assertEqual(native['metrics'],paired['metrics'])
 
+    def test_final_gradient_is_finite_and_side_effect_free(self):
+        from pprtp.paired import support_gradient
+        torch.manual_seed(29)
+        model=torch.nn.Module();model.base=torch.nn.Identity();model.head=torch.nn.Linear(10,10)
+        client=SimpleNamespace(model=model,device='cpu',class_set=[0,1],protos={0:torch.ones(10)})
+        ds=TensorDataset(torch.eye(10),torch.arange(10))
+        before=tensor_hash(model.state_dict().values())
+        for p in model.parameters(): p.grad=torch.ones_like(p)
+        old=[p.grad.clone() for p in model.parameters()]
+        a=support_gradient(model.head,[ds.tensors[0]],[ds.tensors[1]])
+        self.assertTrue(torch.isfinite(torch.tensor([a['grad_inf'],a['grad_l2']])).all())
+        self.assertTrue(all(torch.equal(p.grad,g) for p,g in zip(model.parameters(),old)))
+        result=analyze_paired([client],model.head,ds,[ds],ds,tensor_hash,metrics,max_iter=2000,audit=True)
+        f=result['fit'];self.assertEqual(f['after']['ce'],f['final_support']['ce'])
+        self.assertEqual(f['after']['accuracy'],f['final_support']['accuracy'])
+        self.assertEqual(before,tensor_hash(model.state_dict().values()))
+        self.assertTrue(all(torch.equal(p.grad,g) for p,g in zip(model.parameters(),old)))
+        self.assertTrue(torch.isfinite(torch.tensor(f['final_support']['grad_inf'])))
+
     def test_pair_breaking_preserves_multiset(self):
         a=torch.arange(4000,dtype=torch.float32).reshape(1000,4)
         broken,r=break_pairs(a,1)
