@@ -178,7 +178,7 @@ def run(cfg, mode, seed):
                 historical=Path('research_log/H02A/full/artifacts/experiment')/f'fedgh_seed{seed}'/'rounds.jsonl'
                 old=json.loads(historical.read_text().splitlines()[r])
                 for key in ('client_model_hashes','prototype_bank_hash','metrics','server_head'):
-                    assert record[key]==old[key], f'H02-A online mismatch: round {r+1}, {key}'
+                    assert json.loads(json.dumps(record[key]))==old[key], f'H02-A online mismatch: round {r+1}, {key}'
                 online_before=[tensor_hash(c.model.state_dict().values()) for c in clients]
                 server_before=tensor_hash(server_head.state_dict().values())
                 probe,info=fit_probe(server_head,clients)

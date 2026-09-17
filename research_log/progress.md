@@ -26,3 +26,6 @@ Three seeds x10 rounds exit0; all integrity receipts pass. Fresh shared-head mis
 
 ## 2026-09-17 14:20 +08 — H02-B assigned
 Synced ff7384d and read review16/H02-B. Added opt-in copied-head full-batch LBFGS diagnostic with frozen strong_wolfe/max_iter100/tolerances1e-9,1e-12; no online broadcast changes. Historical H02-A online model/prototype/metrics/server records checked exactly each round before probe. Full client and server hashes checked after probe fit/evaluation. Stop if prototype fit <95% or nonfinite; no optimizer fallback. Seed0 only,10 rounds; retain remote models due local disk pressure.
+
+## 2026-09-17 15:08 +08 — H02-B comparison serialization repair
+Initial run20260917-150642-h02b-probe exited1 before probe: round1 server_head comparison matched model/prototype/metrics but Python tuple sample_order compared unequal to JSON historical lists. Normalize the live record through JSON for equality (same persisted representation); retain all keys and exact values. No training/optimizer changes. Failed remote log retained. Prior implementation timestamp14:20 was based on heartbeat time; actual deployment15:06.
