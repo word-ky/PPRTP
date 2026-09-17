@@ -22,11 +22,15 @@ def provenance(datasets,split,oracle_indices):
         oracle_overlap=0,test_used_for_fitting=False)
 
 
-def analyze_owner(clients,head,datasets,test,tensor_hash,metrics,max_iter=100):
+def analyze_owner(clients,head,datasets,test,tensor_hash,metrics,max_iter=100,audit=False):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(head.state_dict().values()),
             prototypes=[tensor_hash([c.protos[k] for k in sorted(c.protos)]) for c in clients])
+    def gradient_state():
+        return [[None if p.grad is None else tensor_hash([p.grad]) for p in module.parameters()]
+                for module in [head]+[c.model for c in clients]]
+    gradients_before=gradient_state() if audit else None
     before=state()
     modes=[[m.training for m in c.model.modules()] for c in clients]
     cpu=torch.get_rng_state().clone()
@@ -37,6 +41,9 @@ def analyze_owner(clients,head,datasets,test,tensor_hash,metrics,max_iter=100):
         z=torch.cat([z for z,y in pairs]); y=torch.cat([y for z,y in pairs])
         probe,fit=fit_linear(head,z,y,zero=True,max_iter=max_iter)
         fit['head_hash']=tensor_hash(probe.state_dict().values())
+        if audit:
+            from pprtp.paired import support_gradient
+            fit['final_support']=support_gradient(probe,[z for z,y in pairs],[y for z,y in pairs])
         values=[]
         for c in clients:
             tz,ty=features(c,test)
@@ -48,6 +55,11 @@ def analyze_owner(clients,head,datasets,test,tensor_hash,metrics,max_iter=100):
     assert torch.equal(cpu,torch.get_rng_state())
     assert all(torch.equal(a,b) for a,b in zip(cuda,torch.cuda.get_rng_state_all() if devices else []))
     assert modes==[[m.training for m in c.model.modules()] for c in clients]
-    return dict(metrics={k:sum(v[k] for v in values)/len(values) for k in ('seen','missing','all','macro')},
+    result=dict(metrics={k:sum(v[k] for v in values)/len(values) for k in ('seen','missing','all','macro')},
         per_client=values,fit=fit,state_before=before,state_after=state(),
         rng_cpu_unchanged=True,rng_cuda_unchanged=True,module_modes_unchanged=True)
+
+    if audit:
+        assert gradient_state()==gradients_before
+        result['existing_gradients_unchanged']=True
+    return result
