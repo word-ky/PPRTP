@@ -1,0 +1,34 @@
+test_nested_prefixes (test_anchor_count.AnchorCountTest.test_nested_prefixes) ... ok
+test_rank_diagnostics_preserve_full_anchor_result (test_anchor_count.AnchorCountTest.test_rank_diagnostics_preserve_full_anchor_result) ... /home/wenchang/anaconda3/envs/python3.12-tk2-2.3/lib/python3.12/site-packages/torch/cuda/__init__.py:654: UserWarning: Can't initialize NVML
+  warnings.warn("Can't initialize NVML")
+ok
+test_unmodified_upstream_two_rounds (test_baseline.BaselineTest.test_unmodified_upstream_two_rounds) ... ok
+test_seed0_historical_regeneration (test_cross_seed.CrossSeedTest.test_seed0_historical_regeneration) ... ok
+test_seed_specific_disjoint_construction (test_cross_seed.CrossSeedTest.test_seed_specific_disjoint_construction) ... ok
+test_known_metrics (test_data_metrics.DataMetricTests.test_known_metrics) ... ok
+test_partition_disjoint_complete_and_reproducible (test_data_metrics.DataMetricTests.test_partition_disjoint_complete_and_reproducible) ... ok
+test_probe_separable_and_side_effect_free (test_fedgh.FedGHTest.test_probe_separable_and_side_effect_free) ... ok
+test_server_update_detach_broadcast_and_all_classes (test_fedgh.FedGHTest.test_server_update_detach_broadcast_and_all_classes) ... ok
+test_denominator_and_detachment (test_h01c.H01CTests.test_denominator_and_detachment) ... ok
+test_owner_cosine (test_h01c.H01CTests.test_owner_cosine) ... ok
+test_same_tensor_direction_matches_direct_autograd (test_h01c.H01CTests.test_same_tensor_direction_matches_direct_autograd) ... ok
+test_assignment_counts_support_disjoint_and_deterministic (test_heldout.HeldoutTest.test_assignment_counts_support_disjoint_and_deterministic) ... ok
+test_missing_class_changes_gpc_loss_and_gradient_only (test_mechanism.MechanismTests.test_missing_class_changes_gpc_loss_and_gradient_only) ... ok
+test_round_one_pairing_all_modes_and_grad_ratio (test_mechanism.MechanismTests.test_round_one_pairing_all_modes_and_grad_ratio) ... ok
+test_sample_weighted_aggregation (test_mechanism.MechanismTests.test_sample_weighted_aggregation) ... ok
+test_training_parity_with_unmodified_upstream (test_mechanism.MechanismTests.test_training_parity_with_unmodified_upstream) ... ok
+test_validity_and_noncontiguous_labels (test_mechanism.MechanismTests.test_validity_and_noncontiguous_labels) ... ok
+test_balanced_deterministic_disjoint (test_oracle.OracleTest.test_balanced_deterministic_disjoint) ... ok
+test_oracle_state_rng_buffers_and_test_label_isolation (test_oracle.OracleTest.test_oracle_state_rng_buffers_and_test_label_isolation) ... ok
+test_original_indices_counts_and_exclusion (test_owner_probe.OwnerProbeTest.test_original_indices_counts_and_exclusion) ... ok
+test_owner_fit_state_and_test_label_isolation (test_owner_probe.OwnerProbeTest.test_owner_fit_state_and_test_label_isolation) ... ok
+test_final_gradient_is_finite_and_side_effect_free (test_paired.PairedTest.test_final_gradient_is_finite_and_side_effect_free) ... ok
+test_known_rotation_translation (test_paired.PairedTest.test_known_rotation_translation) ... ok
+test_label_blind_selection_and_fit (test_paired.PairedTest.test_label_blind_selection_and_fit) ... ok
+test_matched_500_fits_preserve_same_state (test_paired.PairedTest.test_matched_500_fits_preserve_same_state) ... ok
+test_pair_breaking_preserves_multiset (test_paired.PairedTest.test_pair_breaking_preserves_multiset) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 2.128s
+
+OK

@@ -157,3 +157,66 @@ Anything between these thresholds is ambiguous: report and stop without tuning a
 Append `CODEX REPORT H04-B` with STATUS, source SHA, exact commands/run IDs, tests, seed0 regeneration receipt, per-seed provenance hashes/disjointness, one compact table for seeds1/2 x three arms, fit/final-gradient/head-norm diagnostics, paired alignment/rank diagnostics, `B/G/Rgain` values, state/RNG receipts, warnings, artifact paths, and a 3-5 sentence interpretation following the frozen branch.
 
 Do **not** implement PCA, random projection, low-rank learned maps, nonlinear transport, OT, CORAL/whitening, hybrid/gating heads, anchor selection, new losses, or publication-scale sweeps in H04-B. Await research-lead review.
+
+## CODEX REPORT H04-B — DONE (2026-09-18 00:26 +08)
+
+STATUS: DONE; **cross-seed mechanism/compression replicated** under all frozen thresholds. Source `c27f05b8996018c65ae7fa032487a40b9154edbf`;release `20260918-002045-h04b`;run `20260918-002118-h04b-crossseed`,exit0. Only seeds1/2,round10,three arms each. No new method,other anchor counts,round2 or solver changes.
+
+Changes: `pprtp/cross_seed.py` composes existing calibration_indices/assign_indices/select_anchors policies perseed; `pprtp/owner_probe.py` opt-in final-gradient/per-client support and existing-gradient receipt; `pprtp/run.py` opt-in --cross-seed-probe; `tests/test_cross_seed.py`; `scripts/report_h04b.py`.27 tests pass locally/remotely,previous25 preserved.
+
+Commands (project root,AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h04b
+./scripts/autodl-run.ps1 -Name h04b-crossseed -Cmd 'PPRTP_SOURCE_SHA=c27f05b8996018c65ae7fa032487a40b9154edbf bash scripts/run_h01.sh --modes fedgh --seeds 1 2 --rounds 10 --cross-seed-probe'
+D:\anaconda3\python.exe scripts/report_h04b.py research_log/H04B/full
+```
+
+Before deployment, local tests regenerated seed0 oracle/support/anchors using real official CIFAR10 train label ordering exported read-only from the verified A6000 data. All indices and hashes exactly equal H02-C/H02-E/H03-A; explicit receipt `research_log/H04B/seed0_regeneration.json`,50KB label fixture with source/SHA retained. This fixture is used for provenance tests,not anchor label conditioning. Current-seed oracle indices are exclusion-only,no oracle heads trained. Each seed has disjoint2000train/1000oracle/2000support/1000anchors;support100per ownedclass/client,unique acrossclients. Anchors selected from exclusions label-blind using161803,compressed prefix exact first256;oracle314159/support271828 unchanged. Official test data evaluation-only.
+
+Every arm uses the same perseed support and frozen state,fresh zero-init head,fullbatch LBFGS lr1,max_iter2000,strong_wolfe,tolerance_grad1e-9,tolerance_change1e-12,no regularization. Centered float64SVD/float32 applied Procrustes toclient0,reflections allowed,unchanged. All10 H02-A client/prototype/server/ordinary metrics exact for EACH seed. All arms preserve client/server parameters/buffers/prototypes,module modes,CPU/CUDA RNG and existing gradients. All quantities finite.
+
+| Seed | Arm | Seen % | Missing % | All % | Macro % | Fit % | CE | grad_inf | grad_l2 | Weight/bias norm | Iter/eval |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
+| 1 | native_2000 | 78.050000 | 0.000000 | 15.610000 | 15.610000 | 100.000000 | 1.0371183e-08 | 1.51575374e-08 | 1.18869849e-07 | 70183.2266/6569.71191 | 284/316 |
+| 1 | paired_1000_2000 | 35.750000 | 25.325000 | 27.410000 | 27.409999 | 100.000000 | 6.11538482e-08 | 5.61580826e-08 | 4.21879548e-07 | 494414.719/18858.8184 | 1398/1484 |
+| 1 | paired_256_2000 | 44.200000 | 20.962500 | 25.610000 | 25.610000 | 100.000000 | 8.34464997e-10 | 7.4051032e-10 | 5.48625678e-09 | 675899.938/22872.6035 | 1053/1094 |
+| 2 | native_2000 | 75.500000 | 0.000000 | 15.100000 | 15.100000 | 100.000000 | 9.00028585e-09 | 8.25218294e-09 | 7.65028361e-08 | 62626.0234/7737.11035 | 329/373 |
+| 2 | paired_1000_2000 | 31.599999 | 22.812500 | 24.570000 | 24.569999 | 100.000000 | 8.10608611e-08 | 1.80212155e-07 | 1.09756093e-06 | 866001.812/24828.0664 | 1584/1666 |
+| 2 | paired_256_2000 | 38.800000 | 19.537500 | 23.390000 | 23.390000 | 100.000000 | 5.36441724e-10 | 6.63552491e-10 | 4.33157687e-09 | 461095.906/13343.0605 | 1243/1303 |
+
+| Seed | B | P1000 | P256 | G1000 pp | G256 pp | Rgain |
+|---|---:|---:|---:|---:|---:|---:|
+| 1 | 0.0 | 25.32499983906746 | 20.962500125169754 | 25.32499983906746 | 20.962500125169754 | 0.8277393981591297 |
+| 2 | 0.0 | 22.8125 | 19.537499845027924 | 22.8125 | 19.537499845027924 | 0.8564383493710871 |
+
+Frozen branch: cross-seed mechanism/compression replicated.
+
+N256 payload524288 bytes/client (5242880 total),exact3.90625x reduction from N1000. Diagnostic anchor features only; support side channel excluded,not a deployable protocol.
+
+| Seed | Set | SHA256 |
+|---|---|---|
+| 1 | oracle | 4c972e65f2c29657b36e7bd0641a3632e390090b17a1ce2899234ceffc8e5f2a |
+| 1 | support | 8373dc4071d7760582de0613b98aae19620374d6f1b6b1cc01b5d5c8b9e207dd |
+| 1 | anchor | 5ac2570f6c34481b027322b9dd1215b877e509ea696e9156d2c429e0095d23c2 |
+| 2 | oracle | d0165050117976afcb1e7ddca3afb70971bb033799ddba42d43560ad4b86dd2a |
+| 2 | support | b59d0199adad3696cf32f95d272375d23f4ca0979da76e234da806d2fbefab4a |
+| 2 | anchor | 9582386f902eb84ac6ad3ee40d851dad04b8aa3110adb6a5d43846513e802f1c |
+
+
+Rank/alignment summary (full per-client residuals/orthogonality/transform hashes in RESULTS.md;singular extrema/tolerances in raw final.json):
+
+| Seed | N | Effective rank range | Rank ceiling | Nonreference reduction range | Max orthogonality double/applied |
+|---|---|---|---|---|---|
+| 1 | 1000 | 406–407 | 512 | 49.9423–74.7762% | 3.82450708e-12/4.274822e-06 |
+| 1 | 256 | 255–255 | 255 | 48.3255–75.8552% | 4.7373369e-12/3.98163729e-06 |
+| 2 | 1000 | 405–405 | 512 | 46.6197–81.7880% | 3.58734055e-12/4.17462616e-06 |
+| 2 | 256 | 255–255 | 255 | 45.7398–82.7018% | 4.30533134e-12/3.95323696e-06 |
+
+Rank tolerance remains512*eps64*smax,no rank truncation. All six heads100% fit;final-gradient/head norms are in the table and perclient support/test correct/counts in rawJSON. Scores are raw/unclipped;no seed0 oracle reference is misapplied to seeds1/2.
+
+Warnings: this run retains the known `Can't initialize NVML` PyTorch warning verbatim in train.log (tests and runtime);CUDA computation/tests completed. No SVD fallback warning appeared in this run;H04-A's historical SVD warning remains preserved. No reruns to hide warnings. Ddrive capacity constraint repaired by deleting only one ignored duplicate checkpoint after exact local/remote SHA match;original retained remotely,receipt in progress.md.
+
+Interpretation: both seeds satisfy G1000>=10pp,G256>=8pp,Rgain>=.75 with all heads100%fit and clean provenance. Thus the frozen correspondence mechanism and N256 compression replicate beyond seed0,with gain retention82.77%/85.64%. The native heads fit owner support perfectly yet retain0% missing accuracy,while paired support gives substantial missing recognition in both splits. Extreme unregularized head norms and the seen/missing tradeoff remain diagnostic limitations;this is not yet a deployable method or publication-scale validation. Stop and await lead review;no low-dimensional map,learned compressor or gating implemented.
+
+Artifacts: `research_log/H04B/full/RESULTS.md`,verification.json,perseed cross_seed_provenance.json,rounds.jsonl/final.json,meta/run/log/tests;seed0 regeneration receipt/fixture under H04B. Remote originals/checkpoints `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260918-002118-h04b-crossseed`.

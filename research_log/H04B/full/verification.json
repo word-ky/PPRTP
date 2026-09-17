@@ -1,0 +1,27 @@
+{
+  "1": {
+    "B": 0.0,
+    "P1000": 25.32499983906746,
+    "P256": 20.962500125169754,
+    "G1000": 25.32499983906746,
+    "G256": 20.962500125169754,
+    "Rgain": 0.8277393981591297,
+    "fits_adequate": true,
+    "all_ten_online_exact": true,
+    "disjoint": true,
+    "state_rng_modes_gradients_unchanged": true
+  },
+  "2": {
+    "B": 0.0,
+    "P1000": 22.8125,
+    "P256": 19.537499845027924,
+    "G1000": 22.8125,
+    "G256": 19.537499845027924,
+    "Rgain": 0.8564383493710871,
+    "fits_adequate": true,
+    "all_ten_online_exact": true,
+    "disjoint": true,
+    "state_rng_modes_gradients_unchanged": true
+  },
+  "verdict": "cross-seed mechanism/compression replicated"
+}
