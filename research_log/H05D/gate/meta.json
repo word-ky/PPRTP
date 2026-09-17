@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-043934-h05d-precision",
+  "releaseId": "20260918-043913-h05d",
+  "sessionName": "autodl-20260918-043934-h05d-precision",
+  "command": "PPRTP_SOURCE_SHA=9085f01eeccfb270faf6a93a4ee3957904210a7c bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --precision-probe"
+}

@@ -131,3 +131,74 @@ For the broken arm, always report fit and gradient. Do not overinterpret a paire
 Append `CODEX REPORT H05-D` with STATUS, source SHA, exact commands/run IDs, tests, exact H05-C feature/provenance equivalence, fp64-only casting receipt, paired/broken fit and gradient diagnostics, test metrics, `q_rel_64`, paired-minus-broken delta, integrity receipts, warnings, and artifact paths.
 
 Do **not** implement more iterations, another optimizer, float64 relation construction, PCA/SVD truncation, whitening, cosine/RBF kernels, learned encoders, MLPs, OT, hybrid heads, class-level relation prototypes, other anchor counts, or seeds1/2 in H05-D. Await research-lead review.
+
+
+## CODEX REPORT H05-D — DONE (2026-09-18 04:42 +08)
+
+STATUS: DONE; **C: still solver-unresolved**, stop under frozen rule. Source `9085f01eeccfb270faf6a93a4ee3957904210a7c`;release `20260918-043913-h05d`;run `20260918-043934-h05d-precision`,exit0,finished04:41:10+08.
+
+Changed pprtp/relation.py (optional final-feature receipts and exact cast),pprtp/run.py (--precision-probe),tests/test_precision.py,scripts/report_h05d.py. All33 tests pass locally/remotely,including existing32. Added minimal integrated test proves float32->float64->float32 bitwise identity, same pre-cast feature hashes/statistics, and full state/RNG/mode/preexisting-gradient preservation. A local initial edit placed receipt code in the raw helper, caused NameError in2tests, and was repaired before deployment; full33 then passed. No failed remote run.
+
+Commands (AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h05d
+./scripts/autodl-run.ps1 -Name h05d-precision -Cmd 'PPRTP_SOURCE_SHA=9085f01eeccfb270faf6a93a4ee3957904210a7c bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --precision-probe'
+D:\anaconda3\python.exe scripts/report_h05d.py research_log/H05D/gate
+```
+
+Frozen upstream PFLlib0169ba7,CIFAR10subset,10clients2classes,100train/class/client,test100/class,CNN512features,SGD.01,1epoch,batch32,seed0round10 unchanged. No online trajectory change: all10 H02-A records match exactly. Saved H02-E support2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073 and parentanchors1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125 with exactN256prefix reused;allindices/permutations/Gram diagnostics exact.
+
+H05-C did not retain direct conditioned-feature hashes. Therefore each original float32 arm was rerun first, preserving the exact path, and its complete result (all metrics,headhash,fitdiagnostics,structural-null/basis/spectral/conditioning/provenance/state receipts) asserted equal to historical H05-C before its corresponding fp64 fit. The newly recorded final support and test hashes are below. Double arm recomputes the same float32 path, asserts these hashes and labels equal, then casts only the completed255Dmatrices. Mean/std,basis products and relation entries remain float32. Each converted tensor converts back bitwise; labels unchanged. No float64 representation construction.
+
+Exactly two new zero-initialized255->10doubleheads;fullbatchLBFGS lr1,strong_wolfe,max_iter2000,tolerance_grad1e-9,tolerance_change1e-12,no regularization. Float32 reruns are solely the required historical equivalence check, not extra tuned arms. Initial CE2.302585092994046,accuracy10% bothdoubleheads. All perclient support correct/count/classcounts and testmetrics retained in final.json. Both heads reach2000iterations;PyTorch exposes no explicit termination reason.
+
+# H05-D float64 solver-only audit
+
+| Arm | Seen % | Missing % | All % | Macro % | Fit % | CE | grad_inf | grad_l2 | Weight/bias norm | Iter/eval |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
+| rel255_paired_helmert_zscore_fp64 | 55.950000 | 11.837500 | 20.660000 | 20.660000 | 68.450004 | 1.08140367 | 0.00197867214 | 0.0260176584 | 751.47876/0.907168241 | 2000/2111 |
+| rel255_broken_helmert_zscore_fp64 | 60.249999 | 4.762500 | 15.860000 | 15.859999 | 76.350003 | 0.854595055 | 0.0010495563 | 0.00791066368 | 812.502234/0.670096799 | 2000/2092 |
+
+R64=11.837500%, S64=4.762500%, q_rel_64=0.538374088, delta=7.075000pp. Frozen branch: still solver-unresolved.
+
+rel255_paired_helmert_zscore:
+{
+  "support_hash": "845fc12e427ccb65980b176fc70335c1fbd8fd248d8a2705750f9c2636af2e3a",
+  "test_hash": "33d5529e6673c8ced16ce1622ad3c0ae711a26f006ddfc22c705fc470d1375ca",
+  "support_labels_hash": "3c2c8976e417d87ef7900f1762cfa6ccd3102c21bf90340eb576be20a1f6cded",
+  "test_labels_hash": "3ec878cc71c6e7af0269b9f28ac14993dfd998608f65ba75486f511e34292057",
+  "dtype": "torch.float32"
+}
+{
+  "input_dtype": "torch.float32",
+  "solver_dtype": "torch.float64",
+  "roundtrip_bitwise_equal": true,
+  "support_hash": "0155bba740f810019a939fbe534da6d845c076fab9b1181670f08588fbe3a855",
+  "test_hash": "156554db22421cc64b7a8ec2ed894df4c0620336608ab744fbff7464f631ad33"
+}
+Initial fit: {"ce": 2.302585092994046, "accuracy": 0.10000000149011612}
+
+rel255_broken_helmert_zscore:
+{
+  "support_hash": "73cc6868693feea83cdea22a355a1473d8e08d439ac65f508b255c6939e2e602",
+  "test_hash": "b287678634b74d8bc2635a87007eb1bb702a55698fe56d54b99ddec78e01ef0b",
+  "support_labels_hash": "3c2c8976e417d87ef7900f1762cfa6ccd3102c21bf90340eb576be20a1f6cded",
+  "test_labels_hash": "3ec878cc71c6e7af0269b9f28ac14993dfd998608f65ba75486f511e34292057",
+  "dtype": "torch.float32"
+}
+{
+  "input_dtype": "torch.float32",
+  "solver_dtype": "torch.float64",
+  "roundtrip_bitwise_equal": true,
+  "support_hash": "66fdec23df3610e72342878a4f63a72f2371f7943f703dbc2eb9007a1694d429",
+  "test_hash": "90197aebff6a0f9a8381a2e4e8aea4c4e52b3ad7557485a7b2f1f051a0f2909d"
+}
+Initial fit: {"ce": 2.302585092994046, "accuracy": 0.10000000149011612}
+
+Both original H05-C float32 arms reproduced exactly, including all metrics, fit diagnostics, hashes and statistics, before the corresponding double fit. Final float32 feature matrices were hashed, then cast only; double-to-float32 roundtrips bitwise equal. All historical online/state/provenance checks passed. No optimizer/iteration/representation change.
+
+
+Interpretation: simply using double solver arithmetic at the same fixed2000iteration budget did not achieve adequate support fit or the <=1e-6 stationary-gradient criterion. Pairedfit68.45% andgrad_inf1.9787e-3 require branchC,not a separability-limit conclusion. Brokenfit76.35%,grad_inf1.0496e-3 is also unresolved;the+7.075pp contrast does not close a pairing/representation gate. q=.538374 is descriptive only. No optimizer tuning,iterations,whitening,newrepresentation,classprototypes,counts orseeds added;await research-lead review.
+
+Integrity: same state entering arms;allparameters/buffers/prototypes/modulemodes/CPU-CUDA RNG/preexistinggradients unchanged;anchorlabelsunused;support-only statistics;testevaluationonly;allfeatures,statistics,losses,logits,parameters,gradients finite. Known NVML initialization warnings retained in train.log;no SVD warning/nonfinite/failure. Compact evidence `research_log/H05D/gate/` (RESULTS.md,verification.json,fullrawfinal/rounds/provenance receipts,tests,meta,run.sh,train.log). Original checkpoints remain `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260918-043934-h05d-precision`.

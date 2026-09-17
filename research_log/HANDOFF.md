@@ -1,3 +1,5 @@
+# Latest state — H05-D complete, 2026-09-18 04:42 +08
+Source9085f01/run20260918-043934-h05d-precision exit0;33tests pass. Entire H05C float32 results exact reproduced before doublefits;finalsupport/test/labelhashes exact,castbackbitwise. All10online/state/RNG/modes/grad exact. Paired/broken fit68.45/76.35,missing11.8375/4.7625,grad_inf.00197867/.00104956,both2000cap => C STILL SOLVER-UNRESOLVED. q.538374088 delta7.075. H05D/gate+BRIDGE;awaitlead,no furtheroptimizer/representation/iteration changes.20minheartbeat active.
 # Latest state — H05-C complete, 2026-09-18 03:30 +08
 Source8a6cae2/run20260918-032735-h05c-helmert exit0;32tests pass. Helmert identities/reconstruction/logitequivalence pass;all10online/rawsupport/provenance/permutations/Grams/state/RNG/modes/grad exact. Paired/broken fit68.70/76.00 missing11.7875/4.8875 grad_inf.00125634/.00191305,both2000cap=>OPTIMIZATION UNRESOLVED. q.536100057 delta6.9. Removedenergy9.37e-16support/5.31e-15test;paired255zscore rank109eps32/255eps64 condition4185/57284. H05C/gate+BRIDGE;awaitlead,no float64training/iterations/prototypecompression.20minheartbeat active.
 # Latest state — H05-B complete, 2026-09-18 02:22 +08

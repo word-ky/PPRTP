@@ -1,0 +1,12 @@
+{
+  "all_ten_online_exact": true,
+  "h05c_entire_historical_output_exact": true,
+  "precast_features_exact": true,
+  "fp64_only_cast_roundtrip_exact": true,
+  "state_rng_modes_gradients_unchanged": true,
+  "R64": 11.837500259280205,
+  "S64": 4.762499984353781,
+  "q_rel_64": 0.5383740879718114,
+  "delta_rel_64": 7.075000274926424,
+  "verdict": "still solver-unresolved"
+}
