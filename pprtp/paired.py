@@ -33,7 +33,7 @@ def prepare_paired(root,split,oracle_indices,support_indices,anchor_indices=None
     return anchors,support,receipt
 
 
-def procrustes(a,reference,identity=False):
+def procrustes(a,reference,identity=False,rank_diagnostics=False):
     # Double precision SVD; mapped features retain the original float32 dtype.
     x=a.detach().double(); y=reference.detach().double()
     mx=x.mean(0); my=y.mean(0); xc=x-mx; yc=y-my
@@ -50,6 +50,16 @@ def procrustes(a,reference,identity=False):
     info=dict(centered_residual_before=before.item(),centered_residual_after=after.item(),
         raw_residual_before=(x-y).norm().item(),relative_residual_reduction=(1-after/before).item() if before.item() else 0.,
         orthogonality_error_double=ortho.item(),orthogonality_error_applied=(transform[1].T@transform[1]-torch.eye(x.shape[1],device=a.device)).norm().item())
+    if rank_diagnostics:
+        if identity:
+            s=torch.linalg.svdvals(xc.T@yc)
+        assert torch.isfinite(s).all()
+        tolerance=x.shape[1]*torch.finfo(x.dtype).eps*s.max()
+        nonzero=s[s>tolerance]
+        info['rank']=dict(centered_rank_ceiling=min(x.shape[1],len(x)-1),
+            effective_rank=len(nonzero),tolerance=tolerance.item(),
+            tolerance_rule='feature_dim * float64_epsilon * largest_singular_value',
+            largest_singular_value=s.max().item(),smallest_nonzero_singular_value=nonzero.min().item() if len(nonzero) else 0.)
     return transform,info
 
 
@@ -73,11 +83,16 @@ def break_pairs(a,client_id):
         multiset_bitwise_unchanged=True)
 
 
-def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=False,max_iter=100,expected_alignment=None,audit=False):
+def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=False,max_iter=100,expected_alignment=None,audit=False,rank_diagnostics=False):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(head.state_dict().values()),
             prototypes=[tensor_hash([c.protos[k] for k in sorted(c.protos)]) for c in clients])
+    def gradient_state():
+        return [[None if p.grad is None else tensor_hash([p.grad]) for p in module.parameters()]
+                for module in [head]+[c.model for c in clients]]
+    gradients_before=gradient_state() if rank_diagnostics else None
+    ranks=[]
     before=state(); modes=[[m.training for m in c.model.modules()] for c in clients]
     cpu=torch.get_rng_state().clone(); devices=list(range(torch.cuda.device_count())) if torch.cuda.is_available() else []
     cuda=torch.cuda.get_rng_state_all() if devices else []
@@ -89,7 +104,9 @@ def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=
             if broken and i:
                 a,receipt=break_pairs(a,i)
                 permutations.append(dict(client=i,**receipt))
-            t,d=procrustes(a,anchor_features[0],identity=i==0)
+            t,d=procrustes(a,anchor_features[0],identity=i==0,rank_diagnostics=rank_diagnostics)
+            if rank_diagnostics:
+                ranks.append(d.pop('rank'))
             d['transform_hash']=tensor_hash(t); transforms.append(t); diagnostics.append(d)
             z,y=features(c,support[i]); zz.append(transform(z,t)); yy.append(y)
         if expected_alignment is not None:
@@ -111,6 +128,10 @@ def analyze_paired(clients,head,anchors,support,test,tensor_hash,metrics,broken=
     result=dict(metrics={k:sum(v[k] for v in values)/len(values) for k in ('seen','missing','all','macro')},
         per_client=values,fit=fit,alignment=diagnostics,state_before=before,state_after=state(),
         rng_cpu_unchanged=True,rng_cuda_unchanged=True,module_modes_unchanged=True,anchor_labels_used=False)
+    if rank_diagnostics:
+        assert gradient_state()==gradients_before
+        result['rank_diagnostics']=ranks
+        result['existing_gradients_unchanged']=True
     if broken:
         result['permutations']=permutations
     return result
