@@ -183,3 +183,35 @@ All H03-A isolation requirements remain active:
 Append `CODEX REPORT H03-B` with STATUS, source SHA, exact commands/run IDs, tests, frozen provenance hashes, permutation receipts, paired reproduction, both fit diagnostics, both metric tables, residual/orthogonality diagnostics, `q_paired`, `q_broken`, `delta_pair`, state/RNG equivalence, artifact locations, and a 3–5 sentence interpretation following the frozen branch.
 
 Do **not** implement anchor-budget compression, random projections, whitening/CORAL, affine/nonlinear maps, new online losses, seeds1/2, or publication-scale experiments in H03-B. Await research-lead review.
+## CODEX REPORT H03-B — DONE (2026-09-17 19:45 +08)
+
+STATUS: DONE. Source `d12a5012a52d2164201c802e7f010acd0ca8e761`; run `20260917-194253-h03b-pairbreak`, release `20260917-194234-h03b`, exit0. Seed0/round2 only; both heads100% fit; **predeclared branch: intermediate**. No compression, projections, CORAL/whitening, affine/nonlinear maps, new online losses or seed sweep.
+
+Files: parameterized `fit_linear` max_iter (default100 unchanged), matched-arm extension in `pprtp/paired.py` and `pprtp/run.py`, permutation unit test in `tests/test_paired.py`, `scripts/report_h03b.py`. Each diagnostic starts from identical frozen online state and restores all state/RNG/modes. Both heads zero initialized with identical full-batch LBFGS lr1(default),strong_wolfe,max_iter500,tolerance_grad1e-9,tolerance_change1e-12,no regularizer.500 was fixed by lead, not chosen from results.
+
+Exact commands (project root; AUTODL_CONFIG_PATH=.autodl/config.json):
+```powershell
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+./scripts/autodl-deploy.ps1 -Tag h03b
+./scripts/autodl-run.ps1 -Name h03b-pairbreak -Cmd 'PPRTP_SOURCE_SHA=d12a5012a52d2164201c802e7f010acd0ca8e761 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 2 --pair-breaking-probe'
+D:\anaconda3\python.exe scripts/report_h03b.py research_log/H03B/gate
+```
+
+21 tests pass locally/remotely; original20 preserved. New test proves true deterministic permutations, changed row identity, bitwise multiset equality via inverse permutation, and≥99% displacement. Actual independent nonreference seeds314159+i (i1..9), fixed-point counts `[1,0,1,3,0,1,0,3,1]`, so99.7–100% displaced. Every permutation and SHA256 is saved in raw round2 JSON; hashes/counts also tabulated in RESULTS.md. Client0 remains identity. Only anchor rows used for fitting R_i are permuted; support labels/features/test order are untouched. Anchor vectors/count/images/marginals and communication payload are identical across arms.
+
+Frozen provenance loaded verbatim, with no resampling: anchor hash `1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125`; H02-E support hash `2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073`. Index receipts exactly equal H03-A. Train/oracle/support exclusions remain intact, no test-fitting or anchor-label use. Paired Procrustes diagnostics including every transform hash reproduce H03-A **exactly**, asserted before head fitting. Both H02-A online rounds' client/prototype/server hashes and ordinary metrics match exactly; both arms preserve client parameters/buffers, server, prototypes, module modes and CPU/CUDA RNG. All features/SVD factors/transforms/losses/gradients/logits/parameters finite.
+
+Round2 accuracy %, mean over10 clients:
+
+| Arm | Seen | Missing | All | Macro | Fit CE before→after | Fit accuracy before→after | LBFGS iter/eval |
+|---|---:|---:|---:|---:|---|---|---|
+| paired | 31.25 | 28.8250 | 29.3100 | 29.3100 | 2.30258393→1.13248799e-9 | 10%→100% | 210/217 |
+| pair_broken | 48.70 | 8.2625 | 16.3500 | 16.3500 | 2.30258393→3.27825478e-9 | 10%→100% | 149/156 |
+
+Both exceed≥95% training-fit threshold; no optimizer-limited branch. Reference B=.0875%,O=31.45% reused. **q_paired=.916301308; q_broken=.260661614; delta_pair=20.5625pp** (raw,unclipped).
+
+Full per-client residual/orthogonality diagnostics in `research_log/H03B/gate/RESULTS.md`. Nonreference paired centered residuals before10.2858–15.4092, after5.5037–7.6498, reductions44.7481–53.9998%; pair-broken objective residuals before28.8160–31.4578, after24.9843–27.4047, reductions12.8142–13.7869%. These broken residuals are evaluated against the permuted pairing objective, as documented, not falsely treated as correctly paired residuals. Orthogonality max float64≤4.724e-12; applied float32≤4.558e-6,client0 exact identity.
+
+Per-client class counts/correct counts, fit head norms/hashes, transform hashes, complete permutations and state receipts: `research_log/H03B/gate/artifacts/experiment/fedgh_seed0/rounds.jsonl`; indices in `paired_anchors.json`; independent checks/ratios in `verification.json`. Remote originals/checkpoints under `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-194253-h03b-pairbreak`. No failed experiment/nonfinite values.
+
+Interpretation: correctly paired alignment has20.5625pp higher missing accuracy than pair-broken alignment with both support heads fit to100%, showing a large pairing-dependent contribution in this frozen diagnostic. However q_broken=.2607 exceeds the preregistered≤.20 threshold, while remaining below.50 and more than5pp from paired. Therefore neither decisive branch applies: the correct frozen conclusion is **intermediate**, with correspondence contributing strongly but some gain remaining without exact pairing. Do not overclaim exact pairing is necessary or marginal alignment alone sufficient from one seed/permutation family. Stop and await lead review without changing permutations, solver, anchor count or map family.

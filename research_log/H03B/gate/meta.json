@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-194253-h03b-pairbreak",
+  "releaseId": "20260917-194234-h03b",
+  "sessionName": "autodl-20260917-194253-h03b-pairbreak",
+  "command": "PPRTP_SOURCE_SHA=d12a5012a52d2164201c802e7f010acd0ca8e761 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 2 --pair-breaking-probe"
+}

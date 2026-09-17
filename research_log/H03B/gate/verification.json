@@ -1,0 +1,13 @@
+{
+  "paired": {
+    "state_rng_modes_unchanged": true,
+    "fit_adequate": true
+  },
+  "pair_broken": {
+    "state_rng_modes_unchanged": true,
+    "fit_adequate": true
+  },
+  "q_paired": 0.9163013082331706,
+  "q_broken": 0.26066161399345655,
+  "delta_pair": 20.56249991059303
+}
