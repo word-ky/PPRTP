@@ -32,3 +32,7 @@ Initial run20260917-150642-h02b-probe exited1 before probe: round1 server_head c
 
 ## 2026-09-17 15:10 +08 — H02-B completed
 Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round online historical and side-effect checks pass; all20prototype fits100%. R2 probe missing.0125% all12.88%;R10 missing0% all13.04%. Anchors can be fit, missing-class test recognition remains absent. Initial record tuple/list mismatch and transient SSH deploy timeout repaired minimally; failed log preserved. Compact results and receipts under research_log/H02B; BRIDGE DONE. Await lead next task; no H02-C.
+
+[2026-09-17T16:14:16.1948714+08:00] Fetch blocked by D: zero free bytes. Evicted only ignored redundant local remote_runs/20260917-000608-h01b-smoke/artifacts/experiment/fedproto_seed0/client0.pt after exact local/remote SHA256 match39f1143bbf0421735a5d8eeea31eac80b9d5586e94f9a2c32d5adba3794f44e7. Original retained at /home/wenchang/asdasdsad/wjq/PPRTP/runs/20260917-000608-h01b-smoke/artifacts/experiment/fedproto_seed0/client0.pt; restores3.54MB for Git. No unique evidence deleted.
+
+[2026-09-17T16:16:13.9503219+08:00] H02-C implemented as --oracle-head side channel: train-only calibration100/class excluding all seed0 client indices, RNG314159. Zero-copy-initialized linear individual/shared LBFGS fixed settings; analysis rounds1/2/10. Hash all model parameters/buffers, server and per-client prototypes; preserve module training flags and CPU/CUDA RNG. Historical H02-A exact online check every round; no H02-B refit.

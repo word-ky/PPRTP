@@ -10,9 +10,18 @@ def broadcast(head, clients):
 
 
 def fit_probe(head, clients):
-    probe=copy.deepcopy(head)
     x=torch.stack([c.protos[k].detach() for c in clients for k in sorted(c.protos)])
     y=torch.tensor([k for c in clients for k in sorted(c.protos)],device=x.device)
+    return fit_linear(head,x,y)
+
+
+def fit_linear(head,x,y,zero=False):
+    probe=copy.deepcopy(head)
+    x=x.detach()
+    if zero:
+        with torch.no_grad():
+            probe.weight.zero_()
+            probe.bias.zero_()
     optimizer=torch.optim.LBFGS(probe.parameters(),line_search_fn='strong_wolfe',
         max_iter=100,tolerance_grad=1e-9,tolerance_change=1e-12)
     def score():

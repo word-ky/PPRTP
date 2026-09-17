@@ -16,6 +16,7 @@ from flcore.trainmodel.models import FedAvgCNN, BaseHeadSplit
 from pprtp.client import H01Client, aggregate, prototype_bank
 from pprtp.data import prepare
 from pprtp.fedgh import broadcast, train_server, fit_probe
+from pprtp.oracle import calibration, analyze
 
 
 def tensor_hash(tensors):
@@ -105,6 +106,9 @@ def run(cfg, mode, seed):
         initial_state_sha256=initial_hash,split_sha256=hashlib.sha256((out/'split.json').read_bytes()).hexdigest())
     (out/'metadata.json').write_text(json.dumps(metadata,indent=2))
     testloader=DataLoader(test,batch_size=128,shuffle=False)
+    if cfg.oracle_head:
+        oracle_data,oracle_receipt=calibration(cfg.data,split)
+        (out/'oracle_calibration.json').write_text(json.dumps(oracle_receipt,indent=2))
     if mode == 'fedgh':
         server_head=copy.deepcopy(args.model.head)
         server_optimizer=torch.optim.SGD(server_head.parameters(),lr=.01)
@@ -174,11 +178,15 @@ def run(cfg, mode, seed):
                     communication_bytes=dict(upload_vectors=20*512*4,upload_labels=20*8,
                         downloaded_head_per_client=sum(p.numel()*p.element_size() for p in server_head.parameters()),
                         downloaded_head_all_clients=len(clients)*sum(p.numel()*p.element_size() for p in server_head.parameters())))
-            if mode == 'fedgh' and cfg.probe_head:
+            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head):
                 historical=Path('research_log/H02A/full/artifacts/experiment')/f'fedgh_seed{seed}'/'rounds.jsonl'
                 old=json.loads(historical.read_text().splitlines()[r])
                 for key in ('client_model_hashes','prototype_bank_hash','metrics','server_head'):
                     assert json.loads(json.dumps(record[key]))==old[key], f'H02-A online mismatch: round {r+1}, {key}'
+                record['historical_online_exact']=True
+            if mode == 'fedgh' and cfg.oracle_head and r+1 in (1,2,10):
+                record['oracle']=analyze(clients,server_head,oracle_data,test,tensor_hash,metrics)
+            if mode == 'fedgh' and cfg.probe_head:
                 online_before=[tensor_hash(c.model.state_dict().values()) for c in clients]
                 server_before=tensor_hash(server_head.state_dict().values())
                 probe,info=fit_probe(server_head,clients)
@@ -237,6 +245,7 @@ def main():
     parser.add_argument('--seen-lamda',type=float,default=.002)
     parser.add_argument('--scale',type=float,default=10.)
     parser.add_argument('--probe-head',action='store_true')
+    parser.add_argument('--oracle-head',action='store_true')
     cfg=parser.parse_args()
     torch.set_num_threads(1)
     torch.backends.cudnn.benchmark=False
