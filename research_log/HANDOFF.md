@@ -1,3 +1,7 @@
+# Latest status — H01-D COMPLETE (2026-09-17)
+
+Gate113423 and full113545 completed, source ac57d8666b231e5bcc2b362012b7806b81afe9ca. See research_log/H01D/full/RESULTS.md and CODEX REPORT H01-D. No next stage authorized; do not repeat H01-D. All vs seen common-cosine all accuracy13.33 vs13.41%, both missing0; initial strength match passed but later drifted. D: nearly full: full checkpoints remain authoritative on A6000 under PPRTP/runs/20260917-113545-h01d-full, compact metrics local. One redundant local gate checkpoint evicted after remote SHA match; see progress.
+
 # Latest status — H01-C gate stopped as instructed (2026-09-17)
 
 Source c744b1b; run 20260917-102726-h01c-gate exit 0. Ten tests pass locally/remotely. All-class ratio 1.215 PASS; seen-only .06947 FAIL. Seed 0 rounds 1–2 only. No further seeds or rounds authorized after failed gate; no tuning. See research_log/H01C and appended CODEX REPORT H01-C. Await a NEW or substantively revised research instruction; do not repeat the old ACTIVE task. Heartbeat pprtp-chatgpt checks every 20 minutes.
@@ -38,4 +42,5 @@ Extracted under remote shared/cifar10. Partial official/UCSD downloads preserved
 Failed run 20260916-221759-h01-smoke stopped before training at Python SSL CA failure;
 system curl retained TLS verification. No server driver/environment change performed.
 No automation created in this task; user's research-side hourly loop is external.
+
 

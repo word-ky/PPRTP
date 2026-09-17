@@ -202,3 +202,55 @@ No accuracy-driven hyperparameter search is allowed.
 ### Deliverable
 
 Append `CODEX REPORT H01-D` with source SHA, exact commands, tests, pairing gate, gradient-direction diagnostic, full accepted result table if the gate passes, owner-cosine trajectory, any suspicious behavior, and a concise recommendation. Do not independently start H02.
+
+---
+
+## CODEX REPORT H01-D — 2026-09-17 — DONE
+
+STATUS: DONE. Mandatory seed0 gate passed, followed by frozen seeds 0/1/2 for 10 rounds. No tuning and no H02 started.
+
+Source `ac57d8666b231e5bcc2b362012b7806b81afe9ca`; gate run `20260917-113423-h01d-gate`; full run `20260917-113545-h01d-full`; release `20260917-113355-h01d`; both exit 0 on A6000 CUDA0. Exact commands (workflow supplies output directory and source environment variable):
+
+```bash
+PPRTP_SOURCE_SHA=ac57d8666b231e5bcc2b362012b7806b81afe9ca bash scripts/run_h01.sh --seeds 0 --rounds 2 --seen-lamda 0.03498 --modes fedproto gpc_all_match gpc_seen_match
+PPRTP_SOURCE_SHA=ac57d8666b231e5bcc2b362012b7806b81afe9ca bash scripts/run_h01.sh --seeds 0 1 2 --seen-lamda 0.03498 --modes fedproto gpc_all_match gpc_seen_match
+```
+
+Both commands run the unit suite first. **11 tests passed locally and remotely**, including direct-autograd equivalence for the new same-tensor feature-gradient diagnostic, denominator sensitivity/invariance, and upstream training parity. Initial test attempt exposed a missing class_set in a tiny fixture; fixed the fixture with its actual labels [0,1], no production fallback. Added only explicit seen-lambda configuration and the observational diagnostic; old H01-C default .002 remains reproducible. FedProto lambda1 and all-GPC lambda.002 unchanged.
+
+**Fairness PASS for all seeds:** exact round1 client/prototype hashes; same initialization/split/batch protocol; all rerun FedProto model/prototype hashes match original H01-B at every one of the ten rounds. Gate/full seed0 use the same frozen code/configuration.
+
+Seed0 round2 client0 scaled base-gradient norms: FedProto .00947861932, all .0115169547, seen .0115170972. Seen/all = **1.0000123724**, within [0.8,1.25]. Local CE norm 1.21294522. On the SAME pre-update z and P, both unscaled feature gradients give cosine **.382520884**, all/seen norm ratio **2.33901405**, identically in all three arms. These are dL/dz diagnostics, distinct from gradients into base parameters; no repeated norm-matched cosine statistic is reported.
+
+Round2/10 common cosine (percent, mean ± sample SD, three seeds):
+
+| Round | Arm | Seen | Missing | All | Macro |
+|---|---|---:|---:|---:|---:|
+| 2 | FedProto | 67.0000 ± 4.8008 | 0 | 13.4000 ± .9602 | 13.4000 ± .9602 |
+| 2 | GPC all | 66.9667 ± 4.7435 | 0 | 13.3933 ± .9487 | 13.3933 ± .9487 |
+| 2 | GPC seen | 67.1500 ± 4.7752 | 0 | 13.4300 ± .9550 | 13.4300 ± .9550 |
+| 10 | FedProto | 66.8500 ± 5.5725 | 0 | 13.3700 ± 1.1145 | 13.3700 ± 1.1145 |
+| 10 | GPC all | 66.6667 ± 6.4161 | 0 | 13.3333 ± 1.2832 | 13.3333 ± 1.2832 |
+| 10 | GPC seen | 67.0500 ± 5.6340 | 0 | 13.4100 ± 1.1268 | 13.4100 ± 1.1268 |
+
+All head/L2 tables, per-client receipts, and owner-cosine mean/min/max for every seed at rounds 1/2/5/10: `research_log/H01D/full/RESULTS.md` and `full/receipts/`. Gate evidence: `research_log/H01D/gate/`. Missing accuracy is exactly zero in all common-cosine arms/seeds at rounds2/10; all and macro are consequently .2 times seen on this balanced test.
+
+**Important limitation: initial strength match does NOT generalize over seeds/time.** Client0 first-batch scaled base-gradient seen/all ratios:
+
+| Seed | Round2 | Round5 | Round10 |
+|---|---:|---:|---:|
+| 0 | 1.00001237 | 11.1710108 | 10.9947028 |
+| 1 | 5.64879324 | 18.7095172 | 18.0870266 |
+| 2 | 3.13287649 | 14.8852817 | 16.9231845 |
+
+The task specified the seed0 initial gate, so the full matrix was completed as authorized without dynamic matching or retuning. Later ratios concern diverged arm states; they do not constitute an identical-state causal comparison.
+
+Owner-cosine trajectories (means across the ten classes, seed0 example):
+- FedProto rounds1/2/5/10: .989057 / .908855 / .707849 / .731823.
+- All-GPC: .989057 / .908423 / .703667 / .691548.
+- Seen-GPC: .989057 / .908658 / .704649 / .693240.
+Other seeds show the same early decline; complete per-seed minima/maxima are in the table. It is not a monotonic collapse: FedProto partially recovers after round5. Prototype norms remain finite and nonzero. No experimental run failed.
+
+Operational failure: local D: ran out of space during result fetch. Remote run originals/checkpoints are intact. Stopped the incomplete transfer, removed only the incomplete downloaded checkpoint, and retrieved a compact metrics archive. To finish reporting, evicted one redundant local gate FedProto checkpoint ONLY AFTER SHA256 matched the authoritative remote copy (`05b8211057c0d60852d797b25e60a131d4b633f8732414d6068fc42676739952`); its location is in progress.md. All full-run checkpoints remain under the remote full-run directory. Metrics, split indices, hashes, logs and reports are preserved locally and published; no experiment was rerun due to transfer failure. D: remains nearly full and needs additional user-managed space before large downloads.
+
+Interpretation: missing-class prototypes change gradient direction, not just magnitude, but there is no useful missing-recognition advantage here; all-GPC is 0.0767 pp below seen-GPC in common-cosine all accuracy. This provides no support for the simple denominator thesis in the tested setting, while the large later/other-seed strength mismatch prevents claiming a fully magnitude-controlled causal rejection. The simultaneous coordinate-compatibility decline and missing-recognition loss remain correlational. Recommend research lead consider the already proposed shared-head control and explicitly account for this calibration limitation; do not move straight to relational modules. No new research stage has been launched.

@@ -1,0 +1,6 @@
+{
+  "runId": "20260917-113545-h01d-full",
+  "releaseId": "20260917-113355-h01d",
+  "sessionName": "autodl-20260917-113545-h01d-full",
+  "command": "PPRTP_SOURCE_SHA=ac57d8666b231e5bcc2b362012b7806b81afe9ca bash scripts/run_h01.sh --seeds 0 1 2 --seen-lamda 0.03498 --modes fedproto gpc_all_match gpc_seen_match"
+}
