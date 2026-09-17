@@ -20,7 +20,8 @@ from pprtp.oracle import calibration, analyze
 from pprtp.owner_probe import provenance, analyze_owner
 from pprtp.heldout import prepare_heldout
 from pprtp.paired import prepare_paired, analyze_paired
-from pprtp.anchor_count import analyze_counts
+from pprtp.anchor_count import analyze_counts,prefix
+from pprtp.relation import analyze_relation
 from pprtp.cross_seed import prepare_cross_seed,analyze_cross_seed
 
 
@@ -111,10 +112,10 @@ def run(cfg, mode, seed):
         initial_state_sha256=initial_hash,split_sha256=hashlib.sha256((out/'split.json').read_bytes()).hexdigest())
     (out/'metadata.json').write_text(json.dumps(metadata,indent=2))
     testloader=DataLoader(test,batch_size=128,shuffle=False)
-    if cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe:
+    if cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe:
         oracle_indices=json.loads(Path('research_log/H02C/full/artifacts/experiment/fedgh_seed0/oracle_calibration.json').read_text())['indices']
         saved_support=json.loads(Path('research_log/H02E/full/artifacts/experiment/fedgh_seed0/heldout_owner_support.json').read_text())
-        saved_anchors=json.loads(Path('research_log/H03A/gate/artifacts/experiment/fedgh_seed0/paired_anchors.json').read_text()) if (cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe) else None
+        saved_anchors=json.loads(Path('research_log/H03A/gate/artifacts/experiment/fedgh_seed0/paired_anchors.json').read_text()) if (cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe) else None
         anchors,paired_support,paired_receipt=prepare_paired(cfg.data,split,oracle_indices,saved_support['indices'],
             anchor_indices=saved_anchors['indices'] if saved_anchors else None)
         if saved_anchors:
@@ -204,12 +205,18 @@ def run(cfg, mode, seed):
                     communication_bytes=dict(upload_vectors=20*512*4,upload_labels=20*8,
                         downloaded_head_per_client=sum(p.numel()*p.element_size() for p in server_head.parameters()),
                         downloaded_head_all_clients=len(clients)*sum(p.numel()*p.element_size() for p in server_head.parameters())))
-            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe or cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.cross_seed_probe):
+            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe or cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.cross_seed_probe):
                 historical=Path('research_log/H02A/full/artifacts/experiment')/f'fedgh_seed{seed}'/'rounds.jsonl'
                 old=json.loads(historical.read_text().splitlines()[r])
                 for key in ('client_model_hashes','prototype_bank_hash','metrics','server_head'):
                     assert json.loads(json.dumps(record[key]))==old[key], f'H02-A online mismatch: round {r+1}, {key}'
                 record['historical_online_exact']=True
+            if mode == 'fedgh' and cfg.relation_probe and r+1==10:
+                subset,receipt=prefix(anchors,paired_receipt['indices'],256)
+                paired=analyze_relation(clients,server_head,subset,paired_support,test,tensor_hash,metrics)
+                broken=analyze_relation(clients,server_head,subset,paired_support,test,tensor_hash,metrics,broken=True)
+                assert paired['state_before']==broken['state_before'] and paired['gram']==broken['gram']
+                record['relation_probe']=dict(rel256_paired=paired,rel256_broken=broken,anchor_receipt=receipt)
             if mode == 'fedgh' and cfg.cross_seed_probe and r+1==10:
                 record['cross_seed_probe']=analyze_cross_seed(clients,server_head,cross_anchors,cross_support,test,
                     tensor_hash,metrics,cross_receipt['anchor_indices'])
@@ -316,6 +323,7 @@ def main():
     parser.add_argument('--convexity-probe',action='store_true')
     parser.add_argument('--anchor-count-probe',action='store_true')
     parser.add_argument('--cross-seed-probe',action='store_true')
+    parser.add_argument('--relation-probe',action='store_true')
     cfg=parser.parse_args()
     torch.set_num_threads(1)
     torch.backends.cudnn.benchmark=False
