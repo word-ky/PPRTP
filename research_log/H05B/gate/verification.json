@@ -1,0 +1,12 @@
+{
+  "all_ten_online_exact": true,
+  "provenance_permutations_gram_exact": true,
+  "state_rng_modes_gradients_unchanged": true,
+  "Rz": 12.0125000923872,
+  "Sz": 4.924999959766865,
+  "q_rel_z": 0.5463331480335281,
+  "delta_rel_z": 7.087500132620335,
+  "paired_fit_adequate": false,
+  "broken_fit_adequate": false,
+  "verdict": "optimization remains unresolved after fixed conditioning"
+}

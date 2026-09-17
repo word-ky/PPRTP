@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-021953-h05b-conditioning",
+  "releaseId": "20260918-021930-h05b",
+  "sessionName": "autodl-20260918-021953-h05b-conditioning",
+  "command": "PPRTP_SOURCE_SHA=c8c5c2ec405f4134a709f45df63c7cdf854c6d9a bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --conditioning-probe"
+}
