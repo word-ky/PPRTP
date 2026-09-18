@@ -1,0 +1,6 @@
+{
+  "runId": "20260919-022005-h11c-full-pairbreak",
+  "releaseId": "20260919-021830-h11c",
+  "sessionName": "autodl-20260919-022005-h11c-full-pairbreak",
+  "command": "PPRTP_SOURCE_SHA=b8c51419ced3cb35aedd920cf89236ab558731ee bash scripts/run_h01.sh --modes fedgh --seeds 0 1 2 --rounds 10 --full-data --full-pair-probe"
+}

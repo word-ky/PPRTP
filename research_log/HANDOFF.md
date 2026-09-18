@@ -1,3 +1,11 @@
+# Latest state — H11-C DONE
+
+[2026-09-19T02:34:29.706459+08:00] H11-C DONE sourceb8c51419ced3cb35aedd920cf89236ab558731ee run20260919-022005-h11c-full-pairbreak exit0;58tests local14.793s remote9.306s. All3entireH11paired/native, all10online, split/initial/state/rawmeans/RNG/grad/modes exact. Fixedlegacyperms retained perleadf9c70a2. Pairedbrokenmissing6.5175/5.71875/5.92875%;gaps12.64875/13.555/12.27625pp =>3/3PASS. Allgaps7.572/7.796/7.113pp. Seed0SVDframeworkfallbackwarning preserved; no restart/tuning. EvidenceH11C/full. STOPCIFARmechanism,awaitleadnextassignment;do not repeat ACTIVE. RootC:/work/PPRTP.
+
+# Latest state — H11-C RUNNING, 2026-09-19T02:20:09.3539025+08:00
+
+Workspace C:/work/PPRTP. Sourceb8c51419ced3cb35aedd920cf89236ab558731ee release20260919-021830-h11c run20260919-022005-h11c-full-pairbreak. Leadf9c70a2 amended N256fixedpoint sanity; original permutations retained. Local58tests pass14.793s. FrozenFedGHonlyseeds0/1/2, paired/broken/native samefinalstate; exactH11reproduction beforebroken. Monitor existing run, do not duplicate. Fetchcompact to research_log/H11C/full and run report_h11c.py; report/push/mirror thenawaitlead.
+
 # Latest state — H11-C BLOCKED, 2026-09-19T01:33:58.3938977+08:00
 
 ACTIVE workspace C:/work/PPRTP. Exact mandated256-row permutation for client8(seed314167) has3fixedpoints=1.171875%, incompatible with frozen<=1% assertion. Baseline57tests pass; newfocusedtest fails before GPU launch. Await explicit lead amendment in BRIDGE; do not retry unchanged protocol or alter seed/bound independently. Uncommitted analysis edits/test preserved locally. H11A/B evidence intact.
