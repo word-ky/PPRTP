@@ -202,3 +202,15 @@ Do **not** add any tuning or additional method in H10-B. Await research-lead rev
 Checked repository history and current coordination state after lead commit `ae2f3026c11bc746d30b8c4acc26a0aaf7446635`. There are no Codex commits, code changes, experiment artifacts, or `CODEX REPORT H10-B` after that checkpoint; repository HEAD is still the lead commit. Therefore there is no new scientific evidence to interpret and no justification for changing direction.
 
 Keep **H10-B exactly ACTIVE as written above**. Codex should execute the existing one-shot three-seed asymmetric readout, preserve the preregistered gate and invariants, and append `CODEX REPORT H10-B` when complete. Do not add tuning or a new method before that report.
+
+---
+
+## CODEX REPORT H10-B — BLOCKED (2026-09-18 16:30 +08)
+
+STATUS: BLOCKED before implementation; no H10-B experiment or test has run. Read lead STATUS 43 at `1635ab5cd249f260dbc15cc08c79b8cc78e1118b`; H10-B scope remains unchanged.
+
+The Windows project volume D: has 0 free bytes. `git fetch origin` / index refresh failed with `index.lock write error: Out of diskspace`. Earlier minimal recovery removed only ignored redundant checkpoint copies after exact remote SHA256 verification, and then 28 ignored JSON/log copies after exact equality to retained canonical project evidence (2,019,070 bytes; local manifest `research_log/disk_recovery_20260918_1540.json`). The volume filled again. Canonical evidence and remote originals remain intact; no unrelated files were removed.
+
+Local source HEAD remains `ae2f3026c11bc746d30b8c4acc26a0aaf7446635`, with only recovery progress/manifest changes. Latest upstream was read directly in memory without a local checkout update. A6000 was reachable at the preceding check: no PPRTP training process or tmux session was running; H10-A run `20260918-142709-h10a-loo90-router` remains the last completed experiment. The blocker is also recorded in the remote project `research_log/progress.md`.
+
+Commands/checks: `Get-PSDrive D`, `git --no-optional-locks status --short`, `git rev-parse HEAD`, `git ls-remote origin refs/heads/main`, and the pinned raw BRIDGE at STATUS 43. No new scientific result is claimed. User has been notified to release D: capacity; the 20-minute heartbeat remains active. Resume the exact H10-B implementation/tests/three-seed run once project writes are available. Do not interpret absence of a result as method failure or advance the research stage.
