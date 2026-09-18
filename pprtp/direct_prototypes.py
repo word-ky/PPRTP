@@ -19,7 +19,7 @@ def cosine_scores(z,bank):
     return scores
 
 
-def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,historical,aligned=True,expected_alignment=None,bank_output=None,construction_output=None,broken=False):
+def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,historical,aligned=True,expected_alignment=None,bank_output=None,construction_output=None,broken=False,num_classes=10):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(head.state_dict().values()),
@@ -65,7 +65,7 @@ def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,histori
         p=torch.cat(pp);labels=torch.cat(ll);counts=torch.cat(nn)
         if historical is not None: assert tensor_hash(ll)==historical['labels_hash'] and tensor_hash(nn)==historical['counts_hash']
         bank,classes=global_means(p,labels,counts)
-        assert classes.tolist()==list(range(10)) # bank row c is explicitly global class c
+        assert classes.tolist()==list(range(num_classes)) # bank row c is explicitly global class c
         norms=bank.norm(dim=1);assert torch.isfinite(norms).all() and (norms>0).all()
         pooled=torch.cat(zz);pooled_labels=torch.cat(yy);receipts=[]
         for j,c in enumerate(classes.tolist()):
@@ -81,16 +81,16 @@ def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,histori
                 z,y=features(c,test)
                 if aligned: z=transform(z,transforms[i])
                 scores=cosine_scores(z,bank);pred=classes[scores.argmax(1)]
-                values.append(metrics(pred.cpu(),y.cpu(),c.class_set))
+                values.append(metrics(pred.cpu(),y.cpu(),c.class_set,num_classes=num_classes))
                 seen=torch.zeros_like(y,dtype=torch.bool)
                 for label in c.class_set: seen|=y==label
-                histograms.append(dict(client=i,overall=torch.bincount(pred,minlength=10).tolist(),
-                    seen=torch.bincount(pred[seen],minlength=10).tolist(),missing=torch.bincount(pred[~seen],minlength=10).tolist()))
+                histograms.append(dict(client=i,overall=torch.bincount(pred,minlength=num_classes).tolist(),
+                    seen=torch.bincount(pred[seen],minlength=num_classes).tolist(),missing=torch.bincount(pred[~seen],minlength=num_classes).tolist()))
         assert state()==before and gradients()==grads
     assert modes==[[m.training for m in c.model.modules()] for c in clients]
     assert torch.equal(cpu,torch.get_rng_state())
     assert all(torch.equal(a,b) for a,b in zip(cuda,torch.cuda.get_rng_state_all() if devices else []))
-    totals={k:[sum(h[k][j] for h in histograms) for j in range(10)] for k in ('overall','seen','missing')}
+    totals={k:[sum(h[k][j] for h in histograms) for j in range(num_classes)] for k in ('overall','seen','missing')}
     if construction_output is not None:
         construction_output.update(bank=bank.detach().clone(),transforms=transforms,raw_owners=raw_owners)
     if bank_output is not None: bank_output['bank']=bank.detach().clone()
@@ -102,7 +102,7 @@ def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,histori
         communication=dict(semantic_uplink_bytes=p.numel()*p.element_size()+labels.numel()*labels.element_size()+counts.numel()*counts.element_size(),
             anchor_uplink_bytes=len(clients)*len(anchors)*bank.shape[1]*bank.element_size() if aligned else 0,
             global_vectors_downlink_per_client=vector_bytes,global_vectors_downlink_total=vector_bytes*len(clients),
-            class_ids_downlink_bytes=0,class_order='fixed ascending 0..9; no separate IDs transmitted',
+            class_ids_downlink_bytes=0,class_order=f'fixed ascending 0..{num_classes-1}; no separate IDs transmitted',
             learned_head_downlink_per_client=sum(p.numel()*p.element_size() for p in head.parameters()),
             learned_head_downlink_total=len(clients)*sum(p.numel()*p.element_size() for p in head.parameters())),
         state_before=before,state_after=state(),rng_cpu_unchanged=True,rng_cuda_unchanged=True,

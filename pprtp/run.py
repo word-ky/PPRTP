@@ -30,9 +30,9 @@ def tensor_hash(tensors):
                                   for t in tensors)).hexdigest()
 
 
-def owner_compatibility(clients):
+def owner_compatibility(clients,num_classes=10):
     values = {}
-    for label in range(10):
+    for label in range(num_classes):
         owners = [c for c in clients if label in c.protos]
         if len(owners) == 2:
             values[label] = dict(owners=[c.id for c in owners], cosine=F.cosine_similarity(
@@ -48,10 +48,10 @@ def check_round_one(records):
         assert record['prototype_bank_hash'] == reference['prototype_bank_hash'], 'Round-1 prototype mismatch'
 
 
-def metrics(predictions, labels, seen):
-    count = torch.bincount(labels, minlength=10)
-    correct = torch.bincount(labels[predictions == labels], minlength=10)
-    mask = torch.zeros(10, dtype=torch.bool)
+def metrics(predictions, labels, seen,num_classes=10):
+    count = torch.bincount(labels, minlength=num_classes)
+    correct = torch.bincount(labels[predictions == labels], minlength=num_classes)
+    mask = torch.zeros(num_classes, dtype=torch.bool)
     mask[seen] = True
     return dict(seen=(correct[mask].sum()/count[mask].sum()).item(),
         missing=(correct[~mask].sum()/count[~mask].sum()).item() if (~mask).any() else None,
@@ -60,13 +60,13 @@ def metrics(predictions, labels, seen):
 
 
 @torch.no_grad()
-def evaluate(client, loader, protos, include_histograms=False):
+def evaluate(client, loader, protos, include_histograms=False,num_classes=10):
     client.model.eval()
     predictions = {key: [] for key in ("head", "cosine", "l2")}
     labels = []
     for x,y in loader:
         z = client.model.base(x.to(client.device))
-        bank, valid = prototype_bank(protos, 10, z)
+        bank, valid = prototype_bank(protos, num_classes, z)
         predictions['head'].append(client.model.head(z).argmax(1).cpu())
         cosine = F.normalize(z,dim=1) @ F.normalize(bank,dim=1).T
         l2 = (z[:,None,:]-bank[None,:,:]).square().mean(2)
@@ -74,40 +74,46 @@ def evaluate(client, loader, protos, include_histograms=False):
         predictions['l2'].append(l2.masked_fill(~valid[None], torch.inf).argmin(1).cpu())
         labels.append(y)
     labels = torch.cat(labels)
-    result={key: metrics(torch.cat(value), labels, client.class_set) for key,value in predictions.items()}
+    result={key: metrics(torch.cat(value), labels, client.class_set,num_classes=num_classes) for key,value in predictions.items()}
     if include_histograms:
         for key,value in predictions.items():
-            hist=torch.bincount(torch.cat(value),minlength=10)
+            hist=torch.bincount(torch.cat(value),minlength=num_classes)
             result[key].update(prediction_histogram=hist.tolist(),predicted_class_count=int((hist>0).sum()))
     return result
 
 
 def run(cfg, mode, seed):
+    num_classes=cfg.num_classes
     online=mode in ("pprtp_all_lag1","pprtp_seen_lag1")
     fedgh=mode=="fedgh" or online
     torch.manual_seed(seed)
     np.random.seed(seed)
     random.seed(seed)
     if cfg.full_data:
-        from pprtp.full_data import prepare_full
-        assert seed in (0,1,2) and cfg.clients==10 and cfg.k==2 and mode in ('local','fedproto','fedgh')
-        datasets,test,split,full_anchors=prepare_full(cfg.data,seed)
+        from pprtp.full_data import prepare_full,prepare_cifar100
+        assert cfg.clients==10 and mode in ('local','fedproto','fedgh')
+        if cfg.dataset=='CIFAR100':
+            assert seed==0 and num_classes==100 and cfg.k==20
+            datasets,test,split,full_anchors=prepare_cifar100(cfg.data)
+        else:
+            assert seed in (0,1,2) and num_classes==10 and cfg.k==2
+            datasets,test,split,full_anchors=prepare_full(cfg.data,seed)
     else:
         datasets, test, split = prepare(cfg.data, seed, cfg.clients, cfg.k, cfg.train_per_class, cfg.test_per_class)
     if cfg.full_pair_probe:
-        assert cfg.full_data and mode=='fedgh' and cfg.rounds==10
+        assert cfg.full_data and mode=='fedgh' and cfg.rounds==10 and num_classes==10
         h11=Path('research_log/H11A/full' if seed==0 else 'research_log/H11B/full')/'artifacts/experiment'/f'fedgh_seed{seed}'
         assert json.loads(json.dumps(split))==json.loads((h11/'split.json').read_text())
         h11_rounds=[json.loads(line) for line in (h11/'rounds.jsonl').read_text().splitlines()]
     out = Path(cfg.output) / f"{mode}_seed{seed}"
     out.mkdir(parents=True, exist_ok=True)
     (out/'split.json').write_text(json.dumps(split))
-    cnn = FedAvgCNN(in_features=3, num_classes=10, dim=1600)
+    cnn = FedAvgCNN(in_features=3, num_classes=num_classes, dim=1600)
     head = copy.deepcopy(cnn.fc)
     cnn.fc = torch.nn.Identity()
     args = SimpleNamespace(model=BaseHeadSplit(cnn,head).to(cfg.device),
-        algorithm=mode, mode=mode, scale=cfg.scale, dataset='Cifar10',device=cfg.device,
-        save_folder_name='items',num_classes=10,batch_size=cfg.batch_size,
+        algorithm=mode, mode=mode, scale=cfg.scale, dataset='Cifar100' if num_classes==100 else 'Cifar10',device=cfg.device,
+        save_folder_name='items',num_classes=num_classes,batch_size=cfg.batch_size,
         local_learning_rate=cfg.lr,local_epochs=cfg.local_epochs,few_shot=0,
         learning_rate_decay_gamma=1.,learning_rate_decay=False,
         lamda=(cfg.seen_lamda if mode=='gpc_seen_match' else
@@ -205,15 +211,15 @@ def run(cfg, mode, seed):
                 local_start=time.time()
                 client.train()
                 local_seconds.append(time.time()-local_start);local_steps.append(client.optimizer_steps)
-            compatibility=owner_compatibility(clients)
+            compatibility=owner_compatibility(clients,num_classes)
             protos=aggregate(clients)
-            # All ten classes covered by construction. Missing validity remains
+            # All global classes covered by construction. Missing validity remains
             # supported and unit-tested at the loss seam, but is not hidden here.
-            assert set(protos)==set(range(10))
-            bank=torch.stack([protos[c] for c in range(10)])
+            assert set(protos)==set(range(num_classes))
+            bank=torch.stack([protos[c] for c in range(num_classes)])
             if not torch.isfinite(bank).all() or (bank.norm(dim=1)<1e-12).any():
                 raise RuntimeError('Nonfinite or zero-norm prototype; H01 stop condition')
-            per_client=[evaluate(client,testloader,protos,include_histograms=cfg.full_data) for client in clients]
+            per_client=[evaluate(client,testloader,protos,include_histograms=cfg.full_data,num_classes=num_classes) for client in clients]
             summary={readout:{metric:float(np.mean([v[readout][metric] for v in per_client]))
                               for metric in ('seen','missing','all','macro')}
                       for readout in ('head','cosine','l2')}
@@ -226,7 +232,7 @@ def run(cfg, mode, seed):
                 prototype_norms=bank.norm(dim=1).tolist(),
                 uploaded_class_counts=[c.proto_counts for c in clients],
                 prototype_payload_bytes=dict(upload_vectors=sum(len(c.protos)*512*4 for c in clients),
-                    upload_counts=sum(len(c.protos)*8 for c in clients),download_vectors=cfg.clients*10*512*4),
+                    upload_counts=sum(len(c.protos)*8 for c in clients),download_vectors=cfg.clients*num_classes*512*4),
                 elapsed_seconds=time.time()-started)
             if fedgh:
                 if r == 0 and not cfg.full_data:
@@ -242,14 +248,14 @@ def run(cfg, mode, seed):
                     values['local_head_pre_server']=values.pop('head')
                     local_head=c.model.head
                     c.model.head=server_head
-                    values['global_head_post_server']=evaluate(c,testloader,protos,include_histograms=cfg.full_data)['head']
+                    values['global_head_post_server']=evaluate(c,testloader,protos,include_histograms=cfg.full_data,num_classes=num_classes)['head']
                     c.model.head=local_head
                 summary['local_head_pre_server']=summary.pop('head')
                 summary['global_head_post_server']={k:float(np.mean([v['global_head_post_server'][k] for v in per_client]))
                                                   for k in ('seen','missing','all','macro')}
                 record.update(server_head=server,broadcast=broadcast_receipt,
                     historical_round_one_paired=True if r==0 and not cfg.full_data else None,
-                    communication_bytes=dict(upload_vectors=20*512*4,upload_labels=20*8,
+                    communication_bytes=dict(upload_vectors=sum(len(c.protos) for c in clients)*512*4,upload_labels=sum(len(c.protos) for c in clients)*8,
                         downloaded_head_per_client=sum(p.numel()*p.element_size() for p in server_head.parameters()),
                         downloaded_head_all_clients=len(clients)*sum(p.numel()*p.element_size() for p in server_head.parameters())))
             if online:
@@ -535,7 +541,7 @@ def run(cfg, mode, seed):
             if cfg.full_data:
                 assert local_steps==[cfg.local_epochs*((len(d)+cfg.batch_size-1)//cfg.batch_size) for d in datasets]
                 record['local_optimizer_steps']=local_steps;record['local_training_seconds']=local_seconds
-                record['prediction_histograms']={key:[sum(v[key]['prediction_histogram'][c] for v in per_client) for c in range(10)] for key in per_client[0]}
+                record['prediction_histograms']={key:[sum(v[key]['prediction_histogram'][c] for v in per_client) for c in range(num_classes)] for key in per_client[0]}
                 record['predicted_class_counts']={key:sum(n>0 for n in hh) for key,hh in record['prediction_histograms'].items()}
                 if cfg.full_pair_probe:
                     for key in ('metrics','per_client','client_model_hashes','prototype_bank_hash','server_head','uploaded_class_counts','local_optimizer_steps'):
@@ -543,13 +549,14 @@ def run(cfg, mode, seed):
                 if mode=='fedgh' and r+1==cfg.rounds:
                     from pprtp.full_data import full_readouts
                     diagnostic_start=time.time()
-                    capture={} if cfg.full_pair_probe else None
-                    record['full_data_readout']=full_readouts(clients,server_head,full_anchors,datasets,test,tensor_hash,metrics,construction_output=capture)
+                    capture={} if cfg.full_pair_probe or num_classes==100 else None
+                    record['full_data_readout']=full_readouts(clients,server_head,full_anchors,datasets,test,tensor_hash,metrics,construction_output=capture,num_classes=num_classes)
                     if cfg.full_pair_probe:
                         historical=dict(h11_rounds[-1]['full_data_readout']);historical.pop('diagnostic_seconds')
                         assert record['full_data_readout']==historical, 'Entire H11 readout must reproduce before pair breaking'
+                    if cfg.full_pair_probe or num_classes==100:
                         from pprtp.direct_prototypes import analyze_direct
-                        broken=analyze_direct(clients,server_head,full_anchors,datasets,test,tensor_hash,metrics,None,broken=True)
+                        broken=analyze_direct(clients,server_head,full_anchors,datasets,test,tensor_hash,metrics,None,broken=True,num_classes=num_classes)
                         paired=record['full_data_readout']['pprtp_h07']
                         assert broken['anchor_feature_hashes']==capture['anchor_feature_hashes']
                         assert broken['state_before']==broken['state_after']==paired['state_before']
@@ -557,8 +564,8 @@ def run(cfg, mode, seed):
                         assert signature(broken)==signature(paired)
                         assert broken['alignment'][0]==paired['alignment'][0]
                         assert [p['fixed_points'] for p in broken['permutation_receipts']]==[1,0,1,2,1,0,2,3,1]
-                        record['full_pair_probe']=dict(pair_broken_h07=broken,h11_entire_reference_exact=True,
-                            all_online_rounds_exact=True,split_exact=True,anchor_feature_hashes_exact=True,
+                        record['full_pair_probe']=dict(pair_broken_h07=broken,h11_entire_reference_exact=True if cfg.full_pair_probe else None,
+                            all_online_rounds_exact=True if cfg.full_pair_probe else None,split_exact=True if cfg.full_pair_probe else None,anchor_feature_hashes_exact=True,
                             same_raw_means_counts_exact=True,paired_anchor_feature_hashes=capture['anchor_feature_hashes'])
                     record['full_data_readout']['diagnostic_seconds']=time.time()-diagnostic_start
                 record['elapsed_seconds']=time.time()-started
@@ -613,6 +620,8 @@ def main():
     parser.add_argument('--cross-seed-probe',action='store_true')
     parser.add_argument('--relation-probe',action='store_true')
     parser.add_argument('--conditioning-probe',action='store_true')
+    parser.add_argument('--dataset',choices=['CIFAR10','CIFAR100'],default='CIFAR10')
+    parser.add_argument('--num-classes',type=int,default=10)
     parser.add_argument('--full-data',action='store_true')
     parser.add_argument('--full-pair-probe',action='store_true')
     parser.add_argument('--group-refine-probe',action='store_true')

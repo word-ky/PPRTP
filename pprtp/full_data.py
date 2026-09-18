@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset
-from torchvision.datasets import CIFAR10
+from torchvision.datasets import CIFAR10,CIFAR100
 from pprtp.direct_prototypes import analyze_direct
 
 ANCHOR_SEED=161803
@@ -18,10 +18,10 @@ def reserve_anchors(size):
     return np.random.default_rng(ANCHOR_SEED).permutation(size)[:256].tolist()
 
 
-def allocate(labels,class_sets,anchors):
+def allocate(labels,class_sets,anchors,num_classes=10):
     labels=np.asarray(labels);reserved=np.zeros(len(labels),dtype=bool);reserved[anchors]=True
     rng=np.random.default_rng(ALLOCATION_SEED);indices=[[] for _ in class_sets];owners={}
-    for c in range(10):
+    for c in range(num_classes):
         owners[c]=[i for i,cs in enumerate(class_sets) if c in cs]
         available=rng.permutation(np.flatnonzero((labels==c)&~reserved))
         for i,part in zip(owners[c],np.array_split(available,len(owners[c]))):indices[i].extend(part.tolist())
@@ -54,10 +54,10 @@ def prepare_full(root,seed=0):
     return local,evaluation,split,public
 
 
-def full_readouts(clients,head,anchors,datasets,test,tensor_hash,metrics,construction_output=None):
+def full_readouts(clients,head,anchors,datasets,test,tensor_hash,metrics,construction_output=None,num_classes=10):
     capture={}
-    aligned=analyze_direct(clients,head,anchors,datasets,test,tensor_hash,metrics,None,construction_output=capture)
-    native=analyze_direct(clients,head,anchors,datasets,test,tensor_hash,metrics,None,aligned=False)
+    aligned=analyze_direct(clients,head,anchors,datasets,test,tensor_hash,metrics,None,construction_output=capture,num_classes=num_classes)
+    native=analyze_direct(clients,head,anchors,datasets,test,tensor_hash,metrics,None,aligned=False,num_classes=num_classes)
     assert aligned['state_before']==aligned['state_after']==native['state_before']==native['state_after']
     signature=lambda r:[(p['client'],p['label'],p['count'],p['raw_hash']) for p in r['local_prototypes']]
     assert signature(aligned)==signature(native)
@@ -73,3 +73,32 @@ def full_readouts(clients,head,anchors,datasets,test,tensor_hash,metrics,constru
         forward_examples=dict(anchor_per_client=[len(anchors)]*len(clients),prototype_refresh_per_client=[len(d) for d in datasets],
             pprtp_total=len(anchors)*len(clients)+sum(map(len,datasets)),matched_native_extra_refresh_total=sum(map(len,datasets))),
         same_final_state_exact=True,same_raw_means_counts_exact=True)
+
+
+OWNERSHIP_SEED=120100
+
+def cifar100_ownership():
+    order=np.random.default_rng(OWNERSHIP_SEED).permutation(100).tolist()
+    class_sets=[[] for _ in range(10)]
+    for j,label in enumerate(order):
+        class_sets[j%10].append(label);class_sets[(j+1)%10].append(label)
+    return [sorted(cs) for cs in class_sets],order
+
+
+def prepare_cifar100(root):
+    train=CIFAR100(root,train=True,download=True)
+    anchors=reserve_anchors(len(train.data)) # Reserve before accessing labels.
+    class_sets,order=cifar100_ownership()
+    split=allocate(np.asarray(train.targets),class_sets,anchors,num_classes=100)
+    split.update(dataset='CIFAR100',num_classes=100,ownership_seed=OWNERSHIP_SEED,
+        ownership_order=order,ownership_order_sha256=index_hash(order),class_sets_sha256=index_hash(class_sets))
+    assert len(train.data)==50000
+    test=CIFAR100(root,train=False,download=True);assert len(test.data)==10000
+    def images(ds,ii):
+        x=torch.from_numpy(ds.data[ii].copy()).permute(0,3,1,2).float()/255
+        return (x-.5)/.5
+    local=[TensorDataset(images(train,ii),torch.tensor(np.asarray(train.targets)[ii],dtype=torch.long)) for ii in split['train_indices']]
+    public=TensorDataset(images(train,anchors),torch.zeros(256,dtype=torch.long))
+    test_indices=list(range(len(test.data)));split.update(test_indices=test_indices,test_indices_sha256=index_hash(test_indices),test_count=len(test_indices))
+    evaluation=TensorDataset(images(test,test_indices),torch.tensor(test.targets,dtype=torch.long))
+    return local,evaluation,split,public
