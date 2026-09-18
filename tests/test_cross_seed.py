@@ -33,3 +33,14 @@ class CrossSeedTest(unittest.TestCase):
             receipts.append(r)
         self.assertEqual(len({r['anchor_sha256'] for r in receipts}),3)
         self.assertEqual(len({r['support_sha256'] for r in receipts}),3)
+
+    def test_seed12_exact_committed_provenance(self):
+        labels=np.frombuffer(Path('research_log/H04B/cifar10-train-labels.bin').read_bytes(),dtype=np.uint8)
+        for seed in (1,2):
+            sets,indices=partition(labels,seed)
+            receipt=construct_indices(labels,dict(class_sets=sets,train_indices=indices))
+            folder=Path('research_log/H04B/full/artifacts/experiment')/f'fedgh_seed{seed}'
+            self.assertEqual(receipt,json.loads((folder/'cross_seed_provenance.json').read_text()))
+            historical=json.loads((folder/'final.json').read_text())['cross_seed_probe']['paired_256_2000']['anchor_receipt']
+            self.assertEqual(receipt['anchor_indices'][:256],historical['indices'])
+            self.assertEqual(index_hash(receipt['anchor_indices'][:256]),historical['indices_sha256'])

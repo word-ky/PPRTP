@@ -122,3 +122,5 @@ Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round onl
 [2026-09-18T09:22:34.0149651+08:00] H07-A launched source8a241e689ea06132c739df2d015be608011f01c9 release20260918-092203-h07a run20260918-092219-h07a-local-source.
 
 [2026-09-18T09:24:58.285806] H07-A DONE source8a241e6/run20260918-092219-h07a-local-source exit0;40tests pass. H06Ccompleteexact,allonline/state/provenance exact. Ordinaryalignedmissing22.25/all23.39/seen27.95,native0;retmissing.957504 retall.970942 gain22.25,10classes=>Astrongordinarylocalclosure. Noextraheldoutsemantics;indexhash5fbbd599...,hierarchicalchecks pass,refresh2000forwardexamplesperarm. H07A/gate+BRIDGE;awaitlead.
+
+[2026-09-18T10:38:23.8821991+08:00] H07-B assigned6f4824b;41tests pass(prior40preserved). Seeds1/2 exact H04B provenance/N256 transforms checked before scoring, ordinary-local source only, matched aligned/native rawmeans/counts. No learnedhead reruns or analyze_direct changes. Reporting includes frozen per-seed gates and seed0 historical comparison.

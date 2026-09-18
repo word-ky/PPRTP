@@ -28,7 +28,10 @@ class LocalSourceTest(unittest.TestCase):
         for p in a['local_prototypes']:
             ds=local[p['client']];expected=ds.tensors[0][ds.tensors[1]==p['label']].mean(0)
             self.assertEqual(p['raw_hash'],tensor_hash([expected]));self.assertEqual(p['count'],100)
+        checked=analyze_direct(clients,clients[0].model.head,anchors,local,test,tensor_hash,metrics,None,expected_alignment=a['alignment'])
+        self.assertEqual(checked,a)
         b=analyze_direct(clients,clients[0].model.head,anchors,local,test,tensor_hash,metrics,None,aligned=False)
+        self.assertEqual([(p['client'],p['label'],p['count'],p['raw_hash']) for p in a['local_prototypes']],[(p['client'],p['label'],p['count'],p['raw_hash']) for p in b['local_prototypes']])
         self.assertTrue(torch.equal(rng,torch.get_rng_state()))
         for arm in (a,b):
             self.assertEqual(arm['state_before'],arm['state_after'])
