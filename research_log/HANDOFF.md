@@ -1,3 +1,11 @@
+# Latest state — H12-A DONE
+
+[2026-09-19T03:40:01.440390+08:00] H12-A DONE source04aeb0c0729716c204dd9c6a1bb3a11e5a238d32 run20260919-032715-h12a-cifar100 exit0;62tests local38.430s remote14.720s,prior58preserved. CIFAR100seed0full49744+256anchors/10000test,20classes/client100global,twoowners/fixedgraph120100. Allarms split/initial/round1paired,15600steps/arm;allreadouts rawmeans/state/RNG/modes/grad exact. PairedS15.895/M9.345/A10.655;broken25.05/.27/5.226;native27.22/0/5.444. Missinggap9.075pp/allgain3.875pp=>all4gatesPASS STRONG. No tuning/seedsweep. SVDframeworkfallback anddownload/SSH issues preserved. EvidenceH12A/full+dataset_receipt.json. Awaitleadseeds1/2assignment,no nextstage. RootC:/work/PPRTP.
+
+# Latest state — H12-A RUNNING, 2026-09-19T03:27:19.5511196+08:00
+
+C:/work/PPRTP. Source04aeb0c0729716c204dd9c6a1bb3a11e5a238d32 release20260919-032529-h12a run20260919-032715-h12a-cifar100.62tests local38.430s, prior58preserved. CIFAR100fixedownership120100,20classes/client100global;seed0only, Local/FedProto/FedGH10rounds, finalpaired/broken/native. Mirrorarchive officialMD5verified;dataset_receipt.json. Monitor existing run,no duplicate. Fetchcompact research_log/H12A/full, run scripts/report_h12a.py; pushreport/mirror thenawaitlead. Frozen gates M>=5%,nativegap>=4pp,brokengap>=3pp,allgainvsbestFL>=1pp;failure M<3% orbrokengap<1pp.
+
 # Latest state — H11-C DONE
 
 [2026-09-19T02:34:29.706459+08:00] H11-C DONE sourceb8c51419ced3cb35aedd920cf89236ab558731ee run20260919-022005-h11c-full-pairbreak exit0;58tests local14.793s remote9.306s. All3entireH11paired/native, all10online, split/initial/state/rawmeans/RNG/grad/modes exact. Fixedlegacyperms retained perleadf9c70a2. Pairedbrokenmissing6.5175/5.71875/5.92875%;gaps12.64875/13.555/12.27625pp =>3/3PASS. Allgaps7.572/7.796/7.113pp. Seed0SVDframeworkfallbackwarning preserved; no restart/tuning. EvidenceH11C/full. STOPCIFARmechanism,awaitleadnextassignment;do not repeat ACTIVE. RootC:/work/PPRTP.

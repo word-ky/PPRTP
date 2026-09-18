@@ -267,3 +267,81 @@ Interpretation is fixed:
 Do **not** add a new backbone, learned transport, routing/fusion, temperature/threshold tuning, more anchors, online PPRTP training, communication compression, or seed sweep in H12-A.
 
 Append `CODEX REPORT H12-A — DONE/PARTIAL/BLOCKED` with exact commands, source SHA, tests, run ID, compact result table, integrity receipts, and evidence paths.
+
+## CODEX REPORT H12-A — DONE: CIFAR100 seed0 passes all four frozen gates
+
+Source `04aeb0c0729716c204dd9c6a1bb3a11e5a238d32`; assignment `39c748d`; release `20260919-032529-h12a`; run `20260919-032715-h12a-cifar100`, A6000 GPU0, exit0. Started2026-09-19 03:27:19+08, finished03:37:20+08 (601s including tests/setup). No additional seeds or tuning. Checkpoints remain on server PPRTP/runs/20260919-032715-h12a-cifar100.
+
+Exact commands:
+```powershell
+D:/anaconda3/python.exe -m unittest discover -s tests -q
+D:/anaconda3/python.exe -m unittest discover -s tests -p test_cifar100.py -v
+./scripts/autodl-deploy.ps1 -Tag h12a
+./scripts/autodl-run.ps1 -Name h12a-cifar100 -Cmd "PPRTP_SOURCE_SHA=04aeb0c0729716c204dd9c6a1bb3a11e5a238d32 bash scripts/run_h01.sh --data /home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar100 --modes local fedproto fedgh --seeds 0 --rounds 10 --full-data --dataset CIFAR100 --num-classes 100 --k 20"
+D:/anaconda3/python.exe scripts/report_h12a.py research_log/H12A/full
+```
+
+Minimal code changes: `run.py` exposes num_classes(default10) in the main full-data training/evaluation/statistics path and selects narrow CIFAR100 loading. `full_data.py` parameterizes allocation and readout, adds the exact fixed ownership and CIFAR100 loader. `direct_prototypes.py` parameterizes bank row checks/metrics/histograms and class-order receipt. No old H01–H10 diagnostic algorithm, training loss, aggregation, transport, pairing rule or reference client changed. Pinned PFLlib is unchanged at0169ba7e412c9856a08bb3faefab1e35f538a3c1. `tests/test_cifar100.py` adds four focused tests; `scripts/report_h12a.py` independently verifies fetched evidence and fixedgates. Existing H11 evidence files are unchanged.
+
+Baseline58tests pass13.751s before edits. Final62tests pass38.430s locally and14.720s remotely, preserving all58. The four newtests cover 100class metrics/histograms/bank ordering, exact20classes/client/twoowners/fullcoverage/labelblindreservation, allthree readouts' rawmeans/state/RNG/grad/mode/label independence, and actual3arm100class entrypoint/fairness/communication. The first focused invocation had one fixture error (SimpleNamespace lacked eval); repaired only the test fixture to nn.Module, then all62 passed. No scientific failure was hidden.
+
+Dataset: official CIFAR100 Python archive mirrored at https://mindspore-website.obs.cn-north-4.myhuaweicloud.com/notebook/datasets/cifar-100-python.tar.gz;169001437bytes,MD5eb9058c3a382ffc7106e4002c42a8d85 exactly matches torchvision.CIFAR100.tgz_md5. Torchvision verified extracted50000train/10000test with download=False. Officialserver download timedout300s at42184000bytes; localofficial attempt timedout240s at36344000bytes. Partial files retained; resumedserver transfer stopped only after identical mirrorverified. TLSverification remainedenabled. Provenance in research_log/H12A/dataset_receipt.json.
+
+Frozen protocol exactly retained: seed0;10clients/20classes each/100globalclasses;ownershipseed120100 with positionj assignedtoj%10 and(j+1)%10;anchors256selectedby161803before labeluse;allocation110001;49744disjoint trainingexamples;10000test only for evaluation. PFLlibFedAvgCNN512D, classifier100outputs, SGDlr.01/no momentum/no decay,batch32,1localepoch,10rounds;FedGHserver one passlr.01. Allarms sameinitialstate/split and exactfirst-roundclient/prototype hashes. All30arm-rounds have156steps/client,15600steps/arm. Ordinary rawclassmeans/countweightedglobalbank and canonical centeredorthogonal Procrustes toclient0, directcosine; no temperatures/thresholds/readout selection added. Pairbreaking formula314159+clientID unchanged, exactfixedpoints[1,0,1,2,1,0,2,3,1]. Rawmeans/counts/model/server/prototype state/RNG/modes/gradients match acrossreadouts and anchorfeature multisets remainbitwise identical; no anchor/testlabels used for fitting.
+
+# H12-A CIFAR100 seed0 portability stress test
+
+| Arm | Seen % | Missing % | All % | Macro % | Aggregate classes |
+|---|---:|---:|---:|---:|---:|
+| local | 32.440000 | 0.000000 | 6.488000 | 6.488000 | 100 |
+| fedproto | 33.900000 | 0.000000 | 6.780000 | 6.780000 | 100 |
+| fedgh | 16.180000 | 0.000000 | 3.236000 | 3.236000 | 57 |
+| paired_h07 | 15.895000 | 9.345000 | 10.655000 | 10.655000 | 100 |
+| pair_broken_h07 | 25.050000 | 0.270000 | 5.226000 | 5.226000 | 100 |
+| native_control | 27.220000 | 0.000000 | 5.444000 | 5.444000 | 100 |
+
+Frozen verdict: STRONG.
+Missing paired-minus-broken: 9.075000 pp; paired-minus-native: 9.345000 pp; all gain vs best FedProto/FedGH: 3.875000 pp.
+Gates: {"missing_at_least5": true, "native_gap_at_least4": true, "broken_gap_at_least3": true, "all_gain_at_least1": true}
+
+Split/initialization/all-arm round1 hashes identical. Exact50000-index coverage:49744 disjoint clienttrain+256 label-blind anchors;10000 evaluation-only test.20classes/client,exactly2owners/class.
+Ownership classsets SHA256: d14fbe0d88f0f0bb958d201aa117d704c360ccce70219ee880f56a8488d3e652
+Ownership order SHA256: 39aa9e4178ffc4ac098e636d5bb7a93c45d1adc32813d7adfb29d29d83532271
+Anchor SHA256: 5ef034047d3bb6532a854912e7eccfc876d52d15053b0465d9f42741199983b4
+Split-file SHA256: a843a6d67be6cf1ced31ff3e344c42c6d7be27c8c93e163a5b242b0df6bcf7a0
+Classsets: [[3, 10, 11, 13, 23, 37, 41, 42, 44, 52, 60, 67, 70, 73, 78, 81, 94, 95, 97, 99], [3, 7, 10, 14, 22, 23, 35, 37, 42, 44, 52, 54, 62, 68, 76, 84, 91, 94, 95, 99], [1, 6, 7, 12, 14, 20, 22, 28, 33, 35, 54, 58, 62, 63, 68, 76, 82, 84, 86, 91], [1, 4, 6, 8, 12, 19, 20, 28, 30, 33, 36, 45, 46, 58, 63, 72, 75, 82, 86, 96], [4, 8, 19, 30, 32, 36, 39, 40, 43, 45, 46, 53, 61, 72, 75, 79, 80, 90, 93, 96], [0, 9, 15, 16, 21, 29, 32, 39, 40, 43, 53, 55, 61, 64, 69, 79, 80, 90, 92, 93], [0, 9, 15, 16, 17, 21, 26, 29, 34, 38, 48, 49, 51, 55, 59, 64, 66, 69, 71, 92], [2, 17, 18, 24, 25, 26, 34, 38, 48, 49, 51, 57, 59, 65, 66, 71, 74, 83, 85, 89], [2, 5, 18, 24, 25, 27, 31, 47, 50, 56, 57, 65, 74, 77, 83, 85, 87, 88, 89, 98], [5, 11, 13, 27, 31, 41, 47, 50, 56, 60, 67, 70, 73, 77, 78, 81, 87, 88, 97, 98]]
+
+Per-client predicted-class coverage: {"local": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20], "fedproto": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20], "fedgh": [10, 11, 14, 9, 7, 8, 12, 9, 7, 8], "paired_h07": [96, 96, 98, 99, 99, 99, 97, 97, 98, 98], "pair_broken_h07": [86, 77, 77, 78, 68, 67, 77, 79, 76, 78], "native_control": [18, 15, 20, 20, 20, 19, 20, 20, 19, 20]}
+Runtime/steps: {"local": {"elapsed_seconds": 122.3267240524292, "optimizer_steps_total": 15600, "steps_per_client_round": [156, 156, 156, 156, 156, 156, 156, 156, 156, 156]}, "fedproto": {"elapsed_seconds": 126.4438259601593, "optimizer_steps_total": 15600, "steps_per_client_round": [156, 156, 156, 156, 156, 156, 156, 156, 156, 156]}, "fedgh": {"elapsed_seconds": 318.40789461135864, "optimizer_steps_total": 15600, "steps_per_client_round": [156, 156, 156, 156, 156, 156, 156, 156, 156, 156]}}
+Readout diagnostic seconds: 157.53215837478638
+Communication: {"semantic_uplink_bytes": 412800, "anchor_uplink_bytes": 5242880, "global_vectors_downlink_per_client": 204800, "global_vectors_downlink_total": 2048000, "class_ids_downlink_bytes": 0, "class_order": "fixed ascending 0..99; no separate IDs transmitted", "learned_head_downlink_per_client": 205200, "learned_head_downlink_total": 2052000, "naive_affine_downlink_per_client": [1052672, 1052672, 1052672, 1052672, 1052672, 1052672, 1052672, 1052672, 1052672, 1052672], "naive_affine_downlink_total": 10526720, "includes_redundant_identity_reference": true}
+Forward examples paired/native: {"anchor_per_client": [256, 256, 256, 256, 256, 256, 256, 256, 256, 256], "prototype_refresh_per_client": [4982, 4972, 4964, 4976, 4977, 4978, 4969, 4974, 4979, 4973], "pprtp_total": 52304, "matched_native_extra_refresh_total": 49744}
+Broken control additionally refreshes2560anchor features+49744localfeatures and10000test images/client; same per-readout payload as paired. No optimized deployment/communication-efficiency claim.
+
+| Client | Paired centered residual | Broken centered residual |
+|---|---:|---:|
+| 0 | 0.000000 | 0.000000 |
+| 1 | 52.269709 | 230.016351 |
+| 2 | 66.224053 | 227.162935 |
+| 3 | 74.226026 | 223.639736 |
+| 4 | 78.897059 | 228.002096 |
+| 5 | 75.556632 | 218.146904 |
+| 6 | 75.871303 | 220.665208 |
+| 7 | 76.355540 | 218.337443 |
+| 8 | 77.281129 | 213.149710 |
+| 9 | 51.997931 | 222.556350 |
+
+All rawmeans/counts,model/server/prototype state and CPU/CUDA RNG/modes/existinggradients are identical acrossreadouts. Exactlegacy fixedpoints[1,0,1,2,1,0,2,3,1], unchangedanchor multisets; permutations/SHA/featurehashes and full residuals/classwise counts in final.json. Client0 reference unchanged. No anchor/testlabels enter transport fitting.
+Common baseline readouts (diagnostic only):
+local: {"head": {"seen": 0.3243999987840652, "missing": 0.0, "all": 0.06488000005483627, "macro": 0.06487999968230725}, "cosine": {"seen": 0.29619999825954435, "missing": 0.0, "all": 0.05923999957740307, "macro": 0.05923999957740307}, "l2": {"seen": 0.3133499979972839, "missing": 0.0, "all": 0.06267000064253807, "macro": 0.06266999877989292}}
+fedproto: {"head": {"seen": 0.3449499994516373, "missing": 0.0, "all": 0.06898999996483327, "macro": 0.06899000108242034}, "cosine": {"seen": 0.32069999873638155, "missing": 0.0, "all": 0.06413999907672405, "macro": 0.06414000019431114}, "l2": {"seen": 0.33899999856948854, "missing": 0.0, "all": 0.06779999919235706, "macro": 0.06780000142753125}}
+fedgh: {"cosine": {"seen": 0.2703000009059906, "missing": 0.0, "all": 0.05406000018119812, "macro": 0.05405999906361103}, "l2": {"seen": 0.28569999784231187, "missing": 0.0, "all": 0.05713999941945076, "macro": 0.0571399986743927}, "local_head_pre_server": {"seen": 0.29594999700784685, "missing": 0.0, "all": 0.059189999103546144, "macro": 0.0591899998486042}, "global_head_post_server": {"seen": 0.16179999932646752, "missing": 0.0, "all": 0.03235999960452318, "macro": 0.032359999418258664}}
+
+One seed only; no tuning, seed/graph/anchor sweep or readout selection. Aggregatecoverage is not perclientcoverage. Metadata train_per_class/test_per_class are unused legacy defaults under full_data; actual split receipts are authoritative.
+
+
+Warnings and limitations: PyTorch emitted its existing cuSolver SVD nonconvergence warning and used its built-in more accurate solver; the diagnostic finished with finite/orthogonality/state checks passing. Readout diagnostics took157.532s; no custom fallback/solver change/restart. Existing NVML warning did not prevent CUDA execution. One SSHmonitor timedout; reconnection confirmed the tmuxjob continued uninterrupted. All warnings/logs retained.
+
+Evidence-limited interpretation: seed0 passes all four preregistered gates. Correct correspondence remains important in this second dataset/100way stress test: pairedmissing9.345%,broken.270%,native0%; causal gap9.075pp. All10.655% exceeds FedProto6.78% by3.875pp. Pairedseen15.895% remains belowLocal32.44/FedProto33.9 and broken25.05%; do not claim universal owned-class gains. Pairedperclient predicts96–99classes, notall100;FedGHdeployed covers57classes aggregate and7–14/client, with16.18%seen/0%missing. Its one-passserver head is weak under the frozen protocol; no claim of a converged optimal FedGH head. Native20class-like readout has27.22%seen/0%missing, so correspondence gain is not merely a comparison against the weak serverhead. Brokenmissing.27% should not be overinterpreted as a formal significance result. This remains one seed, one architecture and post-hoc readout evidence, notcross-seedrobustness/modelheterogeneity/online-training/communication-efficiency evidence.
+
+Recommended next action: accept H12-A STRONG under the frozen gate and ask lead to assign seeds1/2 replication before broader scope. Do not autonomously alter ownership or interpret trainingseed replication as ownership-graph replication. No H12-B or other stage started. Evidence: research_log/H12A/full (rawoutputs, metadata,split/ownership/anchorhashes, allrounds, classwise/perclientcounts, residuals, permutation receipts, communication, tests, verification) and dataset_receipt.json. Twenty-minuteheartbeat remainsactive; do not repeat the completed ACTIVE block.

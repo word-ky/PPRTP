@@ -1,0 +1,16 @@
+{
+  "dataset": "official CIFAR100 python archive",
+  "official_url": "https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz",
+  "download_url": "https://mindspore-website.obs.cn-north-4.myhuaweicloud.com/notebook/datasets/cifar-100-python.tar.gz",
+  "archive_bytes": 169001437,
+  "md5": "eb9058c3a382ffc7106e4002c42a8d85",
+  "matches_torchvision_CIFAR100_tgz_md5": true,
+  "train_count": 50000,
+  "test_count": 10000,
+  "remote_archive": "/home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar100/cifar100-mirror.tar.gz",
+  "failures": [
+    "Official server curl timeout300s at42184000bytes; resumed download stopped once mirror checksum verified.",
+    "Local official curl timeout240s at36344000bytes. Partial files retained."
+  ],
+  "tls_verification": true
+}
