@@ -1,0 +1,100 @@
+{
+  "0": {
+    "h09a_h07_entire_references_exact": true,
+    "all_ten_online_exact": true,
+    "state_rng_modes_gradients_unchanged": true,
+    "oracle_components_exact": true,
+    "delta_pp": {
+      "seen": 34.950000271201134,
+      "missing": -17.987500224262476,
+      "all": -7.399999871850013
+    },
+    "strong": false,
+    "oracle_all": 0.3526999980211258,
+    "routing": {
+      "total": 10000,
+      "seen_count": 2000,
+      "missing_count": 8000,
+      "seen_accepted": 1898,
+      "missing_rejected": 1000,
+      "native_count": 8898,
+      "native_correct": 1258,
+      "missing_branch_count": 1102,
+      "missing_branch_correct": 341,
+      "true_seen_accept_rate": 0.949,
+      "true_missing_reject_rate": 0.125,
+      "false_accept_rate": 0.875,
+      "false_reject_rate": 0.051000000000000045,
+      "native_branch_usage": 0.8898,
+      "missing_branch_usage": 0.1102,
+      "native_branch_accuracy": 0.14138008541245223,
+      "missing_branch_accuracy": 0.30943738656987296
+    }
+  },
+  "1": {
+    "h09a_h07_entire_references_exact": true,
+    "all_ten_online_exact": true,
+    "state_rng_modes_gradients_unchanged": true,
+    "oracle_components_exact": true,
+    "delta_pp": {
+      "seen": 43.849999234080315,
+      "missing": -18.6374995065853,
+      "all": -6.140000075101851
+    },
+    "strong": false,
+    "oracle_all": 0.37149999141693113,
+    "routing": {
+      "total": 10000,
+      "seen_count": 2000,
+      "missing_count": 8000,
+      "seen_accepted": 1928,
+      "missing_rejected": 725,
+      "native_count": 9203,
+      "native_correct": 1444,
+      "missing_branch_count": 797,
+      "missing_branch_correct": 248,
+      "true_seen_accept_rate": 0.964,
+      "true_missing_reject_rate": 0.090625,
+      "false_accept_rate": 0.909375,
+      "false_reject_rate": 0.03600000000000003,
+      "native_branch_usage": 0.9203,
+      "missing_branch_usage": 0.0797,
+      "native_branch_accuracy": 0.15690535694882105,
+      "missing_branch_accuracy": 0.3111668757841907
+    }
+  },
+  "2": {
+    "h09a_h07_entire_references_exact": true,
+    "all_ten_online_exact": true,
+    "state_rng_modes_gradients_unchanged": true,
+    "oracle_components_exact": true,
+    "delta_pp": {
+      "seen": 42.450000531971455,
+      "missing": -16.97499996982515,
+      "all": -5.090000033378603
+    },
+    "strong": false,
+    "oracle_all": 0.3454000025987625,
+    "routing": {
+      "total": 10000,
+      "seen_count": 2000,
+      "missing_count": 8000,
+      "seen_accepted": 1892,
+      "missing_rejected": 747,
+      "native_count": 9145,
+      "native_correct": 1333,
+      "missing_branch_count": 855,
+      "missing_branch_correct": 298,
+      "true_seen_accept_rate": 0.946,
+      "true_missing_reject_rate": 0.093375,
+      "false_accept_rate": 0.906625,
+      "false_reject_rate": 0.05400000000000005,
+      "native_branch_usage": 0.9145,
+      "missing_branch_usage": 0.0855,
+      "native_branch_accuracy": 0.14576271186440679,
+      "missing_branch_accuracy": 0.3485380116959064
+    }
+  },
+  "strong_seed_count": 0,
+  "verdict": "simple radial known-class detection insufficient despite component headroom"
+}

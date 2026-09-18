@@ -221,3 +221,159 @@ Interpretation branches:
 Append `CODEX REPORT H10-A` with STATUS, source SHA, exact commands/run IDs, 47+ tests, exact historical reproduction receipts, three-seed result table, 20 radii per seed and train-coverage diagnostics, routing confusion diagnostics, oracle-router table, communication/local-storage statement, warnings, and interpretation under the preregistered gate.
 
 Do **not** add alpha sweeps, learned calibration, validation tuning, adapters, multi-prototypes, transport learning, new anchors or communication optimization in H10-A. Await research-lead review after the fixed one-shot result.
+
+
+## CODEX REPORT H10-A
+
+STATUS: DONE — 0/3 pass; simple radial known-class detection is insufficient despite exact component/oracle headroom.
+
+Source SHA `be444d7f5d07a1769e461aaa0047dc63558a950a`; release `20260918-142646-h10a`; run `20260918-142709-h10a-loo90-router`, exit0 at2026-09-18 14:28:34+08. Official pinned Jianqing Zhang PFLlib unchanged.
+
+### Implementation / commands / tests
+
+Added `pprtp/router.py` with separate train-only `calibrate_radii`, target-free `route`, and post-prediction evaluator. Final-state ordinary-local feature refresh reproduces every historical raw owner mean by hash before computing LOO means `(100*p-z)/99`. Fixed alpha=.10 gives the91st smallest LOO `1-cos` for every class. Prediction uses the historical full means: accept iff any owned class is eligible, choose highest cosine among eligible owned classes, otherwise choose only among eight historical aligned missing prototypes. No centered geometry, new prototype, learned parameter, threshold selection, validation or sweep.
+
+`pprtp/run.py` adds `--radius-router-probe`, reusing the H09-A/H07 reconstruction path; the entire historical analysis must equal before any radius is constructed. Oracle per-client seen/missing correct counts must equal the historical H09-A component diagnostics exactly. Added3tests in `tests/test_router.py` and `scripts/report_h10a.py`.
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE=1
+D:\anaconda3\python.exe -m unittest discover -s tests -p test_router.py -v
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+$env:AUTODL_CONFIG_PATH=(Resolve-Path .autodl/config.json).Path
+./scripts/autodl-deploy.ps1 -Tag h10a
+./scripts/autodl-run.ps1 -Name h10a-loo90-router -Cmd "PPRTP_SOURCE_SHA=be444d7f5d07a1769e461aaa0047dc63558a950a bash scripts/run_h01.sh --modes fedgh --seeds 0 1 2 --rounds 10 --radius-router-probe"
+D:\anaconda3\python.exe scripts/report_h10a.py research_log/H10A/full
+```
+
+All3focused tests pass; full50tests pass locally6.793s/remotely1.799s, preserving47prior tests. Tests cover vectorized/brute-force LOO equality, rank91, deterministic radius, eligible-only selection (including when an ineligible owner has higher score), rejection to missing classes, no test argument in calibration/no target in route, label perturbation leaving predictions and branch counts unchanged, state/RNG/modes/grad isolation and unchanged historical analysis. Real-data integration and report verification pass.
+
+Frozen setting: seeds0/1/2, CIFAR10 tenclients/twoownedclasses/100localtrain perclass, official test100/class, PFLlibCNN512D, SGD.01/no momentum/decay,batch32,oneepoch,10rounds. Exact FedGH trajectories are replayed only to recover final historical states; no new training mechanism or H08arm. Radius alpha is globally.10; readout is raw cosine without scale. Generic metadata scale10 is unused by this post-hoc classifier.
+
+### Exact reproduction / fairness
+
+Before radius construction, all10H02-A online records and the complete H09-A/H07 analysis reproduce exactly for all3seeds: anchor/local provenance, means/counts, affine transform hashes, global bank, model/server/client.protos state, raw dual and aligned/native outputs. Radius calibration uses only each client's200ordinary training examples under its final eval/no-grad model, never H02-E semantics/oracle/test features or online client.protos. Every class count100 is asserted, refreshed owner means match historical hashes, and all60radii are finite. No test-target information enters acceptance or class restriction.
+
+Both calibration and evaluation preserve model/server/client.protos, existing gradients, CPU/CUDA RNG and module modes. Radius hashes before/after evaluation match. Accepted predictions are asserted owned; rejected predictions asserted missing. The oracle is computed strictly after proposed predictions from true group membership and the same unchanged two component predictors; its correct counts match H09-A exactly.
+
+### Results, oracle and all20radii per seed
+
+# H10-A LOO90 native-radius router
+
+| Seed | Arm | Seen % | Missing % | All % | Macro % | Classes |
+|---|---|---:|---:|---:|---:|---:|
+| 0 | aligned_global_prototype_cosine | 27.950000 | 22.250000 | 23.390000 | 23.389999 | 10 |
+| 0 | dual_space_owner_seen_aligned_missing | 38.050000 | 16.875000 | 21.110000 | 21.110000 | 10 |
+| 0 | loo90_native_accept_else_aligned_missing | 62.900000 | 4.262500 | 15.990000 | 15.990000 | 10 |
+| 1 | aligned_global_prototype_cosine | 28.350000 | 21.737500 | 23.060000 | 23.060001 | 10 |
+| 1 | dual_space_owner_seen_aligned_missing | 20.450000 | 23.237500 | 22.680000 | 22.680001 | 10 |
+| 1 | loo90_native_accept_else_aligned_missing | 72.199999 | 3.100000 | 16.920000 | 16.919999 | 10 |
+| 2 | aligned_global_prototype_cosine | 24.200000 | 20.700000 | 21.400000 | 21.400000 | 10 |
+| 2 | dual_space_owner_seen_aligned_missing | 32.500000 | 18.250000 | 21.100000 | 21.099999 | 10 |
+| 2 | loo90_native_accept_else_aligned_missing | 66.650001 | 3.725000 | 16.310000 | 16.310000 | 10 |
+
+Strong seeds: 0/3. Frozen verdict: simple radial known-class detection insufficient despite component headroom.
+
+| Seed | Oracle seen % | Oracle missing % | Oracle all % |
+|---|---:|---:|---:|
+| 0 | 66.350000 | 27.500000 | 35.270000 |
+| 1 | 75.050001 | 27.675000 | 37.149999 |
+| 2 | 70.450000 | 25.562499 | 34.540000 |
+
+Oracle uses true labels only after proposed predictions; it is not a method. Fixed alpha=.10, n100, rank91, no tuning. Radius fitting refreshes2000 ordinary-local examples per seed under final eval/no-grad model.
+Incremental communication0B; local storage2float32 scalar radii/client=8B/client,80B across10clients. Prior anchor/global-bank/affine delivery caveats remain. No formal conformal finite-sample guarantee. Full client/class counts, routing confusion and radius hashes are in final.json.
+
+Seed 0 routing: {"total": 10000, "seen_count": 2000, "missing_count": 8000, "seen_accepted": 1898, "missing_rejected": 1000, "native_count": 8898, "native_correct": 1258, "missing_branch_count": 1102, "missing_branch_correct": 341, "true_seen_accept_rate": 0.949, "true_missing_reject_rate": 0.125, "false_accept_rate": 0.875, "false_reject_rate": 0.051000000000000045, "native_branch_usage": 0.8898, "missing_branch_usage": 0.1102, "native_branch_accuracy": 0.14138008541245223, "missing_branch_accuracy": 0.30943738656987296}
+Prediction histograms: {"overall": [1062, 1244, 970, 905, 1060, 983, 790, 986, 878, 1122], "seen": [192, 217, 173, 181, 198, 199, 209, 219, 189, 223], "missing": [870, 1027, 797, 724, 862, 784, 581, 767, 689, 899]}
+
+| Client | Class | Radius (rank91) | LOO p10 | LOO p50 | LOO p90 | LOO accept | Full-mean own-class train accept | Any-owned train accept |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 4 | 0.0089302063 | 0.00104699132 | 0.00295335054 | 0.00882828236 | 0.910000 | 0.910000 | 0.910000 |
+| 0 | 6 | 0.00650560856 | 0.00101401808 | 0.00285214186 | 0.00648812065 | 0.910000 | 0.910000 | 0.990000 |
+| 1 | 2 | 0.0102581382 | 0.00153883698 | 0.0033864677 | 0.00988842174 | 0.910000 | 0.910000 | 0.910000 |
+| 1 | 6 | 0.00604611635 | 0.00100741384 | 0.0030028224 | 0.00590492459 | 0.910000 | 0.910000 | 0.990000 |
+| 2 | 2 | 0.00705724955 | 0.00135760312 | 0.00356793404 | 0.00691836467 | 0.910000 | 0.930000 | 0.930000 |
+| 2 | 7 | 0.00644773245 | 0.00140085223 | 0.00289911032 | 0.00620719139 | 0.910000 | 0.920000 | 0.940000 |
+| 3 | 3 | 0.00693202019 | 0.00203804974 | 0.00382506847 | 0.00692601223 | 0.910000 | 0.920000 | 0.930000 |
+| 3 | 7 | 0.00664103031 | 0.00174888968 | 0.00325283408 | 0.00637275539 | 0.910000 | 0.920000 | 0.930000 |
+| 4 | 3 | 0.00624752045 | 0.00209186669 | 0.0035097003 | 0.00623110542 | 0.910000 | 0.910000 | 0.940000 |
+| 4 | 5 | 0.00611954927 | 0.00200968981 | 0.00365129113 | 0.00602776371 | 0.910000 | 0.920000 | 0.960000 |
+| 5 | 5 | 0.0108121634 | 0.00358929043 | 0.00602400303 | 0.0106099248 | 0.910000 | 0.920000 | 0.920000 |
+| 5 | 9 | 0.0099144578 | 0.00276489253 | 0.00484257936 | 0.00965095684 | 0.910000 | 0.910000 | 0.950000 |
+| 6 | 0 | 0.0118647218 | 0.00355091691 | 0.0063097775 | 0.0116745532 | 0.910000 | 0.910000 | 0.950000 |
+| 6 | 9 | 0.00869017839 | 0.00317082414 | 0.00483071804 | 0.00857071299 | 0.910000 | 0.910000 | 0.980000 |
+| 7 | 0 | 0.00692611933 | 0.00199881196 | 0.00324892998 | 0.00682607293 | 0.910000 | 0.910000 | 0.910000 |
+| 7 | 8 | 0.00661176443 | 0.00214942102 | 0.00387057662 | 0.00646440359 | 0.910000 | 0.910000 | 0.910000 |
+| 8 | 1 | 0.00841414928 | 0.00333671574 | 0.00449308753 | 0.00828465167 | 0.910000 | 0.930000 | 0.980000 |
+| 8 | 8 | 0.0106850863 | 0.00372740044 | 0.00612521172 | 0.0104113398 | 0.910000 | 0.910000 | 0.940000 |
+| 9 | 1 | 0.00915825367 | 0.00220734486 | 0.00415509939 | 0.00911389012 | 0.910000 | 0.910000 | 0.990000 |
+| 9 | 4 | 0.0100441575 | 0.00213145628 | 0.00465622544 | 0.00990602374 | 0.910000 | 0.930000 | 0.960000 |
+
+Seed 1 routing: {"total": 10000, "seen_count": 2000, "missing_count": 8000, "seen_accepted": 1928, "missing_rejected": 725, "native_count": 9203, "native_correct": 1444, "missing_branch_count": 797, "missing_branch_correct": 248, "true_seen_accept_rate": 0.964, "true_missing_reject_rate": 0.090625, "false_accept_rate": 0.909375, "false_reject_rate": 0.03600000000000003, "native_branch_usage": 0.9203, "missing_branch_usage": 0.0797, "native_branch_accuracy": 0.15690535694882105, "missing_branch_accuracy": 0.3111668757841907}
+Prediction histograms: {"overall": [1169, 872, 1179, 1156, 1135, 916, 917, 917, 881, 858], "seen": [221, 212, 201, 193, 207, 185, 212, 188, 189, 192], "missing": [948, 660, 978, 963, 928, 731, 705, 729, 692, 666]}
+
+| Client | Class | Radius (rank91) | LOO p10 | LOO p50 | LOO p90 | LOO accept | Full-mean own-class train accept | Any-owned train accept |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 4 | 0.010317564 | 0.00199781056 | 0.00353521109 | 0.0100077149 | 0.910000 | 0.910000 | 1.000000 |
+| 0 | 8 | 0.0119380951 | 0.00315949926 | 0.00570973754 | 0.0115812533 | 0.910000 | 0.920000 | 0.960000 |
+| 1 | 4 | 0.00630629063 | 0.00105503795 | 0.00233089924 | 0.00616193376 | 0.910000 | 0.910000 | 0.910000 |
+| 1 | 7 | 0.00509697199 | 0.0013593256 | 0.0023047626 | 0.00500534754 | 0.910000 | 0.910000 | 0.940000 |
+| 2 | 0 | 0.0183239579 | 0.00348395109 | 0.00706368685 | 0.0182709042 | 0.910000 | 0.910000 | 1.000000 |
+| 2 | 7 | 0.0196435452 | 0.00302526378 | 0.00455114245 | 0.0141363703 | 0.910000 | 0.930000 | 1.000000 |
+| 3 | 0 | 0.0107617378 | 0.00289065856 | 0.00485402346 | 0.0104398187 | 0.910000 | 0.920000 | 0.970000 |
+| 3 | 1 | 0.00647997856 | 0.00220881705 | 0.00368618965 | 0.0061316127 | 0.910000 | 0.910000 | 0.980000 |
+| 4 | 1 | 0.00524425507 | 0.00196833024 | 0.00325232744 | 0.00519903284 | 0.910000 | 0.910000 | 0.980000 |
+| 4 | 2 | 0.00813633204 | 0.00157330034 | 0.00397878885 | 0.00794728938 | 0.910000 | 0.910000 | 0.910000 |
+| 5 | 2 | 0.00498270988 | 0.00148459675 | 0.00286340714 | 0.00492498884 | 0.910000 | 0.910000 | 0.920000 |
+| 5 | 5 | 0.0056309104 | 0.00168987515 | 0.00302237272 | 0.005484086 | 0.910000 | 0.920000 | 0.930000 |
+| 6 | 5 | 0.0158001184 | 0.00489409547 | 0.007825315 | 0.0153888818 | 0.910000 | 0.910000 | 0.920000 |
+| 6 | 9 | 0.0130895376 | 0.00359680643 | 0.00652679801 | 0.0127708372 | 0.910000 | 0.910000 | 0.950000 |
+| 7 | 6 | 0.00993180275 | 0.00156363845 | 0.00367808342 | 0.00885087065 | 0.910000 | 0.910000 | 0.990000 |
+| 7 | 9 | 0.014329195 | 0.00321213016 | 0.00683960319 | 0.0141734118 | 0.910000 | 0.920000 | 0.930000 |
+| 8 | 3 | 0.00704413652 | 0.00185859809 | 0.00364518166 | 0.00690262299 | 0.910000 | 0.920000 | 0.920000 |
+| 8 | 6 | 0.00405138731 | 0.000701940095 | 0.00157234073 | 0.00390520669 | 0.910000 | 0.910000 | 0.960000 |
+| 9 | 3 | 0.00877255201 | 0.00299643865 | 0.00397282839 | 0.00876488071 | 0.910000 | 0.910000 | 0.980000 |
+| 9 | 8 | 0.00930917263 | 0.00339664822 | 0.0054538548 | 0.00890228059 | 0.910000 | 0.920000 | 0.960000 |
+
+Seed 2 routing: {"total": 10000, "seen_count": 2000, "missing_count": 8000, "seen_accepted": 1892, "missing_rejected": 747, "native_count": 9145, "native_correct": 1333, "missing_branch_count": 855, "missing_branch_correct": 298, "true_seen_accept_rate": 0.946, "true_missing_reject_rate": 0.093375, "false_accept_rate": 0.906625, "false_reject_rate": 0.05400000000000005, "native_branch_usage": 0.9145, "missing_branch_usage": 0.0855, "native_branch_accuracy": 0.14576271186440679, "missing_branch_accuracy": 0.3485380116959064}
+Prediction histograms: {"overall": [883, 959, 1173, 950, 1124, 953, 929, 967, 1225, 837], "seen": [231, 190, 198, 207, 204, 177, 195, 171, 226, 201], "missing": [652, 769, 975, 743, 920, 776, 734, 796, 999, 636]}
+
+| Client | Class | Radius (rank91) | LOO p10 | LOO p50 | LOO p90 | LOO accept | Full-mean own-class train accept | Any-owned train accept |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 0 | 0.00984716415 | 0.0037167191 | 0.00556817651 | 0.00984217506 | 0.910000 | 0.910000 | 0.970000 |
+| 0 | 2 | 0.0104542971 | 0.00369167933 | 0.00605273247 | 0.0102104302 | 0.910000 | 0.910000 | 0.990000 |
+| 1 | 0 | 0.0161845684 | 0.00460355263 | 0.00794762373 | 0.0154818287 | 0.910000 | 0.910000 | 0.920000 |
+| 1 | 7 | 0.00998234749 | 0.00267938967 | 0.00399795175 | 0.00862879492 | 0.910000 | 0.910000 | 1.000000 |
+| 2 | 6 | 0.0115892887 | 0.00134013896 | 0.0035610795 | 0.0109031787 | 0.910000 | 0.910000 | 0.950000 |
+| 2 | 7 | 0.0136865973 | 0.002236092 | 0.0049880147 | 0.012848191 | 0.910000 | 0.910000 | 0.910000 |
+| 3 | 6 | 0.0188727379 | 0.00162956712 | 0.00540518761 | 0.0181884523 | 0.910000 | 0.910000 | 0.970000 |
+| 3 | 9 | 0.0186995268 | 0.00395436306 | 0.00737711787 | 0.0184272286 | 0.910000 | 0.910000 | 0.910000 |
+| 4 | 5 | 0.0227043033 | 0.00440369872 | 0.0109394193 | 0.0220334809 | 0.910000 | 0.930000 | 0.960000 |
+| 4 | 9 | 0.0168091655 | 0.00298402319 | 0.00710627437 | 0.0159237664 | 0.910000 | 0.920000 | 0.980000 |
+| 5 | 3 | 0.00803804398 | 0.0017224669 | 0.00373587012 | 0.00782759767 | 0.910000 | 0.910000 | 0.910000 |
+| 5 | 5 | 0.00705611706 | 0.00204678765 | 0.00393751264 | 0.00670002634 | 0.910000 | 0.910000 | 0.940000 |
+| 6 | 3 | 0.00854635239 | 0.00166468625 | 0.00404170156 | 0.00844947062 | 0.910000 | 0.910000 | 0.910000 |
+| 6 | 4 | 0.00841391087 | 0.00130161049 | 0.0031567812 | 0.00812492892 | 0.910000 | 0.910000 | 0.920000 |
+| 7 | 4 | 0.0226294994 | 0.00300946832 | 0.00577107072 | 0.0190418772 | 0.910000 | 0.910000 | 1.000000 |
+| 7 | 8 | 0.0216290951 | 0.00593600888 | 0.0112381577 | 0.0214034133 | 0.910000 | 0.920000 | 0.970000 |
+| 8 | 1 | 0.010956645 | 0.0030073761 | 0.00502538681 | 0.0103801833 | 0.910000 | 0.910000 | 0.960000 |
+| 8 | 8 | 0.0109238625 | 0.00387298455 | 0.00662279129 | 0.0108113708 | 0.910000 | 0.910000 | 0.920000 |
+| 9 | 1 | 0.0106098652 | 0.00286809797 | 0.00604349375 | 0.010373991 | 0.910000 | 0.920000 | 0.980000 |
+| 9 | 2 | 0.0159559846 | 0.00256456132 | 0.00669670105 | 0.0159439147 | 0.910000 | 0.910000 | 0.920000 |
+
+### Frozen interpretation / limitations
+
+No seed passes the joint gate. The router recovers seen accuracy (62.90/72.20/66.65%) but loses most missing transfer (4.2625/3.10/3.725%), giving only15.99/16.92/16.31% all versus H07's23.39/23.06/21.40%. All10classes receive predictions; finite/exactness checks pass.
+
+Failure is overwhelmingly **false acceptance of missing examples**, not rejection of seen examples. True-seen accept is94.90/96.40/94.60%; true-missing reject is only12.50/9.0625/9.3375%, i.e. false-accept87.50/90.9375/90.6625%. Native branch is used88.98/92.03/91.45% of the time on a test composition with only20%true-seen. Branch-conditional native accuracy includes those falsely accepted missing examples, so its14–16% values must not be confused with owner-only component accuracy.
+
+LOO calibration acceptance is91% for every class, consistent with the fixed91st order statistic. Full-mean self-class ordinary-train acceptance is91–93%; any-owned training acceptance ranges91–99/100%. Thus high ordinary-train/seen coverage does not establish useful missing-class rejection. Radius ranges are .006046–.011865 / .004051–.019644 / .007056–.022704 for seeds0/1/2. No alternative alpha was selected.
+
+Exact oracle all35.27/37.15/34.54% remains>30% in every seed, matching the expected component headroom. Therefore the preregistered branch is “simple radial known-class detection insufficient despite real component headroom.” This result does not license a sweep or learned gate within H10-A.
+
+Calibration adds2000local feature-forward examples/seed,6000across3seeds. Local storage is2float32radii/client=8B/client,80B across10clients. Incremental communication0B relative to H09-A/H07; prior anchor/global-bank/affine delivery caveats remain. This is train-only conformal-style coverage calibration, not a formal conformal finite-sample guarantee, since features were trained on the same samples.
+
+Only existing NVML warnings appeared; run completed exit0. Ddrive exhaustion initially blocked fetch and later compactartifact download. Only SHA-verified ignored local checkpoint duplicates were evicted, originals retained on A6000; exact paths/hashes logged. Compact download was retried successfully without rerunning the experiment.
+
+Evidence under `research_log/H10A/full` includes metadata/splits/provenance, allrounds/final, per-client/class metrics, histogram/routing counts, allradius/nonconformity hashes and quantiles, train coverage, oracle counts, tests/logs/run command and verification. Checkpoints remain remote.
+
+Stop and await research-lead review. No alpha sweep, learned calibration, validation tuning, adapter, new prototypes/anchors, transport or communication optimization added.

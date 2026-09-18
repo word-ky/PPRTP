@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-142709-h10a-loo90-router",
+  "releaseId": "20260918-142646-h10a",
+  "sessionName": "autodl-20260918-142709-h10a-loo90-router",
+  "command": "PPRTP_SOURCE_SHA=be444d7f5d07a1769e461aaa0047dc63558a950a bash scripts/run_h01.sh --modes fedgh --seeds 0 1 2 --rounds 10 --radius-router-probe"
+}
