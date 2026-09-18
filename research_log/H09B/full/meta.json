@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-133526-h09b-centered-dual",
+  "releaseId": "20260918-133513-h09b",
+  "sessionName": "autodl-20260918-133526-h09b-centered-dual",
+  "command": "PPRTP_SOURCE_SHA=34bc33826739b862bb89b7cc7a087f70ce6e7c2d bash scripts/run_h01.sh --modes fedgh --seeds 0 1 2 --rounds 10 --centered-dual-probe"
+}

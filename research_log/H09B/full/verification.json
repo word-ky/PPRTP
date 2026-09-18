@@ -1,0 +1,67 @@
+{
+  "0": {
+    "h09a_h07_entire_references_exact": true,
+    "all_ten_online_exact": true,
+    "state_rng_modes_gradients_unchanged": true,
+    "delta_pp": {
+      "seen": -2.6999997720122346,
+      "missing": -5.262500420212746,
+      "all": -4.749999940395355
+    },
+    "strong": false,
+    "owner_rotation_max_abs_error": 5.364418029785156e-07,
+    "dual_minus_centered_global_pp": {
+      "seen": -0.9499997273087535,
+      "missing": -0.5250001698732382,
+      "all": -0.6100001931190507
+    },
+    "component_diagnostics": {
+      "native_owner_seen_only": 0.6225,
+      "aligned_missing_only": 0.21525
+    }
+  },
+  "1": {
+    "h09a_h07_entire_references_exact": true,
+    "all_ten_online_exact": true,
+    "state_rng_modes_gradients_unchanged": true,
+    "delta_pp": {
+      "seen": 2.1499999612569765,
+      "missing": -0.07499963045120295,
+      "all": 0.3699998557567613
+    },
+    "strong": false,
+    "owner_rotation_max_abs_error": 4.172325134277344e-07,
+    "dual_minus_centered_global_pp": {
+      "seen": 0.2500002086162523,
+      "missing": -0.5250002443790452,
+      "all": -0.3700000047683699
+    },
+    "component_diagnostics": {
+      "native_owner_seen_only": 0.722,
+      "aligned_missing_only": 0.271
+    }
+  },
+  "2": {
+    "h09a_h07_entire_references_exact": true,
+    "all_ten_online_exact": true,
+    "state_rng_modes_gradients_unchanged": true,
+    "delta_pp": {
+      "seen": 2.099999599158761,
+      "missing": 0.8000001311302185,
+      "all": 1.0600000619888306
+    },
+    "strong": false,
+    "owner_rotation_max_abs_error": 4.76837158203125e-07,
+    "dual_minus_centered_global_pp": {
+      "seen": 0.39999946951865817,
+      "missing": -0.3499996662139876,
+      "all": -0.19999995827674755
+    },
+    "component_diagnostics": {
+      "native_owner_seen_only": 0.6695,
+      "aligned_missing_only": 0.263
+    }
+  },
+  "strong_seed_count": 0,
+  "gate": "0/3 pass; inspect component and centered-global control"
+}
