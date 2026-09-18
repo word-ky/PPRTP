@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-181934-h10b-group-refine",
+  "releaseId": "20260918-181850-h10b",
+  "sessionName": "autodl-20260918-181934-h10b-group-refine",
+  "command": "PPRTP_SOURCE_SHA=50ded923a00dba6a327b10f36af5652c20990ea7 bash scripts/run_h01.sh --modes fedgh --seeds 0 1 2 --rounds 10 --group-refine-probe"
+}

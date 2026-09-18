@@ -1,3 +1,6 @@
+# Latest state — 2026-09-18T18:22:56.218075+08:00
+H10-B DONE: source50ded923a00dba6a327b10f36af5652c20990ea7 run20260918-181934-h10b-group-refine exit0;52tests local8.163s remote1.944s. All3seeds entireH09A/H07 and all10online exact;state/RNG/modes/grad/hash invariants preserved. Missing per-example and all30client integer counts exact. Seen28.55/28.65/24.4 missing22.25/21.7375/20.7 all23.51/23.12/21.44;seen gain.6/.3/.2pp,all gain.12/.06/.04pp =>0/3 STOP ROUTING/FUSION,retainH07. True-seen routing40/35.15/31.9%,corrections52/21/12 damage40/15/8. No tuning. Incrementalcomm/storage0B. Awaitlead. ACTIVE WORKSPACE C:/work/PPRTP afterDfull recovery;oldDcopy preserved,heartbeat updated.
+
 # Latest state — H10-A complete, 2026-09-18T14:31:44.966215
 Sourcebe444d7/run20260918-142709-h10a-loo90-router exit0;50tests pass. All3entireH09A/H07/all10online andoraclecomponentcounts exact;state/RNG/modes/grad unchanged. LOOalpha.10rank91all60radii finite. RouterS62.9/72.2/66.65 M4.2625/3.1/3.725 A15.99/16.92/16.31=>0/3strong. Missingfalseaccept87.5/90.9375/90.6625%,seenaccept94.9/96.4/94.6%;oracleall35.27/37.15/34.54=>RADIAL ROUTING INSUFFICIENT WITH HEADROOM. Noalphasweep. 2localfloat32radii/client8B,0incrementalcomm. H10A/full+BRIDGE;awaitlead.20minheartbeat active.
 # Latest state — H09-B complete, 2026-09-18T13:39:49.781185
