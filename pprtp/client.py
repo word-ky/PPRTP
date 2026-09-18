@@ -1,6 +1,7 @@
 """Adapted from PFLlib clientproto.py (Apache-2.0); see PROVENANCE.md."""
 from collections import defaultdict
 import time
+import hashlib
 import torch
 import torch.nn.functional as F
 from flcore.clients.clientproto import clientProto, agg_func
@@ -74,14 +75,23 @@ class H01Client(clientProto):
         protos = defaultdict(list)
         local_sum = knowledge_sum = samples = 0
         self.diagnostic = None
+        online=self.mode in ("pprtp_all_lag1","pprtp_seen_lag1")
+        if online: self.batch_hashes=[]
         for _ in range(self.local_epochs):
             for x, y in self.load_train_data():
                 x, y = x.to(self.device), y.to(self.device)
+                if online: self.batch_hashes.append(hashlib.sha256(x.detach().cpu().contiguous().numpy().tobytes()+y.detach().cpu().contiguous().numpy().tobytes()).hexdigest())
                 z = self.model.base(x)
                 local = self.loss(self.model.head(z), y)
                 bank, valid = prototype_bank(self.global_protos, self.num_classes, z)
-                knowledge = knowledge_loss(z, y, bank, valid, self.mode, self.scale,
-                                           getattr(self, "class_set", None))
+                lag=getattr(self,'aligned_bank',None) if online else None
+                if lag is not None:
+                    from pprtp.online import aligned_loss,gradient_direction
+                    bank=lag;valid=torch.ones(len(bank),dtype=torch.bool,device=z.device)
+                    knowledge=aligned_loss(z,y,bank,self.aligned_transform,self.class_set,self.mode=='pprtp_all_lag1',self.scale)
+                else:
+                    knowledge = knowledge_loss(z, y, bank, valid, 'fedgh' if online else self.mode, self.scale,
+                                               getattr(self, "class_set", None))
                 if self.diagnostic is None and self.id == 0:
                     grad = torch.autograd.grad(knowledge, tuple(self.model.base.parameters()),
                                                retain_graph=True, allow_unused=True)
@@ -93,7 +103,7 @@ class H01Client(clientProto):
                     missing = torch.ones(self.num_classes, dtype=torch.bool, device=z.device)
                     missing[getattr(self, "class_set", [0, 1])] = False
                     mass = None
-                    if valid.any():
+                    if valid.any() and not online:
                         logits = self.scale * F.normalize(z.detach(), dim=1) @ F.normalize(bank, dim=1).T
                         probs = logits.masked_fill(~valid[None], -torch.inf).softmax(1)
                         mass = probs[:, missing].sum(1).mean().item()
@@ -101,9 +111,15 @@ class H01Client(clientProto):
                         local_grad_norm=local_norm.item(), scaled_knowledge_grad_norm=scaled_norm.item(),
                         knowledge_local_grad_ratio=(scaled_norm/local_norm).item() if local_norm.item() else None,
                         missing_probability_on_seen=mass, valid_mask=valid.tolist())
-                    if valid.any():
+                    if online and lag is not None:
+                        direction=gradient_direction(z,y,bank,self.aligned_transform,self.class_set,self.scale)
+                        self.diagnostic['denominator_feature_gradients']=direction
+                        self.diagnostic['missing_probability_on_seen']=direction['missing_probability_mass']
+                        self.diagnostic['preupdate_feature_hash']=hashlib.sha256(z.detach().cpu().contiguous().numpy().tobytes()).hexdigest()
+                    elif valid.any():
                         self.diagnostic['denominator_feature_gradients'] = denominator_direction(
                             z, y, bank, valid, self.scale, self.class_set)
+                if online: assert torch.isfinite(local) and torch.isfinite(knowledge)
                 for j, label in enumerate(y.tolist()):
                     protos[label].append(z[j].detach())
                 self.optimizer.zero_grad()

@@ -78,6 +78,8 @@ def evaluate(client, loader, protos):
 
 
 def run(cfg, mode, seed):
+    online=mode in ("pprtp_all_lag1","pprtp_seen_lag1")
+    fedgh=mode=="fedgh" or online
     torch.manual_seed(seed)
     np.random.seed(seed)
     random.seed(seed)
@@ -94,7 +96,7 @@ def run(cfg, mode, seed):
         local_learning_rate=cfg.lr,local_epochs=cfg.local_epochs,few_shot=0,
         learning_rate_decay_gamma=1.,learning_rate_decay=False,
         lamda=(cfg.seen_lamda if mode=='gpc_seen_match' else
-               .002 if mode=='gpc_all_match' else cfg.lamda))
+               .002 if mode=='gpc_all_match' or online else cfg.lamda))
     clients=[]
     for i, ds in enumerate(datasets):
         client=H01Client(args,i,len(ds),len(test),train_slow=False,send_slow=False)
@@ -139,14 +141,20 @@ def run(cfg, mode, seed):
     if cfg.oracle_head:
         oracle_data,oracle_receipt=calibration(cfg.data,split)
         (out/'oracle_calibration.json').write_text(json.dumps(oracle_receipt,indent=2))
-    if mode == 'fedgh':
+    if online:
+        from pprtp.online import prepare_online,build_bank,score_bank
+        assert seed==0 and cfg.scale==10. and cfg.rounds==10
+        online_anchors,online_source=prepare_online(cfg.data,datasets,split,tensor_hash)
+        (out/'online_provenance.json').write_text(json.dumps(online_source,indent=2))
+        previous_bank=None
+    if fedgh:
         server_head=copy.deepcopy(args.model.head)
         server_optimizer=torch.optim.SGD(server_head.parameters(),lr=.01)
     started=time.time()
     with (out/'rounds.jsonl').open('w') as stream:
         for r in range(cfg.rounds):
             broadcast_receipt=None
-            if mode == 'fedgh' and r > 0:
+            if fedgh and r > 0:
                 bases_before=[tensor_hash(c.model.base.state_dict().values()) for c in clients]
                 broadcast(server_head,clients)
                 head_hash=tensor_hash(server_head.state_dict().values())
@@ -184,7 +192,7 @@ def run(cfg, mode, seed):
                 prototype_payload_bytes=dict(upload_vectors=sum(len(c.protos)*512*4 for c in clients),
                     upload_counts=sum(len(c.protos)*8 for c in clients),download_vectors=cfg.clients*10*512*4),
                 elapsed_seconds=time.time()-started)
-            if mode == 'fedgh':
+            if fedgh:
                 if r == 0:
                     historical=Path('research_log/H01B/receipts')/f'fedproto_seed{seed}'/'rounds.jsonl'
                     check_round_one([json.loads(historical.read_text().splitlines()[0]),record])
@@ -208,6 +216,36 @@ def run(cfg, mode, seed):
                     communication_bytes=dict(upload_vectors=20*512*4,upload_labels=20*8,
                         downloaded_head_per_client=sum(p.numel()*p.element_size() for p in server_head.parameters()),
                         downloaded_head_all_clients=len(clients)*sum(p.numel()*p.element_size() for p in server_head.parameters())))
+            if online:
+                record['batch_hashes']=[c.batch_hashes for c in clients]
+                if r==0:
+                    old=json.loads(Path('research_log/H02A/full/artifacts/experiment/fedgh_seed0/rounds.jsonl').read_text().splitlines()[0])
+                    for key in ('client_model_hashes','prototype_bank_hash','metrics','server_head'):
+                        assert json.loads(json.dumps(record[key]))==old[key], key
+                    record['historical_round_one_exact']=True
+                if previous_bank is not None:
+                    assert tensor_hash([clients[0].aligned_bank])==previous_bank['global_hash']
+                    assert [tensor_hash(c.aligned_transform) for c in clients]==[d['transform_hash'] for d in previous_bank['alignment']]
+                    assert all(c.aligned_bank.grad is None and all(v.grad is None for v in c.aligned_transform) for c in clients)
+                    record['training_bank']=dict(source_round=r,global_hash=previous_bank['global_hash'],
+                        transform_hashes=[d['transform_hash'] for d in previous_bank['alignment']],frozen_through_epoch=True)
+                fresh,transforms,receipt=build_bank(clients,online_anchors,datasets,tensor_hash)
+                receipt.update(source_round=r+1,used_in_round=r+2 if r<9 else None,
+                    anchor_indices_sha256=online_source['anchor_receipt']['indices_sha256'])
+                record['aligned_bank']=receipt
+                if r+1 in (2,5,10): record['aligned_direct']=score_bank(clients,test,fresh,transforms,metrics)
+                other=Path(cfg.output)/'pprtp_all_lag1_seed0'
+                if mode=='pprtp_seen_lag1':
+                    first=json.loads((other/'rounds.jsonl').read_text().splitlines()[r])
+                    assert record['batch_hashes']==first['batch_hashes']
+                    other_meta=json.loads((other/'metadata.json').read_text())
+                    assert initial_hash==other_meta['initial_state_sha256'] and metadata['split_sha256']==other_meta['split_sha256']
+                    if r==0: assert receipt==first['aligned_bank']
+                    if r==1:
+                        assert record['diagnostic_client0']['preupdate_feature_hash']==first['diagnostic_client0']['preupdate_feature_hash']
+                        assert record['diagnostic_client0']['denominator_feature_gradients']==first['diagnostic_client0']['denominator_feature_gradients']
+                for c,t in zip(clients,transforms): c.aligned_bank=fresh;c.aligned_transform=t
+                previous_bank=receipt
             if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe or cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe or cfg.local_source_probe or cfg.cross_seed_probe or cfg.direct_cross_seed_probe):
                 historical=Path('research_log/H02A/full/artifacts/experiment')/f'fedgh_seed{seed}'/'rounds.jsonl'
                 old=json.loads(historical.read_text().splitlines()[r])
@@ -419,8 +457,8 @@ def run(cfg, mode, seed):
                 check_round_one(prior)
             print(json.dumps(dict(mode=mode,seed=seed,round=r+1,metrics=summary,elapsed=record['elapsed_seconds'])),flush=True)
             for client in clients:
-                client.set_protos(protos if mode not in ('local','fedgh') else None)
-    if mode == 'fedgh':
+                client.set_protos(protos if mode not in ('local','fedgh') and not online else None)
+    if fedgh:
         torch.save(server_head.state_dict(),out/'server_head.pt')
     torch.save(dict(model=clients[0].model.state_dict(),global_protos={k:v.cpu() for k,v in protos.items()},
                     client=0,class_set=clients[0].class_set),out/'client0.pt')
