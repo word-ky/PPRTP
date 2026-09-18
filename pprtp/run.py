@@ -93,7 +93,7 @@ def run(cfg, mode, seed):
         from pprtp.full_data import prepare_full,prepare_cifar100
         assert cfg.clients==10 and mode in ('local','fedproto','fedgh')
         if cfg.dataset=='CIFAR100':
-            assert seed==0 and num_classes==100 and cfg.k==20
+            assert seed in (0,1,2) and num_classes==100 and cfg.k==20
             datasets,test,split,full_anchors=prepare_cifar100(cfg.data)
         else:
             assert seed in (0,1,2) and num_classes==10 and cfg.k==2

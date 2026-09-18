@@ -79,3 +79,31 @@ class Cifar100Test(unittest.TestCase):
             self.assertTrue(f['full_pair_probe']['same_raw_means_counts_exact']);self.assertIsNone(f['full_pair_probe']['h11_entire_reference_exact'])
             self.assertEqual(f['communication_bytes']['upload_vectors'],200*512*4)
             self.assertTrue(json.loads((Path(output)/'round_one_pairing_seed0.json').read_text())['passed'])
+
+
+    def test_training_seeds_keep_h12a_split_and_change_initialization(self):
+        old=json.loads(Path('research_log/H12A/full/artifacts/experiment/local_seed0/split.json').read_text())
+        labels=np.zeros(50000,dtype=np.int64)
+        for ii,counts,cs in zip(old['train_indices'],old['class_counts'],old['class_sets']):
+            offset=0
+            for c in cs:
+                n=counts[str(c)];labels[ii[offset:offset+n]]=c;offset+=n
+        train=SimpleNamespace(data=np.zeros((50000,1,1,3),dtype=np.uint8),targets=labels)
+        test=SimpleNamespace(data=np.zeros((10000,1,1,3),dtype=np.uint8),targets=np.arange(10000)%100)
+        for seed in (0,1,2):
+            torch.manual_seed(seed);np.random.seed(seed)
+            with patch('pprtp.full_data.CIFAR100',side_effect=lambda root,train=True,download=True:fixtures[train]):
+                fixtures={True:train,False:test};_,_,split,_=prepare_cifar100('unused')
+            self.assertEqual(json.loads(json.dumps(split)),old)
+        torch.manual_seed(122);sets=old['class_sets'];local=[TensorDataset(torch.randn(40,3,32,32),torch.tensor(cs*2)) for cs in sets]
+        evaluation=TensorDataset(torch.randn(100,3,32,32),torch.arange(100));anchors=TensorDataset(torch.randn(256,3,32,32),torch.zeros(256,dtype=torch.long))
+        with tempfile.TemporaryDirectory() as output:
+            argv=['pprtp','--data','unused','--output',output,'--device','cpu','--modes','local','--seeds','0','1','2','--rounds','1','--full-data','--dataset','CIFAR100','--num-classes','100','--k','20']
+            with patch('sys.argv',argv),patch('pprtp.full_data.prepare_cifar100',return_value=(local,evaluation,old,anchors)),contextlib.redirect_stdout(io.StringIO()):main()
+            meta=[json.loads((Path(output)/f'local_seed{i}/metadata.json').read_text()) for i in (0,1,2)]
+            self.assertEqual(len({m['initial_state_sha256'] for m in meta}),3)
+            self.assertEqual(len({m['split_sha256'] for m in meta}),1)
+            final=[json.loads((Path(output)/f'local_seed{i}/final.json').read_text()) for i in (0,1,2)]
+            self.assertEqual(len({f['client_model_hashes'][0] for f in final}),3)
+            orders=[torch.randperm(40,generator=torch.Generator().manual_seed(seed*100000)).tolist() for seed in (0,1,2)]
+            self.assertEqual(len({tuple(o) for o in orders}),3)
