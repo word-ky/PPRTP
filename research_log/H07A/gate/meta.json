@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-092219-h07a-local-source",
+  "releaseId": "20260918-092203-h07a",
+  "sessionName": "autodl-20260918-092219-h07a-local-source",
+  "command": "PPRTP_SOURCE_SHA=8a241e689ea06132c739df2d015be608011f01c9 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --local-source-probe"
+}

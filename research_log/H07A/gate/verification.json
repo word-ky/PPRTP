@@ -1,0 +1,12 @@
+{
+  "h06c_entire_reference_exact": true,
+  "all_ten_online_exact": true,
+  "provenance_exact": true,
+  "state_rng_modes_gradients_unchanged": true,
+  "ret_missing": 0.9575040491080202,
+  "ret_all": 0.9709422904194366,
+  "alignment_gain_pp": 22.25000023841858,
+  "predicted_classes": 10,
+  "verdict": "A: strong ordinary-local semantic closure",
+  "local_source_provenance_exact": true
+}
