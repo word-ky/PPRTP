@@ -117,3 +117,5 @@ Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round onl
 [2026-09-18T08:14:18.2813745+08:00] H06-C launched source5441cc52cfe941d7e156074604e0a264127d2ba0 release20260918-081345-h06c run20260918-081407-h06c-direct.
 
 [2026-09-18T08:16:32.349530] H06-C DONE source5441cc5/run20260918-081407-h06c-direct exit0;39tests pass. EntireH06Breferenceexact,allonline/state/provenance exact. Aligneddirectmissing23.2375/all24.09/seen27.5,nativemissing0;retmissing.972789 retall.975304 gain23.2375,10predictedclasses=>Astrongdirectreadout. Hierarchicalmax4.77e-7,allnorms/logitsfinite. Downlink20480/client vshead20520;H06C/gate+BRIDGE;awaitlead.
+
+[2026-09-18T09:22:02.8334768+08:00] H07-A assigned30aba04;40tests pass(prior39preserved). Exactprovidedlocaldatasets final-state features,Nonehistoricalsemantics;indexperclient/tensorhashes,200/client100/class,classsets/disjointheldout/anchorchecks. CompleteH06Creference asserted beforelocalarms. Optionalbankcaptureonly forfixed source-shiftdiagnostics;historicaldefaultoutputsunchanged. Noonlineprotosused.

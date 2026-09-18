@@ -112,10 +112,10 @@ def run(cfg, mode, seed):
         initial_state_sha256=initial_hash,split_sha256=hashlib.sha256((out/'split.json').read_bytes()).hexdigest())
     (out/'metadata.json').write_text(json.dumps(metadata,indent=2))
     testloader=DataLoader(test,batch_size=128,shuffle=False)
-    if cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe:
+    if cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe or cfg.local_source_probe:
         oracle_indices=json.loads(Path('research_log/H02C/full/artifacts/experiment/fedgh_seed0/oracle_calibration.json').read_text())['indices']
         saved_support=json.loads(Path('research_log/H02E/full/artifacts/experiment/fedgh_seed0/heldout_owner_support.json').read_text())
-        saved_anchors=json.loads(Path('research_log/H03A/gate/artifacts/experiment/fedgh_seed0/paired_anchors.json').read_text()) if (cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe) else None
+        saved_anchors=json.loads(Path('research_log/H03A/gate/artifacts/experiment/fedgh_seed0/paired_anchors.json').read_text()) if (cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe or cfg.local_source_probe) else None
         anchors,paired_support,paired_receipt=prepare_paired(cfg.data,split,oracle_indices,saved_support['indices'],
             anchor_indices=saved_anchors['indices'] if saved_anchors else None)
         if saved_anchors:
@@ -205,12 +205,31 @@ def run(cfg, mode, seed):
                     communication_bytes=dict(upload_vectors=20*512*4,upload_labels=20*8,
                         downloaded_head_per_client=sum(p.numel()*p.element_size() for p in server_head.parameters()),
                         downloaded_head_all_clients=len(clients)*sum(p.numel()*p.element_size() for p in server_head.parameters())))
-            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe or cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe or cfg.cross_seed_probe):
+            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe or cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe or cfg.local_source_probe or cfg.cross_seed_probe):
                 historical=Path('research_log/H02A/full/artifacts/experiment')/f'fedgh_seed{seed}'/'rounds.jsonl'
                 old=json.loads(historical.read_text().splitlines()[r])
                 for key in ('client_model_hashes','prototype_bank_hash','metrics','server_head'):
                     assert json.loads(json.dumps(record[key]))==old[key], f'H02-A online mismatch: round {r+1}, {key}'
                 record['historical_online_exact']=True
+            if mode == 'fedgh' and cfg.local_source_probe and r+1==10:
+                from pprtp.direct_prototypes import analyze_direct
+                from pprtp.local_source import local_provenance,source_shift
+                subset,receipt=prefix(anchors,paired_receipt['indices'],256)
+                historical=json.loads(Path('research_log/H06C/gate/artifacts/experiment/fedgh_seed0/final.json').read_text())['direct_prototype_probe']
+                assert receipt==historical['anchor_receipt']
+                reference_bank={};local_bank={}
+                reference=analyze_direct(clients,server_head,subset,paired_support,test,tensor_hash,metrics,
+                    historical['aligned_prototype_learned_head_reference'],aligned=True,bank_output=reference_bank)
+                assert reference==historical['aligned_global_prototype_cosine'], 'H07-A stop: H06-C reproduction failed'
+                source=local_provenance(datasets,split,oracle_indices,paired_receipt['support_indices'],receipt['indices'],tensor_hash)
+                aligned=analyze_direct(clients,server_head,subset,datasets,test,tensor_hash,metrics,None,
+                    aligned=True,expected_alignment=reference['alignment'],bank_output=local_bank)
+                native=analyze_direct(clients,server_head,subset,datasets,test,tensor_hash,metrics,None,aligned=False)
+                assert aligned['state_before']==native['state_before']==reference['state_before']
+                assert [(p['client'],p['label'],p['count'],p['raw_hash']) for p in aligned['local_prototypes']]==[(p['client'],p['label'],p['count'],p['raw_hash']) for p in native['local_prototypes']]
+                record['local_source_probe']=dict(heldout_aligned_global_prototype_cosine_reference=reference,
+                    localtrain_aligned_global_prototype_cosine=aligned,localtrain_native_global_prototype_cosine_control=native,
+                    anchor_receipt=receipt,local_source=source,source_shift=source_shift(local_bank['bank'],reference_bank['bank']))
             if mode == 'fedgh' and cfg.direct_prototype_probe and r+1==10:
                 from pprtp.class_prototypes import analyze_prototypes
                 from pprtp.direct_prototypes import analyze_direct
@@ -420,6 +439,7 @@ def main():
     parser.add_argument('--cross-seed-probe',action='store_true')
     parser.add_argument('--relation-probe',action='store_true')
     parser.add_argument('--conditioning-probe',action='store_true')
+    parser.add_argument('--local-source-probe',action='store_true')
     parser.add_argument('--direct-prototype-probe',action='store_true')
     parser.add_argument('--class-prototype-probe',action='store_true')
     parser.add_argument('--completion-probe',action='store_true')

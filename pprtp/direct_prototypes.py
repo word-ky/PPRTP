@@ -19,7 +19,7 @@ def cosine_scores(z,bank):
     return scores
 
 
-def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,historical,aligned=True):
+def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,historical,aligned=True,expected_alignment=None,bank_output=None):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(head.state_dict().values()),
@@ -42,14 +42,16 @@ def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,histori
                 p=transform(raw,t);samples=transform(z,t)
             else: p=raw;samples=z
             for j,label in enumerate(labels.tolist()):
-                old=next(v for v in historical['prototypes'] if v['client']==i and v['label']==label)
-                assert old['count']==counts[j].item() and old['raw_hash']==tensor_hash([raw[j]])
-                if aligned: assert old['prototype_hash']==tensor_hash([p[j]])
+                if historical is not None:
+                    old=next(v for v in historical['prototypes'] if v['client']==i and v['label']==label)
+                    assert old['count']==counts[j].item() and old['raw_hash']==tensor_hash([raw[j]])
+                    if aligned: assert old['prototype_hash']==tensor_hash([p[j]])
                 local.append(dict(client=i,label=label,count=counts[j].item(),raw_hash=tensor_hash([raw[j]]),prototype_hash=tensor_hash([p[j]])))
             pp.append(p);ll.append(labels);nn.append(counts);zz.append(samples);yy.append(y);owners.extend([i]*len(labels))
-        if aligned: assert alignment==historical['alignment'] and tensor_hash(pp)==historical['prototype_hash']
+        if aligned and historical is not None: assert alignment==historical['alignment'] and tensor_hash(pp)==historical['prototype_hash']
+        if expected_alignment is not None: assert alignment==expected_alignment
         p=torch.cat(pp);labels=torch.cat(ll);counts=torch.cat(nn)
-        assert tensor_hash(ll)==historical['labels_hash'] and tensor_hash(nn)==historical['counts_hash']
+        if historical is not None: assert tensor_hash(ll)==historical['labels_hash'] and tensor_hash(nn)==historical['counts_hash']
         bank,classes=global_means(p,labels,counts)
         assert classes.tolist()==list(range(10)) # bank row c is explicitly global class c
         norms=bank.norm(dim=1);assert torch.isfinite(norms).all() and (norms>0).all()
@@ -77,6 +79,7 @@ def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,histori
     assert torch.equal(cpu,torch.get_rng_state())
     assert all(torch.equal(a,b) for a,b in zip(cuda,torch.cuda.get_rng_state_all() if devices else []))
     totals={k:[sum(h[k][j] for h in histograms) for j in range(10)] for k in ('overall','seen','missing')}
+    if bank_output is not None: bank_output['bank']=bank.detach().clone()
     vector_bytes=bank.numel()*bank.element_size()
     return dict(metrics={k:sum(v[k] for v in values)/len(values) for k in ('seen','missing','all','macro')},
         per_client=values,global_prototypes=receipts,global_hash=tensor_hash([bank]),global_labels=classes.tolist(),
