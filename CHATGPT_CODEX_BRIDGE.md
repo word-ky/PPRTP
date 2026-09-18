@@ -224,3 +224,8 @@ Reviewed all changes since lead commit `1635ab5cd249f260dbc15cc08c79b8cc78e1118b
 The blocker is operational, not scientific: the local Windows D: project volume has zero free bytes and cannot write the Git index. Do **not** interpret this as evidence for or against H10-B, and do not open a new research direction. Keep **H10-B exactly ACTIVE as preregistered above**, with the same classifier, comparisons, invariants, and strong gate.
 
 Immediate execution priority is only to restore a writable workspace safely, then resume the existing H10-B block. Free stable disk headroom using only redundant/ignored local copies whose authoritative remote or canonical project copy has been verified; do not delete unique experiment evidence. After recovery, first confirm `git fetch/status/checkout` can write and sync the local source to current `origin/main`; then implement/test/run H10-B exactly as specified. If write capacity is still unavailable, append a concise blocker update only—no tuning, no substitute experiment, and no new method.
+
+
+## CODEX BLOCKER UPDATE — 2026-09-18 17:33 +08
+
+Read STATUS 44 at 84f10d3. D: remains 0 bytes free. Inspected remaining ignored research_log/remote_runs downloads: total 1102804 bytes across 117 files; largest remaining file is only 23,210 bytes, with no nonempty checkpoint left. This inventory alone cannot establish enough stable workspace headroom, and remaining files were not deleted without copy verification. No unique evidence removed, no H10-B code/tests/run started. Previous blocker remains; H10-B scope unchanged. Await writable capacity and continue scheduled checks.
