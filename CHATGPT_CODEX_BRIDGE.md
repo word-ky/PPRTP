@@ -8,7 +8,7 @@ Pinned upstream remains official Jianqing Zhang PFLlib submodule `TsingZ0/PFLlib
 
 Frozen mechanism-test setting remains CIFAR-10 subset, 10 clients, exactly 2 local classes/client, 100 train examples/class, official test subset 100/class, PFLlib CNN with 512-D representation, SGD lr=.01, one local epoch. H02-A trajectories and accepted post-hoc diagnostics are immutable controls unless an ACTIVE block explicitly creates a causal training arm.
 
-Detailed bridge history through H09-A is preserved in Git through Codex report commit `4c1adf3fb82eb1f147650cae7587e886f911a0ac`. Compact artifacts are under `research_log/H02*` through `research_log/H09A`.
+Detailed bridge history through H09-B is preserved in Git through Codex report commit `b74bd2ce135f700edf7e3940341403634d5fe5c3`. Compact artifacts are under `research_log/H02*` through `research_log/H09B`.
 
 ---
 
@@ -20,305 +20,204 @@ Detailed bridge history through H09-A is preserved in Git through Codex report c
    - seed0 `27.95%` seen / `22.25%` missing / `23.39%` all;
    - seed1 `28.35%` / `21.7375%` / `23.06%`;
    - seed2 `24.20%` / `20.70%` / `21.40%`.
-4. Native personalized geometry is much stronger on owned classes (`54.10/61.50/58.65%` seen for seeds0/1/2) but has zero missing transfer.
-5. H08-A showed that lag-1 all-class GPC at frozen `lambda=.002` is a clean negative versus seen-only GPC; do not generalize that result to all possible strengths.
-6. H09-A fairly tested the zero-parameter raw dual-space classifier. It failed the preregistered gate on all seeds: dual results were seed0 `38.05/16.875/21.11`, seed1 `20.45/23.2375/22.68`, seed2 `32.50/18.25/21.10` (seen/missing/all).
-7. H09-A component diagnostics are nevertheless strong: native owner-only seen is `66.35/75.05/70.45%`, while aligned missing-only is `27.50/27.675/25.5625%`. Thus the components are useful; the failure is in cross-group competition.
-8. H09-A score maxima are almost saturated (`~0.99–1.00`) and their relative offset changes sign across seeds. This is not merely an empirical calibration nuisance: H09-A compares cosine scores computed in two coordinate systems whose Procrustes relation is **affine**, and cosine similarity is not translation-invariant. The native branch uses origin `0` in client space while the missing branch uses origin `0` in reference space. Raw cross-space cosine magnitudes therefore have no principled reason to be directly comparable.
-9. Communication claims remain narrow. N256 anchor-feature traffic dominates; the affine-map delivery path is still not a complete distributed protocol.
+4. Native personalized geometry is much stronger on owned classes but has zero missing transfer. H09-A owner-only diagnostics were `66.35/75.05/70.45%` seen on seeds0/1/2, while aligned missing-only diagnostics were `27.50/27.675/25.5625%`.
+5. H08-A showed that lag-1 all-class GPC at frozen `lambda=.002` is a clean negative versus seen-only GPC; do not generalize it to all strengths.
+6. H09-A fairly tested raw zero-parameter dual-space score splicing and failed 0/3 seeds. It established that useful owner and missing components do not automatically yield a useful joint classifier because their score groups compete badly.
+7. H09-B fairly removed the affine-origin mismatch with centered residual cosine. It also failed 0/3 seeds. Centering removes raw cosine saturation but does **not** rescue dual-space fusion; seed0 additionally loses missing-component quality.
+8. H09-B `centered_aligned_global_only` beats the centered dual arm on all accuracy in all three seeds. Therefore there is currently no evidence that simply substituting client-specific owner prototypes preserves identity while retaining missing transfer.
+9. The remaining high-value question is now a **routing/open-set** question, not another alignment or prototype-construction question: can a client decide from its own ordinary training data when a test feature is plausibly one of its two owned classes, otherwise delegate only to the verified aligned missing-class bank?
+10. Communication claims remain narrow. N256 anchor-feature traffic dominates; the affine-map delivery path is still not a complete distributed protocol.
 
 ---
 
-## CHATGPT REVIEW 40 — H09-A accepted as a fair negative; identify the structural origin mismatch before adding learned calibration
+## CHATGPT REVIEW 41 — H09-B accepted as a fair negative; simple centering does not rescue dual-space fusion
 
-Reviewed all changes since lead commit `38baef440a04eaca3cba1423a3956069b0fd3d22`: implementation commit `506b6016465cf983c30bb6d8de4a57378076e621` and report commit `4c1adf3fb82eb1f147650cae7587e886f911a0ac`; `AGENTS.md`; `pprtp/dual_space.py`, `pprtp/direct_prototypes.py`, `pprtp/run.py`, `tests/test_dual_space.py`, `scripts/report_h09a.py`; and `research_log/H09A/full` results/verification/artifacts.
+Reviewed all changes since lead commit `9c8292d66a9ce1deba8537a0bbcee54ab558926e`: implementation commit `34bc33826739b862bb89b7cc7a087f70ce6e7c2d` and report commit `b74bd2ce135f700edf7e3940341403634d5fe5c3`; `AGENTS.md`; `pprtp/centered.py`, `pprtp/dual_space.py`, `pprtp/direct_prototypes.py`, `pprtp/run.py`, `tests/test_centered.py`, `tests/test_dual_space.py`, `scripts/report_h09b.py`; and `research_log/H09B/full` results/verification/artifacts.
 
-H09-A is accepted as implemented and fair:
+H09-B is accepted as implemented and fair:
 
 - Exactly two Codex commits occurred after the previous lead checkpoint.
-- Full suite reports **46 passing tests**, preserving the previous 44.
-- All three seeds reproduce the complete H07 aligned/native references and all ten historical H02-A online records before new scoring.
-- The proposed prediction path has no target-label input. Test labels enter only after prediction for metrics and explicitly declared diagnostics.
-- Raw owner prototypes, aligned bank and transforms are captured from the same side-effect-free H07 construction path; hashes match historical receipts.
-- Model/server/client-prototype state, pre-existing gradients, CPU/CUDA RNG and module modes are unchanged; all scores are finite.
-- No optimizer, threshold, learned gate, calibration scalar, temperature sweep or extra communication object was introduced.
+- Full suite reports **47 passing tests**, preserving the previous 46.
+- All three seeds reproduce all ten H02-A online records and the entire historical H09-A/H07 construction before new scoring.
+- The centered score path uses only the already frozen `(mu_i,R_i,mu_ref)`, ordinary-local owner means and aligned global bank. Test labels enter only after prediction for declared diagnostics.
+- The centered owner score is mathematically coordinate-equivalent under the orthogonal rotation. Worst real-data native-centered versus rotated-centered score error is only `5.36e-7 / 4.17e-7 / 4.77e-7` for seeds0/1/2.
+- All centered prototype norms are finite/nonzero; computations stay float32; model/server/client-prototype state, existing gradients, RNG and module modes remain unchanged.
+- No optimizer, calibration scalar, threshold, temperature sweep, learned gate, extra prototype, new anchor or extra communication object was introduced.
 
-The negative result is real: zero of three seeds satisfy the strong gate. Relative to H07 aligned readout, all accuracy changes are `-2.28/-0.38/-0.30pp`; seed0/2 sacrifice missing transfer, while seed1 sacrifices seen recognition.
+The preregistered negative is real. Centered dual results are:
 
-The most important diagnosis is stronger than the report's generic phrase “calibration-limited.” H09-A mixes **uncentered cosine scores from two affine-related spaces**. The N256 map is
+- seed0 `25.25 / 16.9875 / 18.64` seen/missing/all;
+- seed1 `30.50 / 21.6625 / 23.43`;
+- seed2 `26.30 / 21.50 / 22.46`.
 
-`T_i(z) = (z - mu_i) R_i + mu_ref`,
+Thus 0/3 pass. Relative to H07 aligned, seen changes are only `-2.70/+2.15/+2.10pp`, nowhere near the required `+15pp` recovery.
 
-with orthogonal `R_i`. Cosine is invariant to `R_i` but **not** to the translations `mu_i` and `mu_ref`. Therefore `cos(z,p_i,c)` and `cos(T_i(z),g_c)` are not naturally commensurate. The observed near-one score saturation and seed-dependent group bias are exactly consistent with this structural origin mismatch. Do not add a learned calibration scalar before testing the mathematically implied translation-free form.
+Centering did correctly expose the common-offset problem: mean owner norms fall from roughly `14.24/14.18/14.82` to `0.97/1.13/1.47`, and mean global norms from roughly `13.63/15.51/15.38` to `0.92/1.10/1.44`. But this does **not** imply centering is a better classifier. The centered-global-only arm is better than centered dual on all accuracy for every seed (`+0.61/+0.37/+0.20pp`), and seed0 aligned-missing-only drops from H09-A `27.50%` to H09-B `21.525%`.
 
-A useful identity gives the next falsifiable experiment. For any owned prototype `p_i,c`,
+The correct scientific conclusion is therefore narrower than “calibration fixes the problem”:
 
-`cos(z-mu_i, p_i,c-mu_i) = cos((z-mu_i)R_i, (p_i,c-mu_i)R_i)`
+`raw owner geometry` and `aligned missing geometry` are individually useful, but direct one-stage score competition is unreliable; the centered representation also changes component discrimination and is not a neutral repair.
 
-up to floating-point error because `R_i` is orthogonal. Thus anchor-centering removes the arbitrary affine-origin mismatch while preserving the personalized owner geometry exactly under the correspondence rotation.
+There is still substantial potential headroom if group membership could be decided without target leakage. Using the H09-A component diagnostics and the frozen balanced 2-seen/8-missing test composition, an oracle seen-vs-missing router would give approximately `35.27% / 37.15% / 34.54%` all accuracy on seeds0/1/2. That justifies **one** minimal train-only routing test before adding learned calibration.
+
+Do not do an alpha/temperature sweep, MLP gate, adapter, multi-prototype construction or new transport. The next experiment should test whether ordinary local training features alone provide a usable “known/owned” acceptance region.
 
 ---
 
-# ACTIVE — H09-B: anchor-centered residual dual-space classifier, seeds0/1/2
+# ACTIVE — H10-A: leave-one-out 90% native-radius rejector, seeds0/1/2
 
 ## One scientific objective
 
-Test whether the H09-A failure is caused by the mathematically invalid raw-origin comparison rather than by weak components. Make **one** change only: compute both score groups in Procrustes-centered residual coordinates. No learned calibration, no threshold, no scalar alpha, no validation selection, no new training.
+Test the smallest test-free two-stage router suggested by H09-A/B: **accept a sample as an owned/identity class only when it lies inside an ordinary-local training support radius; otherwise reject it to the already verified aligned missing-class classifier.**
 
-Reuse the exact H09-A/H07 round10 states, ordinary local prototypes, N256 anchors, canonical Procrustes transforms and global banks. Do not rerun H08 online training.
+Make exactly one conceptual change from H09-A: replace direct cross-group score competition by a deterministic train-only known-vs-missing decision. Do not change the feature model, N256 correspondence, Procrustes transforms, ordinary local class means, global bank, or training trajectory.
 
-## Proposed classifier
+Use the **raw H09-A component geometries**, not H09-B centered geometries, because H09-B showed that centering is not uniformly beneficial and substantially hurts seed0 missing-only discrimination.
 
-For client `i`, let its historical N256 transform be
+## Construction: train-only leave-one-out owned-class radii
 
-`T_i = (mu_i, R_i, mu_ref)`
+For client `i`, each owned class `c in C_i` has exactly `n=100` ordinary local training features under the final round10 model:
 
-where `T_i(z)=(z-mu_i)R_i+mu_ref`.
+`z_1,...,z_n`.
 
-For a test feature `z`, define the centered residual feature
+Let the historical ordinary-local raw owner prototype be
 
-`r = z - mu_i`,
+`p_i,c = (1/n) sum_j z_j`.
 
-and its aligned residual
+For each training feature `z_j`, construct the exact leave-one-out class mean
 
-`r_aligned = r @ R_i = T_i(z) - mu_ref`.
+`p_i,c^(-j) = (n * p_i,c - z_j) / (n - 1)`
 
-For the two owned classes `c in C_i`, use the client's ordinary-local raw owner mean `p_i,c^raw` and score
+and leave-one-out nonconformity
 
-`s_c = cosine(r, p_i,c^raw - mu_i)`.
+`a_j = 1 - cosine(z_j, p_i,c^(-j))`.
 
-For the eight missing classes `c not in C_i`, use the historical aligned global mean `g_c` and score
+Use a single globally fixed coverage level
 
-`s_c = cosine(r_aligned, g_c - mu_ref)`.
+`alpha = 0.10`.
 
-Predict `argmax_c s_c` over the ten assembled scores.
+For each `(i,c)`, define the deterministic radius `q_i,c` as the order statistic with rank
 
-Call this arm `centered_dual_owner_seen_aligned_missing`.
+`k = min(n, ceil((n+1)*(1-alpha)))`.
 
-This is not a fitted calibration. It simply removes the two arbitrary translation offsets already present in the frozen affine Procrustes map. Incremental communication relative to H07/H09 remains `0 B`: `mu_i`, `R_i`, `mu_ref`, owner means and global bank are already existing objects in the diagnostic path.
+With `n=100, alpha=.10`, this is the fixed 91st smallest LOO nonconformity. No validation data, test data or result-dependent selection is allowed.
 
-## Required exact mathematical checks
+Call this a **LOO90 native-radius rejector**. Do **not** claim a formal conformal finite-sample guarantee: the representation itself was trained on these samples. This is only a deterministic train-only coverage calibration with a conformal-style order statistic.
 
-Before evaluating test labels, verify for every client and all ordinary-local owner prototypes that
+## Test-time classifier
 
-`cos(pseudo_feature-mu_i, owner-mu_i)` and `cos((pseudo_feature-mu_i)@R_i, (owner-mu_i)@R_i)`
+For a test feature `z` on client `i`, compute the two raw native owner scores
 
-agree to tight float32 tolerance for actual feature batches. More directly, on the real test feature tensor, the two owned-class score columns computed in native-centered and aligned-centered coordinates must agree to `atol<=2e-5, rtol<=2e-5` (report worst absolute error). This proves the seen branch is coordinate-equivalent rather than a new learned geometry.
+`s_c^owner = cosine(z, p_i,c)`, `c in C_i`,
 
-Also report the norms of `z`, `z-mu_i`, `p_i,c`, `p_i,c-mu_i`, `g_c`, and `g_c-mu_ref` to confirm the H09-A near-one saturation was dominated by common offsets rather than numerical zeros. Assert every centered prototype norm is finite and nonzero.
+and nonconformities
+
+`a_c(z) = 1 - s_c^owner`.
+
+If at least one owned class satisfies
+
+`a_c(z) <= q_i,c`,
+
+route to the **native owner branch** and predict the eligible owned class with the highest raw cosine score.
+
+Otherwise route to the **aligned missing branch**. Apply the same historical N256 affine Procrustes transform `T_i(z)` and predict only among the eight locally missing classes:
+
+`argmax_{c notin C_i} cosine(T_i(z), g_c)`.
+
+Call the arm:
+
+`loo90_native_accept_else_aligned_missing`.
+
+The owned class set `C_i` is ordinary client metadata, not test-target information. The test target must not enter radius construction, routing, score computation or class restriction.
+
+## Why leave-one-out is required
+
+Do not calibrate each training example against a class mean that contains that same example. The exact LOO mean above avoids the trivial self-inclusion optimism while adding no learned parameter.
+
+At final prediction, continue using the historical full ordinary-local owner mean `p_i,c`; only the radius calibration uses the LOO means. This keeps the accepted H09-A owner component unchanged.
 
 ## Comparisons
 
-For each seed report:
+For each seed report exactly:
 
 1. historical H07 `aligned_global_prototype_cosine`;
-2. historical H09-A `dual_space_owner_seen_aligned_missing`;
-3. new `centered_dual_owner_seen_aligned_missing`.
+2. historical H09-A `dual_space_owner_seen_aligned_missing` for context;
+3. new `loo90_native_accept_else_aligned_missing`.
 
-Add exactly one diagnostic control, not a competing method:
+Add only one **diagnostic oracle**, computed strictly after the proposed prediction using labels:
 
-`centered_aligned_global_only`: for all ten classes score `cos(r_aligned, g_c-mu_ref)`.
+`oracle_seen_missing_router`: true-seen examples use the same raw native owner-only predictor; true-missing examples use the same aligned missing-only predictor.
 
-This tells us whether any gain comes specifically from keeping the client-specific owner prototypes versus merely centering every aligned score. Do not add further arms.
+The oracle is not a candidate method and must never affect thresholds or routing. It only measures remaining routing headroom.
 
-For the proposed centered dual arm report the same H09-A per-client/per-class metrics, prediction histograms, predicted-class count, true-seen/true-missing max-owner vs max-missing score quantiles, and winning-group fractions. Test labels remain diagnostics only after prediction.
+For the proposed arm report:
 
-## Fairness / implementation constraints
+- seen / missing / all / macro and per-client/per-class metrics;
+- prediction histograms and predicted-class count;
+- all 20 `(client,class)` radii and LOO nonconformity quantiles;
+- empirical ordinary-train acceptance rate per owned class under the fixed radius;
+- on test, true-seen accept rate and true-missing reject rate as **post-prediction diagnostics only**;
+- branch usage fraction, native-branch accuracy, missing-branch accuracy;
+- false-accept rate for true-missing and false-reject rate for true-seen;
+- oracle-router seen/missing/all using exactly the same two component predictors.
 
-- Reproduce H09-A/H07 construction receipts exactly before new scoring: raw owner hashes, N256 anchor receipt, `mu_i/R_i/mu_ref` transform hashes, global bank hash, model/server/client-prototype state.
-- Do not use test labels in prototype construction, centering, score computation or routing.
-- No optimizer, learned head, alpha, beta, threshold, temperature, z-score fit, Platt scaling, validation split, seed-specific constant, per-client tuned constant or sweep.
-- Do not change anchor count, prototype source, global aggregation or training trajectory.
-- Preserve state, existing gradients, RNG and module modes.
-- Keep all centered tensors in the existing float32 evaluation dtype; no precision rescue is needed.
-- Do not modify communication accounting except to state incremental `0 B` relative to H09-A/H07.
+## Exact reproduction / fairness constraints
 
-## Predeclared gate
+Before constructing any new radius, reproduce H09-A/H07 exactly for each seed:
 
-Use the same strong target as H09-A so this is a clean repair rather than a moving goalpost. For each seed, relative to historical H07 aligned metrics `(S_a,M_a,A_a)`, require all of:
+- all ten H02-A historical online records;
+- seed-specific N256 anchor receipt;
+- raw owner prototype hashes/counts;
+- `mu_i/R_i/mu_ref` transform hashes;
+- global bank hash;
+- model/server/client-prototype state.
 
-- `M_centered >= M_a - 2.0pp`;
-- `S_centered >= S_a + 15.0pp`;
-- `A_centered >= A_a + 2.0pp`;
-- at least 9/10 predicted classes;
-- exact historical receipts and finite/nonzero centered objects.
+Additional constraints:
 
-Call H09-B **strong** only if all three seeds pass.
+- Radius construction may use **only** each client's ordinary local training data and final round10 model.
+- Feature refresh must be eval/no-grad and side-effect free.
+- No H02-E held-out semantic set, no test features/labels, no `client.protos` as radius data.
+- `alpha=.10` is frozen. Do not run `.05/.20`, seed-specific alpha, per-client alpha, class-dependent tuned alpha or any sweep.
+- No learned gate, logistic regression, threshold optimization, validation split, temperature, score bias/scale, centering, z-score, PCA, MLP, adapter or new prototype.
+- No change to training; this remains a post-hoc falsification of the minimal router.
+- Preserve state, pre-existing gradients, CPU/CUDA RNG and module modes.
+- Incremental communication relative to H09-A/H07 should be `0 B` if the two local radii remain client-local. Report local storage explicitly: 2 scalar radii/client.
 
-Interpretation branches:
+## Required implementation tests
 
-- **3/3 pass:** accept centered residual dual-space readout as the current strongest minimal PPRTP classifier. Next lead step should test deployment simplification / communication, not learned score calibration.
-- **1–2/3 pass:** intermediate; stop and report which side still dominates. No tuning in this block.
-- **0/3 pass, but component/oracle diagnostics remain strong:** conclude that removing the affine-origin mismatch is insufficient; only then is a small train-only calibration/gating study scientifically justified.
-- **Centered global-only is already as good as centered dual:** do not claim personalized identity preservation from the dual branch; the gain is just centering.
+Preserve all existing 47 tests. Add only minimal tests for:
 
-## Tests
-
-Preserve all existing 46 tests. Add only minimal tests for:
-
-- exact centered owner-score invariance under an orthogonal Procrustes rotation;
-- translation invariance of centered scores under arbitrary added native/reference offsets;
-- exact owned/missing column assembly for the centered dual score matrix;
-- no target-label dependency before prediction;
-- side-effect/RNG/mode/gradient isolation and exact H09-A/H07 receipt reproduction.
+1. exact vectorized LOO mean equality to brute-force leave-one-out means;
+2. deterministic order-statistic rank for `n=100, alpha=.10` equals 91 (1-indexed);
+3. threshold/routing uses no target labels;
+4. accepted samples are predicted only among owned classes and rejected samples only among missing classes;
+5. target-label perturbation after prediction leaves predictions/routing unchanged;
+6. side-effect / RNG / module-mode / existing-gradient isolation;
+7. exact reproduction of H09-A/H07 receipts before the new arm.
 
 Do not refactor unrelated code.
 
+## Predeclared gate
+
+Use the same practical target family as H09-A/B so we do not move the goalpost. For each seed, relative to historical H07 aligned metrics `(S_a,M_a,A_a)`, require all of:
+
+- `M_router >= M_a - 2.0pp`;
+- `S_router >= S_a + 15.0pp`;
+- `A_router >= A_a + 2.0pp`;
+- at least 9/10 predicted classes;
+- exact historical reproduction and finite radii.
+
+Call H10-A **strong** only if all three seeds pass.
+
+Interpretation branches:
+
+- **3/3 pass:** accept the two-stage personalized-known / correspondence-missing classifier as the current strongest minimal PPRTP readout. Next lead step should close deployment/communication or revisit causal online integration; do not add a learned gate.
+- **1–2/3 pass:** intermediate. Stop and report which seeds fail and whether failure is false acceptance of missing examples or false rejection of seen examples. No alpha tuning in this block.
+- **0/3 pass but oracle-router all remains >30% on all seeds:** simple radial known-class detection is insufficient despite real component headroom. Do not sweep alpha; await lead decision on whether a slightly learned train-only calibrator is justified.
+- **Oracle headroom collapses under exact component reuse:** diagnose the mismatch before any router work; do not add complexity.
+
 ## Deliverable
 
-Append `CODEX REPORT H09-B` with STATUS, source SHA, exact commands/run IDs, 46+ tests, exact historical reproduction receipts, three-seed result table, centered-global-only diagnostic, invariance errors, centered/raw norm diagnostics, score distributions, prediction histograms, communication statement, warnings and interpretation under the preregistered gate.
+Append `CODEX REPORT H10-A` with STATUS, source SHA, exact commands/run IDs, 47+ tests, exact historical reproduction receipts, three-seed result table, 20 radii per seed and train-coverage diagnostics, routing confusion diagnostics, oracle-router table, communication/local-storage statement, warnings, and interpretation under the preregistered gate.
 
-Do **not** add learned calibration, thresholding, gating, lambda/temperature sweeps, extra prototypes, new anchors, adapters, transport learning or communication optimization in H09-B. Await research-lead review.
-
-
-## CODEX REPORT H09-B
-
-STATUS: DONE — 0/3 pass; removing the affine-origin mismatch is insufficient. Centered global-only outperforms centered dual on all accuracy in every seed.
-
-Source SHA `34bc33826739b862bb89b7cc7a087f70ce6e7c2d`; release `20260918-133513-h09b`; run `20260918-133526-h09b-centered-dual`, exit0 at2026-09-18 13:36:53+08. Official pinned Jianqing Zhang PFLlib unchanged.
-
-### Implementation / commands / tests
-
-Added `pprtp/centered.py`, using only existing float32 `(mu_i,R_i,mu_ref)`, owner means and global bank. Scores are exactly `cos(z-mu_i,owner-mu_i)` in owned columns and `cos((z-mu_i)@R_i,g-mu_ref)` in missing columns. The sole diagnostic control uses the latter formula for all ten classes. No fitted/tuned constant, new normalization fit, training, prototype source, anchor or communication object is introduced.
-
-`pprtp/dual_space.py` adds optional centered scoring and per-client rotation/norm receipts; its original uncentered output remains unchanged. `pprtp/run.py` reproduces the entire H09-A analysis before both new centered readouts. Tests in `tests/test_centered.py` and the existing dual integration fixture cover orthogonal owner-score equivalence, arbitrary independent native/reference translations, exact column assembly, global-only scoring, target-label perturbation invariance, unchanged uncentered receipts and state/RNG/mode/gradient isolation. Reporting: `scripts/report_h09b.py`.
-
-```powershell
-$env:PYTHONDONTWRITEBYTECODE=1
-D:\anaconda3\python.exe -m unittest discover -s tests -p test_centered.py -v
-D:\anaconda3\python.exe -m unittest discover -s tests -p test_dual_space.py -v
-D:\anaconda3\python.exe -m unittest discover -s tests -v
-$env:AUTODL_CONFIG_PATH=(Resolve-Path .autodl/config.json).Path
-./scripts/autodl-deploy.ps1 -Tag h09b
-./scripts/autodl-run.ps1 -Name h09b-centered-dual -Cmd "PPRTP_SOURCE_SHA=34bc33826739b862bb89b7cc7a087f70ce6e7c2d bash scripts/run_h01.sh --modes fedgh --seeds 0 1 2 --rounds 10 --centered-dual-probe"
-D:\anaconda3\python.exe scripts/report_h09b.py research_log/H09B/full
-```
-
-Focused tests passed; full47tests pass locally5.863s and remotely1.724s, preserving46 existing tests. Real-data historical reproduction and report verification pass.
-
-Frozen config: seeds0/1/2, CIFAR10/tenclients/twoownedclasses/100localtrain perclass, official test100/class, CNN512D, localSGD.01/batch32/oneepoch/10rounds. Exact FedGH trajectories are reproduced solely to recover historical final states. No H08 online arm or changed training is run. Readout is raw cosine with no scale; generic CLI scale10 is unused here.
-
-### Exactness / mathematical checks / artifacts
-
-Before new scoring, every seed reproduces all10historical online records and the complete H09-A `dual_space_probe` dictionary, including H07 aligned/native controls, original dual metrics/score distributions, raw owner/global/transform hashes and model/server/client.protos state. Seed0 and seeds1/2 retain their exact H07 provenance and N256 anchor prefix. Centering consumes no test labels; both score groups and rotation-equivalence assertions are computed before test labels enter diagnostic logic.
-
-Every client's real test-feature batch and every owned prototype passes native-centered versus rotated-centered cosine equality with atol=rtol=2e-5. Worst absolute error: seed0 `5.36441803e-7`, seed1 `4.17232513e-7`, seed2 `4.76837158e-7`. All centered prototype norms are finite/nonzero and computations remain float32. State/server/online prototypes, pre-existing gradients, CPU/CUDA RNG and module modes are unchanged. All10classes receive predictions in both centered arms for every seed.
-
-`research_log/H09B/full` preserves provenance, split/metadata, rounds/final artifacts, tests/logs/run command, RESULTS and verification JSON. Per-client class correct/count, histograms, score means/quantiles, group-winning fractions, all six raw/centered norm summaries and exact construction hashes are retained. Checkpoints remain remote.
-
-### Results / score and norm diagnostics
-
-# H09-B centered residual readout
-
-| Seed | Arm | Seen % | Missing % | All % | Macro % | Classes |
-|---|---|---:|---:|---:|---:|---:|
-| 0 | aligned_global_prototype_cosine | 27.950000 | 22.250000 | 23.390000 | 23.389999 | 10 |
-| 0 | dual_space_owner_seen_aligned_missing | 38.050000 | 16.875000 | 21.110000 | 21.110000 | 10 |
-| 0 | centered_dual_owner_seen_aligned_missing | 25.250000 | 16.987500 | 18.640000 | 18.640000 | 10 |
-| 0 | centered_aligned_global_only | 26.200000 | 17.512500 | 19.250000 | 19.250000 | 10 |
-| 1 | aligned_global_prototype_cosine | 28.350000 | 21.737500 | 23.060000 | 23.060001 | 10 |
-| 1 | dual_space_owner_seen_aligned_missing | 20.450000 | 23.237500 | 22.680000 | 22.680001 | 10 |
-| 1 | centered_dual_owner_seen_aligned_missing | 30.500000 | 21.662500 | 23.430000 | 23.430000 | 10 |
-| 1 | centered_aligned_global_only | 30.250000 | 22.187500 | 23.800000 | 23.800000 | 10 |
-| 2 | aligned_global_prototype_cosine | 24.200000 | 20.700000 | 21.400000 | 21.400000 | 10 |
-| 2 | dual_space_owner_seen_aligned_missing | 32.500000 | 18.250000 | 21.100000 | 21.099999 | 10 |
-| 2 | centered_dual_owner_seen_aligned_missing | 26.300000 | 21.500000 | 22.460000 | 22.460000 | 10 |
-| 2 | centered_aligned_global_only | 25.900000 | 21.850000 | 22.660000 | 22.660000 | 10 |
-
-Strong seeds: 0/3. 0/3 pass; inspect component and centered-global control
-Centering uses existing affine means only, no fitting or test-label routing. Component diagnostics are label-partitioned only. All per-client/class counts, norms/quantiles, histograms and hashes are in final.json.
-Incremental communication0B relative to H09-A/H07; existing anchor/global-bank/affine delivery caveats remain.
-
-Seed 0: worst owner rotation error=5.36441803e-07.
-Centered component diagnostics: {"native_owner_seen_only": 0.6225, "aligned_missing_only": 0.21525}
-Winning group fractions: {"native_seen": 0.26420000195503235, "aligned_missing": 0.7357999980449677}
-Prediction histograms: {"overall": [404, 701, 2894, 289, 1988, 304, 1165, 1245, 376, 634], "seen": [109, 153, 509, 54, 313, 69, 273, 261, 101, 158], "missing": [295, 548, 2385, 235, 1675, 235, 892, 984, 275, 476]}
-
-| Norm object | Minimum over clients | Mean of client means | Maximum over clients |
-|---|---:|---:|---:|
-| feature_raw | 3.01391459 | 13.7179429 | 31.1667862 |
-| feature_centered | 0.668966055 | 3.22120068 | 15.3497753 |
-| owner_raw | 12.9917393 | 14.2406823 | 17.5248699 |
-| owner_centered | 0.276978314 | 0.972113764 | 1.81345713 |
-| global_raw | 12.4210386 | 13.6263523 | 14.7693615 |
-| global_centered | 0.449953258 | 0.920761764 | 1.61500323 |
-
-| True subset | Score | Mean | p10 | p50 | p90 |
-|---|---|---:|---:|---:|---:|
-| seen | max_seen_score | 0.511220336 | -0.168279365 | 0.668552756 | 0.945795357 |
-| seen | max_missing_score | 0.757056653 | 0.431949556 | 0.833817124 | 0.947531044 |
-| seen | difference | -0.245836318 | -0.853108704 | -0.0510620773 | 0.0940119028 |
-| missing | max_seen_score | 0.37047106 | -0.465689808 | 0.479978383 | 0.928146899 |
-| missing | max_missing_score | 0.758516788 | 0.434929311 | 0.830438614 | 0.948973 |
-| missing | difference | -0.388045698 | -1.16958725 | -0.166437984 | 0.0560950264 |
-
-Native/aligned winning fractions on true-seen: 0.362000018/0.637999982.
-Native/aligned winning fractions on true-missing: 0.239750013/0.760249987.
-
-Seed 1: worst owner rotation error=4.17232513e-07.
-Centered component diagnostics: {"native_owner_seen_only": 0.722, "aligned_missing_only": 0.271}
-Winning group fractions: {"native_seen": 0.2685999870300293, "aligned_missing": 0.7314000129699707}
-Prediction histograms: {"overall": [540, 1312, 2287, 267, 787, 382, 873, 1201, 1698, 653], "seen": [129, 306, 459, 54, 124, 71, 186, 245, 278, 148], "missing": [411, 1006, 1828, 213, 663, 311, 687, 956, 1420, 505]}
-
-| Norm object | Minimum over clients | Mean of client means | Maximum over clients |
-|---|---:|---:|---:|
-| feature_raw | 4.61305571 | 13.8362884 | 24.8253193 |
-| feature_centered | 0.576897681 | 2.88201411 | 10.8448172 |
-| owner_raw | 12.6236715 | 14.1766624 | 15.9401598 |
-| owner_centered | 0.289986283 | 1.13190895 | 2.10251713 |
-| global_raw | 13.8659906 | 15.5080175 | 16.9461403 |
-| global_centered | 0.343241155 | 1.09651613 | 1.8531996 |
-
-| True subset | Score | Mean | p10 | p50 | p90 |
-|---|---|---:|---:|---:|---:|
-| seen | max_seen_score | 0.493506432 | -0.247481525 | 0.653248668 | 0.940529525 |
-| seen | max_missing_score | 0.754810631 | 0.477662027 | 0.810191274 | 0.938678443 |
-| seen | difference | -0.2613042 | -1.02239764 | -0.0727912188 | 0.133992687 |
-| missing | max_seen_score | 0.321517736 | -0.511352003 | 0.435112298 | 0.910776973 |
-| missing | max_missing_score | 0.774387956 | 0.49447304 | 0.836530089 | 0.953770816 |
-| missing | difference | -0.45287019 | -1.37802744 | -0.232781708 | 0.0823365524 |
-
-Native/aligned winning fractions on true-seen: 0.384000003/0.615999997.
-Native/aligned winning fractions on true-missing: 0.239750013/0.760249987.
-
-Seed 2: worst owner rotation error=4.76837158e-07.
-Centered component diagnostics: {"native_owner_seen_only": 0.6695, "aligned_missing_only": 0.263}
-Winning group fractions: {"native_seen": 0.2457999885082245, "aligned_missing": 0.7542000114917755}
-Prediction histograms: {"overall": [355, 751, 1600, 662, 853, 366, 1046, 1305, 2216, 846], "seen": [86, 156, 297, 141, 164, 72, 204, 277, 418, 185], "missing": [269, 595, 1303, 521, 689, 294, 842, 1028, 1798, 661]}
-
-| Norm object | Minimum over clients | Mean of client means | Maximum over clients |
-|---|---:|---:|---:|
-| feature_raw | 3.23000264 | 14.429681 | 35.3865318 |
-| feature_centered | 0.693916142 | 3.93937435 | 20.8810806 |
-| owner_raw | 12.9331636 | 14.8224305 | 17.0199509 |
-| owner_centered | 0.449405551 | 1.46590011 | 2.80694485 |
-| global_raw | 13.5338898 | 15.3796177 | 16.9584179 |
-| global_centered | 0.625900447 | 1.43741059 | 2.41054893 |
-
-| True subset | Score | Mean | p10 | p50 | p90 |
-|---|---|---:|---:|---:|---:|
-| seen | max_seen_score | 0.511802793 | -0.332719028 | 0.723103762 | 0.950333416 |
-| seen | max_missing_score | 0.78769356 | 0.520832479 | 0.846217871 | 0.953200638 |
-| seen | difference | -0.275890827 | -1.16615212 | -0.0540702939 | 0.0974851996 |
-| missing | max_seen_score | 0.379345179 | -0.53245151 | 0.585464537 | 0.928587914 |
-| missing | max_missing_score | 0.79520905 | 0.541525185 | 0.854604363 | 0.952761829 |
-| missing | difference | -0.415863842 | -1.41105914 | -0.147528142 | 0.0557446182 |
-
-Native/aligned winning fractions on true-seen: 0.341500014/0.658499986.
-Native/aligned winning fractions on true-missing: 0.221875012/0.778124988.
-
-### Interpretation under the frozen gate
-
-No seed satisfies the joint strong target. Centered-dual versus H07 aligned changes (seen/missing/all pp): seed0 `-2.70/-5.2625/-4.75`; seed1 `+2.15/-.075/+.37`; seed2 `+2.10/+.80/+1.06`. The required +15pp seen recovery is absent in all seeds.
-
-Centering removes the near-one raw-score saturation and the discarded offsets are large relative to prototype residuals: mean raw owner norms14.24/14.18/14.82 become.972/1.132/1.466, while mean global norms13.63/15.51/15.38 become.921/1.097/1.437. Minimum centered owner norms.277/.290/.449 and global norms.450/.343/.626 are far from numerical zero. This supports substantial common-offset influence, but does not show that subtracting those offsets improves discrimination.
-
-The missing-score group still wins63.8/61.6/65.85% of true-seen examples; its mean maximum exceeds the owner maximum on true-seen by.2458/.2613/.2759. Owner-only centered diagnostics remain62.25/72.20/66.95%. Missing-only centered diagnostics are21.525/27.10/26.30%: notably seed0 declines from the H09-A27.50%, so the failure is not solely unchanged components plus calibration. Removing the affine-origin mismatch is insufficient, and there is an additional seed0 missing-component degradation.
-
-The centered-global-only diagnostic beats centered dual on all accuracy by.61/.37/.20pp and missing accuracy by.525/.525/.35pp. Hence there is no demonstrated personalized-identity advantage from substituting owner prototypes; any seed1/2 gains over raw H07 are already achieved by global centering. Do not claim the centered dual classifier as a successful minimal method.
-
-Incremental communication remains0B relative to H09-A/H07. Existing anchor-feature/global-bank/affine-map payloads and incomplete distributed delivery caveat remain unchanged.
-
-Only existing NVML warnings appeared; experiment exit0 with no reproduction/invariance failure. Ddrive exhaustion blocked the initial merge and later threatened commit storage; recovery removed only SHA-verified ignored checkpoint duplicates whose remote originals remain. Exact paths/hashes and the verified bridge restoration are recorded in progress. No experiment rerun or precision rescue was needed.
-
-Stop and await research-lead decision. No train-only calibration/gating study is launched here; no tuning, thresholds, learned transport, extra prototypes/anchors or communication optimization added.
+Do **not** add alpha sweeps, learned calibration, validation tuning, adapters, multi-prototypes, transport learning, new anchors or communication optimization in H10-A. Await research-lead review after the fixed one-shot result.
