@@ -373,3 +373,13 @@ Interpretation is fixed:
 - **Integrity/reproduction failure:** fix only the minimal analysis/checkpoint issue and rerun this same control.
 
 Do **not** add a new dataset, new backbone, learned transport, GPC, routing/fusion, communication compression, online training, extra anchors, or any hyperparameter sweep in H11-C. Append `CODEX REPORT H11-C — DONE/PARTIAL/BLOCKED` with exact commands, source SHA, tests, run IDs, per-seed tables, permutation receipts and evidence paths.
+
+## CODEX REPORT H11-C — BLOCKED: fixed permutation conflicts with fixed-point bound
+
+The focused analysis test fails before any H11-C GPU run. The existing 57-test suite passed (17.737 s). Command: `D:/anaconda3/python.exe -m unittest discover -s tests -p test_full_pair.py -v`; failure: `pprtp/paired.py:83`, `assert fixed<=.01*len(a)`.
+
+Reproduced independently with `np.random.default_rng(314159+i).permutation(256)` for clients1–9: fixed-point counts `[1,0,1,2,1,0,2,3,1]`. Client8 uses seed314167 and has3/256=1.171875% fixed points, exceeding the frozen <=1% requirement (at most2). This depends only on the mandated permutation and anchor count, not features or training seeds. Exact legacy permutation and the stated bound cannot both hold.
+
+No permutation seed, assertion, anchor set, or scientific threshold has been changed. H11-A/B evidence remains unchanged. H11-C analysis edits and the failing focused test remain local and uncommitted; no full-data control result is claimed and no H11-C remote experiment was launched. Current source baseline: c7d1da9.
+
+Research-lead decision needed: explicitly amend the bound to allow the exact legacy permutation's3 fixed points out of256 (preserving the specified permutation), or explicitly specify a revised permutation rule. Recommendation: preserve the preselected legacy permutation and disclose its exact fixed-point fraction; do not choose permutations using performance. Await a revised ACTIVE instruction before dependent experiment execution.

@@ -1,3 +1,7 @@
+# Latest state — H11-C BLOCKED, 2026-09-19T01:33:58.3938977+08:00
+
+ACTIVE workspace C:/work/PPRTP. Exact mandated256-row permutation for client8(seed314167) has3fixedpoints=1.171875%, incompatible with frozen<=1% assertion. Baseline57tests pass; newfocusedtest fails before GPU launch. Await explicit lead amendment in BRIDGE; do not retry unchanged protocol or alter seed/bound independently. Uncommitted analysis edits/test preserved locally. H11A/B evidence intact.
+
 # Latest state — 2026-09-19T00:45:48.510785+08:00
 H11-B DONE: source9e6b25b6a36352457dadc4d7787381d022c7b77e run20260919-002740-h11b-full-seeds12 exit0.57tests local17.448s remote8.577s;prior56preserved;H11Aseed0split/report byte-identical. Seeds1/2full49744train+256fixedanchors/10000test exacthistoricalownership;allarmsinitial/split/round1/156steps perclient-round paired,states/rawmeans/counts/RNG/modes/grad unchanged. PPRTPseed1 S40.09 M19.27375 A23.437;seed2 S38.62 M18.205 A22.288. Withseed0:3/3STRONG,mean+sampleSD S40.19+/-1.622313 M18.881667+/-0.588470 A23.143333+/-0.752763. Native missing0allseeds;no tuning. Caveatperclientclasscount seed1min7 seed2min6 thoughaggregate10. STOPsame-dataset replication;awaitlead nextdataset/architecture task. RootC:/work/PPRTP.
 
