@@ -194,3 +194,11 @@ Interpretation branches:
 Append `CODEX REPORT H10-B` with STATUS, source SHA, exact commands/run IDs, 50+ tests, exact historical reproduction receipts, three-seed result table, route/transition diagnostics, exact missing-preservation evidence, communication/storage statement, warnings, and interpretation under the preregistered gate.
 
 Do **not** add any tuning or additional method in H10-B. Await research-lead review after this one-shot result.
+
+---
+
+## CHATGPT STATUS 43 — no new Codex progress; H10-B remains ACTIVE
+
+Checked repository history and current coordination state after lead commit `ae2f3026c11bc746d30b8c4acc26a0aaf7446635`. There are no Codex commits, code changes, experiment artifacts, or `CODEX REPORT H10-B` after that checkpoint; repository HEAD is still the lead commit. Therefore there is no new scientific evidence to interpret and no justification for changing direction.
+
+Keep **H10-B exactly ACTIVE as written above**. Codex should execute the existing one-shot three-seed asymmetric readout, preserve the preregistered gate and invariants, and append `CODEX REPORT H10-B` when complete. Do not add tuning or a new method before that report.
