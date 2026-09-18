@@ -1,0 +1,255 @@
+{
+  "per_client_predicted_classes": {
+    "local": {
+      "head": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "cosine": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "l2": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        3,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "fedproto": {
+      "head": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "cosine": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "l2": [
+        2,
+        2,
+        2,
+        3,
+        2,
+        3,
+        2,
+        2,
+        2,
+        3
+      ]
+    },
+    "fedgh": {
+      "cosine": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "l2": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "local_head_pre_server": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "global_head_post_server": [
+        2,
+        2,
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "pprtp_h07": [
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10
+    ],
+    "native_control": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  "gates": {
+    "missing_at_least15": true,
+    "missing_beats_baselines5pp": true,
+    "all_beats_baselines2pp": true,
+    "correspondence_missing_gain10pp": true,
+    "predicted_classes9": true,
+    "integrity": true
+  },
+  "verdict": "STRONG",
+  "correspondence_missing_gain_pp": 19.166250005364418,
+  "runtime": {
+    "local": {
+      "total_seconds": 124.80434703826904,
+      "optimizer_steps_total": 15600,
+      "optimizer_steps_per_client_round": [
+        156,
+        156,
+        156,
+        156,
+        156,
+        156,
+        156,
+        156,
+        156,
+        156
+      ],
+      "local_training_seconds_per_client": [
+        8.693451881408691,
+        8.465128660202026,
+        8.150163650512695,
+        8.119387865066528,
+        8.164402961730957,
+        8.141871690750122,
+        8.09127140045166,
+        8.504015922546387,
+        8.095658779144287,
+        8.117757797241211
+      ]
+    },
+    "fedproto": {
+      "total_seconds": 135.537127494812,
+      "optimizer_steps_total": 15600,
+      "optimizer_steps_per_client_round": [
+        156,
+        156,
+        156,
+        156,
+        156,
+        156,
+        156,
+        156,
+        156,
+        156
+      ],
+      "local_training_seconds_per_client": [
+        9.926508903503418,
+        9.492887258529663,
+        9.500600814819336,
+        9.523094654083252,
+        9.536399602890015,
+        9.49373984336853,
+        9.687488794326782,
+        9.47763705253601,
+        9.503539562225342,
+        9.47804045677185
+      ]
+    },
+    "fedgh": {
+      "total_seconds": 188.5446901321411,
+      "optimizer_steps_total": 15600,
+      "optimizer_steps_per_client_round": [
+        156,
+        156,
+        156,
+        156,
+        156,
+        156,
+        156,
+        156,
+        156,
+        156
+      ],
+      "local_training_seconds_per_client": [
+        8.048678636550903,
+        8.01197600364685,
+        7.81899356842041,
+        7.801682949066162,
+        7.792631149291992,
+        7.819865465164185,
+        7.844475746154785,
+        8.026917457580566,
+        7.808336973190308,
+        7.812728404998779
+      ]
+    }
+  },
+  "split_identical": true,
+  "round1_identical": true,
+  "coverage_exact": true,
+  "final_state_and_means_exact": true,
+  "source_sha": "329a6e3754db495245902ed05d28d923eec35cbf"
+}

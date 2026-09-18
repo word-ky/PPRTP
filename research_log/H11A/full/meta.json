@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-230745-h11a-full-data",
+  "releaseId": "20260918-230548-h11a",
+  "sessionName": "autodl-20260918-230745-h11a-full-data",
+  "command": "PPRTP_SOURCE_SHA=329a6e3754db495245902ed05d28d923eec35cbf bash scripts/run_h01.sh --modes local fedproto fedgh --seeds 0 --rounds 10 --full-data"
+}
