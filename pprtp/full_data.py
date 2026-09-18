@@ -36,10 +36,10 @@ def allocate(labels,class_sets,anchors):
         coverage_count=len(flat),coverage_exact=True,client_overlap=0,anchor_train_overlap=0,official_train_test_separate=True)
 
 
-def prepare_full(root):
+def prepare_full(root,seed=0):
     train=CIFAR10(root,train=True,download=True)
     anchors=reserve_anchors(len(train.data)) # No label access until after reservation.
-    historical=json.loads(Path('research_log/H02A/full/artifacts/experiment/fedgh_seed0/split.json').read_text())
+    historical=json.loads(Path(f'research_log/H02A/full/artifacts/experiment/fedgh_seed{seed}/split.json').read_text())
     split=allocate(np.asarray(train.targets),historical['class_sets'],anchors)
     assert split['class_sets']==historical['class_sets'] and len(train.data)==50000
     test=CIFAR10(root,train=False,download=True);assert len(test.data)==10000

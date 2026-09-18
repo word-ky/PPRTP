@@ -69,3 +69,26 @@ class FullDataTest(unittest.TestCase):
             self.assertTrue(r['full_data_readout']['same_final_state_exact'])
             self.assertEqual(sum(r['prediction_histograms']['global_head_post_server']),100)
             self.assertTrue(json.loads((Path(output)/'round_one_pairing_seed0.json').read_text())['passed'])
+
+    def test_seed_generalization_and_exact_h11a_split(self):
+        from unittest.mock import patch
+        from pprtp.full_data import prepare_full
+        old=json.loads(Path('research_log/H11A/full/artifacts/experiment/fedgh_seed0/split.json').read_text())
+        labels=np.zeros(50000,dtype=np.int64)
+        for ii,counts,cs in zip(old['train_indices'],old['class_counts'],old['class_sets']):
+            offset=0
+            for c in cs:
+                n=counts[str(c)];labels[ii[offset:offset+n]]=c;offset+=n
+        train=SimpleNamespace(data=np.zeros((50000,1,1,3),dtype=np.uint8),targets=labels)
+        test=SimpleNamespace(data=np.zeros((10000,1,1,3),dtype=np.uint8),targets=np.arange(10000)%10)
+        def dataset(root,train=True,download=True):return fixtures[train]
+        fixtures={True:train,False:test}
+        for seed in (0,1,2):
+            with patch('pprtp.full_data.CIFAR10',side_effect=dataset):
+                local,evaluation,split,anchors=prepare_full('unused',seed)
+            history=json.loads(Path(f'research_log/H04B/full/artifacts/experiment/fedgh_seed{seed}/split.json').read_text()) if seed else old
+            self.assertEqual(split['class_sets'],history['class_sets'])
+            self.assertEqual(split['anchor_indices'],old['anchor_indices'])
+            self.assertEqual(sum(map(len,local)),49744);self.assertEqual(len(evaluation),10000)
+            self.assertTrue(torch.equal(anchors.tensors[1],torch.zeros(256,dtype=torch.long)))
+            if seed==0:self.assertEqual(json.loads(json.dumps(split)),old)

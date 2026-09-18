@@ -90,8 +90,8 @@ def run(cfg, mode, seed):
     random.seed(seed)
     if cfg.full_data:
         from pprtp.full_data import prepare_full
-        assert seed==0 and cfg.clients==10 and cfg.k==2 and mode in ('local','fedproto','fedgh')
-        datasets,test,split,full_anchors=prepare_full(cfg.data)
+        assert seed in (0,1,2) and cfg.clients==10 and cfg.k==2 and mode in ('local','fedproto','fedgh')
+        datasets,test,split,full_anchors=prepare_full(cfg.data,seed)
     else:
         datasets, test, split = prepare(cfg.data, seed, cfg.clients, cfg.k, cfg.train_per_class, cfg.test_per_class)
     out = Path(cfg.output) / f"{mode}_seed{seed}"
