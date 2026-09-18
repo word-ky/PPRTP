@@ -75,6 +75,7 @@ class H01Client(clientProto):
         protos = defaultdict(list)
         local_sum = knowledge_sum = samples = 0
         self.diagnostic = None
+        self.optimizer_steps = 0
         online=self.mode in ("pprtp_all_lag1","pprtp_seen_lag1")
         if online: self.batch_hashes=[]
         for _ in range(self.local_epochs):
@@ -125,6 +126,7 @@ class H01Client(clientProto):
                 self.optimizer.zero_grad()
                 (local + self.lamda * knowledge).backward()
                 self.optimizer.step()
+                self.optimizer_steps += 1
                 samples += len(y)
                 local_sum += local.item() * len(y)
                 knowledge_sum += knowledge.item() * len(y)
