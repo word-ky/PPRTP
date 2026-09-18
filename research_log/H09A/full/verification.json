@@ -1,0 +1,55 @@
+{
+  "0": {
+    "h07_entire_references_exact": true,
+    "all_ten_online_exact": true,
+    "state_rng_modes_gradients_unchanged": true,
+    "delta_pp": {
+      "seen": 10.099999830126766,
+      "missing": -5.375000499188901,
+      "all": -2.2799995541572553
+    },
+    "strong": false,
+    "native_owner_seen_only": 0.6635,
+    "aligned_missing_only": 0.275,
+    "component_gain_pp": {
+      "seen": 38.40000005662441,
+      "missing": 5.2499997615814245
+    }
+  },
+  "1": {
+    "h07_entire_references_exact": true,
+    "all_ten_online_exact": true,
+    "state_rng_modes_gradients_unchanged": true,
+    "delta_pp": {
+      "seen": -7.899999618530276,
+      "missing": 1.500000655651093,
+      "all": -0.3800000250339497
+    },
+    "strong": false,
+    "native_owner_seen_only": 0.7505,
+    "aligned_missing_only": 0.27675,
+    "component_gain_pp": {
+      "seen": 46.70000014007091,
+      "missing": 5.93750046491623
+    }
+  },
+  "2": {
+    "h07_entire_references_exact": true,
+    "all_ten_online_exact": true,
+    "state_rng_modes_gradients_unchanged": true,
+    "delta_pp": {
+      "seen": 8.299999870359894,
+      "missing": -2.4500000476837176,
+      "all": -0.299999862909317
+    },
+    "strong": false,
+    "native_owner_seen_only": 0.7045,
+    "aligned_missing_only": 0.255625,
+    "component_gain_pp": {
+      "seen": 46.24999972134829,
+      "missing": 4.862500071525574
+    }
+  },
+  "strong_seed_count": 0,
+  "gate": "no seed passes; inspect components and score dominance"
+}

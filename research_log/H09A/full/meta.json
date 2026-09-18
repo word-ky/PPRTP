@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-122435-h09a-dual-space",
+  "releaseId": "20260918-122409-h09a",
+  "sessionName": "autodl-20260918-122435-h09a-dual-space",
+  "command": "PPRTP_SOURCE_SHA=506b6016465cf983c30bb6d8de4a57378076e621 bash scripts/run_h01.sh --modes fedgh --seeds 0 1 2 --rounds 10 --dual-space-probe"
+}
