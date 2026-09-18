@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-115058-h08a-online",
+  "releaseId": "20260918-115039-h08a",
+  "sessionName": "autodl-20260918-115058-h08a-online",
+  "command": "PPRTP_SOURCE_SHA=2da697021300f4adba27418ce7b61b11e690aff8 bash scripts/run_h01.sh --modes pprtp_all_lag1 pprtp_seen_lag1 --seeds 0 --rounds 10"
+}

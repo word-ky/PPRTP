@@ -1,0 +1,21 @@
+{
+  "pprtp_all_lag1": {
+    "round1_exact": true,
+    "lag1_hashes_exact": true,
+    "state_rng_modes_gradients_unchanged": true,
+    "finite": true
+  },
+  "pprtp_seen_lag1": {
+    "round1_exact": true,
+    "lag1_hashes_exact": true,
+    "state_rng_modes_gradients_unchanged": true,
+    "finite": true
+  },
+  "first_bank_identical": true,
+  "all_batches_identical": true,
+  "round2_same_preupdate_tensor": true,
+  "delta_missing_pp": -0.05000010132789612,
+  "delta_all_pp": -0.05999982357025313,
+  "nonzero_allclass_signal": true,
+  "verdict": "B: online mechanism falsified at frozen strength"
+}

@@ -209,3 +209,81 @@ Do not refactor unrelated code.
 Append `CODEX REPORT H08-A` with STATUS, source SHA, exact commands/run IDs, 41+ tests, exact round1 pairing, per-round bank receipts, rounds2/5/10 metrics, round2 gradient diagnostics, communication/local-compute accounting, warnings, and interpretation under the preregistered gate.
 
 Do **not** run seeds1/2, tune lambda or scale, add gating/fusion, change anchor count, use `client.protos`, add learned transport/readout, or optimize communication in H08-A. Await research-lead review.
+
+
+## CODEX REPORT H08-A
+
+STATUS: DONE — B: online mechanism falsified at the frozen strength.
+
+Source SHA `2da697021300f4adba27418ce7b61b11e690aff8`; release `20260918-115039-h08a`; run `20260918-115058-h08a-online`, exit0 at2026-09-18 11:56:03+08. Official pinned Jianqing Zhang PFLlib unchanged.
+
+### Implementation / exact commands / tests
+
+Reused H01Client local training/SGD, FedGH broadcast and server update, `features`, canonical `procrustes`/`transform`, `class_means`/`global_means`. Added `pprtp/online.py`: a pure builder with no test-data argument, a detached aligned loss, paired feature-gradient diagnostic, and a separate test readout. `pprtp/client.py` and `pprtp/run.py` add only the two requested online modes; historical modes retain their previous path. Added3 tests in `tests/test_online.py`, plus reporting script `scripts/report_h08a.py`.
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE=1
+D:\anaconda3\python.exe -m unittest discover -s tests -p test_online.py -v
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+$env:AUTODL_CONFIG_PATH=(Resolve-Path .autodl/config.json).Path
+./scripts/autodl-deploy.ps1 -Tag h08a
+./scripts/autodl-run.ps1 -Name h08a-online -Cmd "PPRTP_SOURCE_SHA=2da697021300f4adba27418ce7b61b11e690aff8 bash scripts/run_h01.sh --modes pprtp_all_lag1 pprtp_seen_lag1 --seeds 0 --rounds 10"
+D:\anaconda3\python.exe scripts/report_h08a.py research_log/H08A/full
+```
+
+Increment1 two focused tests passed; increment2 all3 focused tests passed; full suite44tests passed locally5.928s and remotely1.536s, preserving41 previous tests. New tests check pure-bank state/RNG/mode/gradient isolation, missing-class perturbation affecting all-class loss/feature gradient but not seen-only, no gradient into bank/affine tensors, and exact first-round model/batch pairing against FedGH. End-to-end real-data run and report verification pass.
+
+Frozen setting: seed0, CIFAR10 ten clients with2classes/client and100train/class, official test100/class; PFLlib CNN512D, localSGD.01/no momentum/no decay,batch32,oneepoch,10rounds. Fixed lambda=.002 and scale10 for both modes. Seed0 N256 anchors and ordinary-local provenance fully equal H07-A; no held-out semantic features, oracle features, online client.protos or test data enter the aligned training bank. Generic metadata `prototype_rule` describes the unchanged online FedGH prototypes; the added aligned training bank uses fresh final-state ordinary-local means as recorded in every `aligned_bank` receipt.
+
+### Pairing / timing / isolation
+
+Both arms reproduce historical H02-A round1 model hashes, online-prototype hash, readouts and server-head receipt exactly. No GPC loss in round1. Initial model/split hashes match across arms. Actual x/y minibatch hashes match across both arms at every round; independent explicit client/round generators preserve data order.
+
+After every round, the pure builder independently refreshes that arm's anchors and local examples, computes20classmeans/tenclassbanks, and detaches all bank/affine tensors. Every global class has200 examples, positive finite norms. Construction asserts exact model state, existing gradients, RNG and module modes unchanged. The bank/transform hashes remain identical throughout the following local epoch; no tensor gradient enters construction. Round10's newly built bank is evaluation-only. Rounds2/5 readouts reuse the new bank intended for the next round, through a separate evaluator.
+
+The complete first-bank receipts match across arms, including all ten affine transforms. Round2 client0's pre-update feature hash and both same-tensor feature-gradient diagnostics are identical. Training gradients then differ only through the assigned denominator.
+
+First bank SHA256: `d5436190d2e7bbd3ffd87f0afd7dad304e8c453a0c82459b254ed9e0d2ce4add`.
+
+# H08-A lag-1 aligned-GPC causal gate
+
+| Arm | Round | Seen % | Missing % | All % | Macro % | Predicted classes |
+|---|---:|---:|---:|---:|---:|---:|
+| fedgh_posthoc_reference | 10 | 27.950000 | 22.250000 | 23.390000 | 23.389999 | 10 |
+| pprtp_all_lag1 | 2 | 31.150000 | 30.425000 | 30.570000 | 30.569999 | 10 |
+| pprtp_all_lag1 | 5 | 26.800000 | 24.450000 | 24.920000 | 24.919999 | 10 |
+| pprtp_all_lag1 | 10 | 27.900000 | 22.212500 | 23.350000 | 23.349999 | 10 |
+| pprtp_seen_lag1 | 2 | 31.550000 | 30.500000 | 30.710000 | 30.709999 | 10 |
+| pprtp_seen_lag1 | 5 | 26.850000 | 24.425000 | 24.910000 | 24.909999 | 10 |
+| pprtp_seen_lag1 | 10 | 28.000000 | 22.262500 | 23.410000 | 23.409999 | 10 |
+
+Frozen verdict: B: online mechanism falsified at frozen strength; all-minus-seen missing=-0.050000pp, all=-0.060000pp.
+Per bank: {"semantic_forward_examples": 2000, "anchor_forward_examples": 2560, "semantic_uplink_bytes": 41280, "anchor_uplink_bytes": 5242880, "bank_bytes": 20480, "bank_downlink_total": 204800, "naive_transform_bytes_per_client": [1052672, 1052672, 1052672, 1052672, 1052672, 1052672, 1052672, 1052672, 1052672, 1052672]}
+Ten builds per arm: nine training banks and one evaluation-only final bank; rounds2/5 reuse the fresh next-round bank for separate evaluation. Each arm refreshes20,000 local semantic and25,600 anchor forward examples. Naive affine transform includes both512-D means and512x512 matrix;10,526,720B total per build. This excludes image/reference distribution and unchanged FedGH traffic; no communication-efficiency claim.
+All per-client/class counts, histograms, bank/transform hashes, losses and ordinary readouts are preserved in rounds.jsonl/final.json. Seen-arm missing_probability_on_seen records the counterfactual ALL-class softmax on the same tensor, not the masked training softmax (whose missing mass is zero).
+
+
+### Round2 client0 same-tensor diagnostics
+
+| Quantity | All-class | Seen-only |
+|---|---:|---:|
+| Local base-parameter gradient norm | 1.16238308 | 1.16238308 |
+| Unscaled GPC base-parameter gradient norm | 5.23492861 | .233354658 |
+| Scaled GPC/local gradient norm ratio | .00900723506 | .000401510799 |
+| Feature GPC gradient norm | .202345178 | .0728315413 |
+
+All-vs-seen feature-gradient cosine=.313420296; all-class missing probability mass=.771550179. Thus the missing classes do participate with nonzero, finite gradients. The all-class scaled base-gradient norm is only about0.9007% of local CE at this first batch; it drops to about0.07650% at round5 and0.01685% at round10. This is a measured strength caveat, not authorization to tune. The seen-arm logged missing mass is explicitly the counterfactual all-class distribution on the shared tensor; its actual masked training loss assigns zero probability to missing classes.
+
+### Evidence / accounting / limitations
+
+`research_log/H08A/full/RESULTS.md` contains rounds2/5/10 ordinary readouts, direct readouts, losses, diagnostics, histograms, owner/global norm ranges and hashes. Per-client/per-class correct/count tables, all20local/ten global receipts, all10transform hashes and train-next-round bank identities are preserved in `rounds.jsonl`/`final.json` for both arms. Provenance/metadata/splits/tests/logs/run command and `verification.json` are preserved. Raw checkpoints remain remote. No additional method or seed was run.
+
+Per build:2000semantic +2560anchor forward examples; semantic uplink41,280B; anchor-feature uplink5,242,880B; ten-class bank20,480B, broadcast204,800B. Naive full affine transform payload1,052,672B/client (two512-vectors and512x512matrix),10,526,720B total. These counted objects total16,015,680B/build, excluding image/reference distribution and unchanged FedGH traffic. Ten builds/arm include9training banks plus1final evaluation bank; refresh totals20,000semantic/25,600anchor examples per arm. This is not a communication-efficient claim.
+
+Only existing NVML-initialization warnings occurred; all rounds finished with finite banks/losses and exit0. Local Ddrive exhaustion required evicting one ignored checkpoint duplicate after exact local/remote SHA verification; remote original retained and path/hash logged in progress. No experiment rerun or numerical repair was required.
+
+### Frozen decision / next action
+
+All-class final missing22.2125/all23.35/seen27.90 versus seen-only22.2625/23.41/28.00 and H07-A22.25/23.39/27.95. Both predict10classes. All-minus-seen is -.05pp missing and -.06pp all; the explicit no-better-within.5pp condition holds with clearly nonzero stable gradients. Therefore report branchB: no useful online all-class-denominator benefit at the frozen strength. This does not reject the accepted post-hoc alignment mechanism or establish that all possible strengths/lags fail.
+
+Stop and await research-lead review. No lambda/temperature tuning, additional seeds, gating/fusion, learned transport/readout, or communication optimization.
