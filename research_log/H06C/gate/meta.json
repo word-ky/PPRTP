@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-081407-h06c-direct",
+  "releaseId": "20260918-081345-h06c",
+  "sessionName": "autodl-20260918-081407-h06c-direct",
+  "command": "PPRTP_SOURCE_SHA=5441cc52cfe941d7e156074604e0a264127d2ba0 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --direct-prototype-probe"
+}

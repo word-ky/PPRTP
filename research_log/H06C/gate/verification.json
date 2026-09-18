@@ -1,0 +1,11 @@
+{
+  "h06b_entire_reference_exact": true,
+  "all_ten_online_exact": true,
+  "provenance_exact": true,
+  "state_rng_modes_gradients_unchanged": true,
+  "ret_missing": 0.9727891164949738,
+  "ret_all": 0.9753036538437789,
+  "alignment_gain_pp": 23.23749989271164,
+  "predicted_classes": 10,
+  "verdict": "A: strong direct-global-prototype readout"
+}
