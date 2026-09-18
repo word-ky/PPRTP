@@ -1,3 +1,11 @@
+# Latest state — H13-A DONE
+
+[2026-09-19T06:04:46.964870+08:00] H13-A DONE sourceec249760ca3b229e59be1cb1bc1816c626b5bba0 run20260919-054411-h13a-mixed-backbone exit0;65tests local152.300s remote47.742s prior63preserved. CIFAR100seed0mixed evenCNN/oddResNet18 all512D/head100;exactH12splitoneownerperarchitecture. Perclientinitialmodel/base/head/BNbuffers + round1actualbatches/models/protos paired acrossarms;15600steps/arm;3readoutsstate/rawmeans/RNG/modes/grad/multisets exact. PairedS27.06 M6.38 A10.516;broken28.955/.40/6.111;native35.97/0/7.194=>4/4overallgates STRONG;gap5.98pp/allgain3.316pp vsbestFL. CNNpairedM7.9825/ResNet4.7775 (ResNetbelow5groupwise;overallgateonly),bothpositivepairbreakgaps7.2125/4.7475. SVDframeworkwarningpreserved,noretry/tuning. H13A/full evidence;awaitleadseeds1/2assignment,none launched. RootC:/work/PPRTP.
+
+# Latest state — H13-A RUNNING, 2026-09-19T05:44:16.8339659+08:00
+
+C:/work/PPRTP. Sourceec249760ca3b229e59be1cb1bc1816c626b5bba0 release20260919-054247-h13a run20260919-054411-h13a-mixed-backbone.65tests local152.300s;prior63preserved. CIFAR100seed0only3arms10rounds,evenFedAvgCNNoddpinnedResNet18all512D/head100, exactH12Asplitoneownerperarchitecture. Preconstruct10modelsbeforeclientseedreset; sameperclientinitacrossarms and actualround1batches. Finalpaired/broken/native unchanged. Monitor same run,no duplicate. FetchcompactH13A/full,runreport_h13a.py;push/mirrorthenawaitlead. No newseeds/backbone/adapter/tuning.
+
 # Latest state — H12-B DONE
 
 [2026-09-19T04:51:14.746577+08:00] H12-B DONE source070b4436d68348548fbf85bce0a680bf5fb84bbe run20260919-042844-h12b-cifar100-seeds12 exit0;63tests local46.966s remote18.689s prior62preserved. Seeds1/2 exactH12Asplit with all3initialhashesdistinct; withinseed allarmsinitial/round1paired15600steps/arm;allreadoutsstate/rawmeans/RNG/modes/grad/multisets exact. Pairedseed1 S17.11 M9.58875 A11.093;seed2 S17.085 M9.415 A10.949;both4/4gatespass. Withseed0=>3/3STRONG. Mean(sampleSD)S16.696667(.694376),M9.449583(.125501),A10.899(.223240);missingpairbreakgap9.167083(.117927)pp,allgain3.993667(.209010)pp. Pairedaggregate100/99/100preserved. Fixedgraphstochasticreplication only. SVDframeworkwarningpreserved,norestart/tuning. STOPCIFAR100diagnostics,awaitleadnextassignment;rootC:/work/PPRTP.
