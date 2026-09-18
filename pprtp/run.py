@@ -130,6 +130,24 @@ def run(cfg, mode, seed):
         if cfg.direct_cross_seed_probe:
             assert seed in (1,2)
             assert cross_receipt==json.loads((Path('research_log/H04B/full/artifacts/experiment')/f'fedgh_seed{seed}'/'cross_seed_provenance.json').read_text())
+    if cfg.dual_space_probe:
+        from pprtp.local_source import local_provenance
+        if seed==0:
+            from pprtp.online import prepare_online
+            dual_anchors,dual_provenance=prepare_online(cfg.data,datasets,split,tensor_hash)
+            old=json.loads(Path('research_log/H07A/gate/artifacts/experiment/fedgh_seed0/final.json').read_text())['local_source_probe']
+            dual_refs={k:old['localtrain_'+k] for k in ('aligned_global_prototype_cosine','native_global_prototype_cosine_control')}
+        else:
+            aa,_,cross=prepare_cross_seed(cfg.data,split)
+            dual_anchors,receipt=prefix(aa,cross['anchor_indices'],256)
+            source=local_provenance(datasets,split,cross['oracle_indices'],cross['support_indices'],receipt['indices'],tensor_hash)
+            folder=Path('research_log/H07B/full/artifacts/experiment')/f'fedgh_seed{seed}'
+            old=json.loads((folder/'final.json').read_text())['direct_cross_seed_probe']
+            assert cross==json.loads((folder/'cross_seed_provenance.json').read_text())
+            assert receipt==old['anchor_receipt'] and source==old['local_source']
+            dual_provenance=dict(anchor_receipt=receipt,local_source=source,cross_seed=cross)
+            dual_refs={k:old['arms'][f'seed{seed}_localtrain_'+k] for k in ('aligned_global_prototype_cosine','native_global_prototype_cosine_control')}
+        (out/'dual_provenance.json').write_text(json.dumps(dual_provenance,indent=2))
     if cfg.heldout_owner_probe:
         oracle_indices=json.loads(Path('research_log/H02C/full/artifacts/experiment/fedgh_seed0/oracle_calibration.json').read_text())['indices']
         heldout_data,heldout_receipt=prepare_heldout(cfg.data,split,oracle_indices)
@@ -246,12 +264,29 @@ def run(cfg, mode, seed):
                         assert record['diagnostic_client0']['denominator_feature_gradients']==first['diagnostic_client0']['denominator_feature_gradients']
                 for c,t in zip(clients,transforms): c.aligned_bank=fresh;c.aligned_transform=t
                 previous_bank=receipt
-            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe or cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe or cfg.local_source_probe or cfg.cross_seed_probe or cfg.direct_cross_seed_probe):
+            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe or cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe or cfg.local_source_probe or cfg.cross_seed_probe or cfg.direct_cross_seed_probe or cfg.dual_space_probe):
                 historical=Path('research_log/H02A/full/artifacts/experiment')/f'fedgh_seed{seed}'/'rounds.jsonl'
                 old=json.loads(historical.read_text().splitlines()[r])
                 for key in ('client_model_hashes','prototype_bank_hash','metrics','server_head'):
                     assert json.loads(json.dumps(record[key]))==old[key], f'H02-A online mismatch: round {r+1}, {key}'
                 record['historical_online_exact']=True
+            if mode=='fedgh' and cfg.dual_space_probe and r+1==10:
+                from pprtp.direct_prototypes import analyze_direct
+                from pprtp.dual_space import analyze_dual
+                construction={}
+                aligned=analyze_direct(clients,server_head,dual_anchors,datasets,test,tensor_hash,metrics,None,
+                    expected_alignment=dual_refs['aligned_global_prototype_cosine']['alignment'],construction_output=construction)
+                native=analyze_direct(clients,server_head,dual_anchors,datasets,test,tensor_hash,metrics,None,aligned=False)
+                assert aligned==dual_refs['aligned_global_prototype_cosine']
+                assert native==dual_refs['native_global_prototype_cosine_control']
+                dual=analyze_dual(clients,server_head,test,construction,tensor_hash,metrics)
+                assert dual['state_before']==dual['state_after']==aligned['state_before']
+                assert dual['global_hash']==aligned['global_hash']
+                assert dual['transform_hashes']==[a['transform_hash'] for a in aligned['alignment']]
+                for i,hashes in enumerate(dual['owner_raw_hashes']):
+                    assert hashes==[p['raw_hash'] for p in aligned['local_prototypes'] if p['client']==i]
+                record['dual_space_probe']=dict(aligned_global_prototype_cosine=aligned,native_global_prototype_cosine_control=native,
+                    dual_space_owner_seen_aligned_missing=dual,h07_entire_references_exact=True)
             if mode == 'fedgh' and cfg.direct_cross_seed_probe and r+1==10:
                 from pprtp.direct_prototypes import analyze_direct
                 from pprtp.local_source import local_provenance
@@ -496,6 +531,7 @@ def main():
     parser.add_argument('--cross-seed-probe',action='store_true')
     parser.add_argument('--relation-probe',action='store_true')
     parser.add_argument('--conditioning-probe',action='store_true')
+    parser.add_argument('--dual-space-probe',action='store_true')
     parser.add_argument('--direct-cross-seed-probe',action='store_true')
     parser.add_argument('--local-source-probe',action='store_true')
     parser.add_argument('--direct-prototype-probe',action='store_true')

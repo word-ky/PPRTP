@@ -19,7 +19,7 @@ def cosine_scores(z,bank):
     return scores
 
 
-def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,historical,aligned=True,expected_alignment=None,bank_output=None):
+def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,historical,aligned=True,expected_alignment=None,bank_output=None,construction_output=None):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(head.state_dict().values()),
@@ -33,9 +33,11 @@ def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,histori
     with torch.random.fork_rng(devices=devices):
         aa=[features(c,anchors)[0] for c in clients] if aligned else []
         pp=[];ll=[];nn=[];zz=[];yy=[];owners=[];transforms=[];alignment=[];local=[]
+        raw_owners=[]
         for i,(c,ds) in enumerate(zip(clients,support)):
             z,y=features(c,ds);raw,labels,counts=class_means(z,y)
             assert labels.tolist()==sorted(c.class_set)
+            if construction_output is not None: raw_owners.append((raw.detach().clone(),labels.detach().clone()))
             if aligned:
                 t,d=procrustes(aa[i],aa[0],identity=i==0)
                 d['transform_hash']=tensor_hash(t);alignment.append(d);transforms.append(t)
@@ -79,6 +81,8 @@ def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,histori
     assert torch.equal(cpu,torch.get_rng_state())
     assert all(torch.equal(a,b) for a,b in zip(cuda,torch.cuda.get_rng_state_all() if devices else []))
     totals={k:[sum(h[k][j] for h in histograms) for j in range(10)] for k in ('overall','seen','missing')}
+    if construction_output is not None:
+        construction_output.update(bank=bank.detach().clone(),transforms=transforms,raw_owners=raw_owners)
     if bank_output is not None: bank_output['bank']=bank.detach().clone()
     vector_bytes=bank.numel()*bank.element_size()
     return dict(metrics={k:sum(v[k] for v in values)/len(values) for k in ('seen','missing','all','macro')},
