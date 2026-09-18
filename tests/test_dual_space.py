@@ -39,3 +39,11 @@ class DualSpaceTest(unittest.TestCase):
         self.assertEqual(a['winning_group_fraction'],b['winning_group_fraction'])
         self.assertEqual(a['state_before'],a['state_after']);self.assertTrue(a['state_rng_modes_gradients_unchanged'])
         self.assertEqual(a['metrics']['all'],1.)
+
+        centered=analyze_dual(clients,clients[0].model.head,test,capture,tensor_hash,metrics,centered=True)
+        changed_centered=analyze_dual(clients,clients[0].model.head,changed,capture,tensor_hash,metrics,centered=True)
+        self.assertEqual(centered['prediction_histograms']['total']['overall'],changed_centered['prediction_histograms']['total']['overall'])
+        self.assertTrue(centered['state_rng_modes_gradients_unchanged'])
+        self.assertEqual(centered['state_before'],centered['state_after'])
+        self.assertLess(centered['owner_rotation_max_abs_error'],2e-5)
+        self.assertEqual(analyze_dual(clients,clients[0].model.head,test,capture,tensor_hash,metrics),a)

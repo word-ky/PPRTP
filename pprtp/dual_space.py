@@ -16,7 +16,7 @@ def distributions(values):
     return {k:dict(mean=v.mean().item(),p10=torch.quantile(v,.1).item(),p50=torch.quantile(v,.5).item(),p90=torch.quantile(v,.9).item()) for k,v in values.items()}
 
 
-def analyze_dual(clients,head,test,construction,tensor_hash,metrics):
+def analyze_dual(clients,head,test,construction,tensor_hash,metrics,centered=False,global_only=False):
     bank=construction['bank'];tt=construction['transforms'];owners=construction['raw_owners']
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],server=tensor_hash(head.state_dict().values()),
@@ -25,12 +25,18 @@ def analyze_dual(clients,head,test,construction,tensor_hash,metrics):
     before=state();gb=grads();modes=[[m.training for m in c.model.modules()] for c in clients]
     cpu=torch.get_rng_state().clone();devices=list(range(torch.cuda.device_count())) if torch.cuda.is_available() else []
     cuda=torch.cuda.get_rng_state_all() if devices else []
+    centered_receipts=[]
     per_client=[];hist=[];components=[];score_rows=[];pools={'seen':[],'missing':[]};winners={'seen':[],'missing':[]}
     with torch.random.fork_rng(devices=devices),torch.no_grad():
         for i,(c,t,(raw,labels)) in enumerate(zip(clients,tt,owners)):
             assert labels.tolist()==sorted(c.class_set)
             z,y=features(c,test)
-            scores=dual_scores(z,raw,labels,bank,t);pred=scores.argmax(1)
+            if centered:
+                from pprtp.centered import centered_scores
+                scores,receipt=centered_scores(z,raw,labels,bank,t,global_only)
+                centered_receipts.append(receipt)
+            else: scores=dual_scores(z,raw,labels,bank,t)
+            pred=scores.argmax(1)
             # All targets enter only below this prediction line, for diagnostics.
             owned=torch.zeros(10,dtype=torch.bool,device=z.device);owned[labels]=True
             missing_labels=(~owned).nonzero().flatten()
@@ -53,7 +59,7 @@ def analyze_dual(clients,head,test,construction,tensor_hash,metrics):
     score_summary={name:dict(scores=distributions(dict(zip(('max_seen_score','max_missing_score','difference'),torch.cat(pools[name]).T))),
         native_winner_fraction=torch.cat(winners[name]).float().mean().item(),aligned_winner_fraction=1-torch.cat(winners[name]).float().mean().item()) for name in pools}
     overall=torch.cat([v for group in winners.values() for v in group]).float().mean().item()
-    return dict(metrics={k:sum(v[k] for v in per_client)/len(per_client) for k in ('seen','missing','all','macro')},per_client=per_client,
+    result=dict(metrics={k:sum(v[k] for v in per_client)/len(per_client) for k in ('seen','missing','all','macro')},per_client=per_client,
         prediction_histograms=dict(per_client=hist,total=total),predicted_class_count=sum(v>0 for v in total['overall']),
         component_diagnostics=dict(native_owner_seen_only=sum(v['native_owner_seen_only_correct'] for v in components)/sum(v['seen_count'] for v in components),
             aligned_missing_only=sum(v['aligned_missing_only_correct'] for v in components)/sum(v['missing_count'] for v in components),per_client=components),
@@ -61,3 +67,9 @@ def analyze_dual(clients,head,test,construction,tensor_hash,metrics):
         state_before=before,state_after=state(),state_rng_modes_gradients_unchanged=True,scores_finite=True,incremental_communication_bytes=0,
         global_hash=tensor_hash([bank]),transform_hashes=[tensor_hash(t) for t in tt],
         owner_raw_hashes=[[tensor_hash([p]) for p in raw] for raw,_ in owners])
+    if centered:
+        result['centered_diagnostics']=centered_receipts
+        result['owner_rotation_max_abs_error']=max(v['owner_rotation_max_abs_error'] for v in centered_receipts)
+        if global_only:
+            for key in ('component_diagnostics','score_distributions','winning_group_fraction'): result.pop(key)
+    return result
