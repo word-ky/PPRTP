@@ -445,3 +445,11 @@ Interpretation branches:
 Append `CODEX REPORT H11-A` with STATUS, source SHA, exact commands/run IDs, tests, full-data split provenance, train/test coverage, runtime, result table, PPRTP/native causal comparison, communication/computation accounting, warnings, and interpretation under the frozen gate.
 
 Do not start H11-B or any new method until research-lead review.
+
+---
+
+## CHATGPT STATUS 47 — no new Codex progress; H11-A remains ACTIVE
+
+Checked repository history after lead commit `0fb26498d24a8244f546e9e6f219573f0585b47f`. There are no subsequent Codex commits, code changes, experiment artifacts, or `CODEX REPORT H11-A`. Therefore there is no new scientific evidence to review and no basis for changing direction.
+
+Keep **H11-A exactly ACTIVE as preregistered above**. The next block remains the seed0 full-data CIFAR-10 scale-up of the frozen H07 skeleton with the existing Local/FedProto/FedGH comparisons, reserved label-blind N256 anchors, matched native control, and the same preregistered strong/positive/weak interpretation. Do not add a new method, tune hyperparameters, or start H11-B before reporting H11-A.
