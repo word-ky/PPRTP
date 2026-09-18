@@ -130,7 +130,7 @@ def run(cfg, mode, seed):
         if cfg.direct_cross_seed_probe:
             assert seed in (1,2)
             assert cross_receipt==json.loads((Path('research_log/H04B/full/artifacts/experiment')/f'fedgh_seed{seed}'/'cross_seed_provenance.json').read_text())
-    if cfg.dual_space_probe or cfg.centered_dual_probe or cfg.radius_router_probe:
+    if cfg.dual_space_probe or cfg.centered_dual_probe or (cfg.radius_router_probe or cfg.group_refine_probe):
         from pprtp.local_source import local_provenance
         if seed==0:
             from pprtp.online import prepare_online
@@ -264,13 +264,13 @@ def run(cfg, mode, seed):
                         assert record['diagnostic_client0']['denominator_feature_gradients']==first['diagnostic_client0']['denominator_feature_gradients']
                 for c,t in zip(clients,transforms): c.aligned_bank=fresh;c.aligned_transform=t
                 previous_bank=receipt
-            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe or cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe or cfg.local_source_probe or cfg.cross_seed_probe or cfg.direct_cross_seed_probe or cfg.dual_space_probe or cfg.centered_dual_probe or cfg.radius_router_probe):
+            if mode == 'fedgh' and (cfg.probe_head or cfg.oracle_head or cfg.owner_sample_probe or cfg.heldout_owner_probe or cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe or cfg.local_source_probe or cfg.cross_seed_probe or cfg.direct_cross_seed_probe or cfg.dual_space_probe or cfg.centered_dual_probe or (cfg.radius_router_probe or cfg.group_refine_probe)):
                 historical=Path('research_log/H02A/full/artifacts/experiment')/f'fedgh_seed{seed}'/'rounds.jsonl'
                 old=json.loads(historical.read_text().splitlines()[r])
                 for key in ('client_model_hashes','prototype_bank_hash','metrics','server_head'):
                     assert json.loads(json.dumps(record[key]))==old[key], f'H02-A online mismatch: round {r+1}, {key}'
                 record['historical_online_exact']=True
-            if mode=='fedgh' and (cfg.dual_space_probe or cfg.centered_dual_probe or cfg.radius_router_probe) and r+1==10:
+            if mode=='fedgh' and (cfg.dual_space_probe or cfg.centered_dual_probe or (cfg.radius_router_probe or cfg.group_refine_probe)) and r+1==10:
                 from pprtp.direct_prototypes import analyze_direct
                 from pprtp.dual_space import analyze_dual
                 construction={}
@@ -287,6 +287,18 @@ def run(cfg, mode, seed):
                     assert hashes==[p['raw_hash'] for p in aligned['local_prototypes'] if p['client']==i]
                 record['dual_space_probe']=dict(aligned_global_prototype_cosine=aligned,native_global_prototype_cosine_control=native,
                     dual_space_owner_seen_aligned_missing=dual,h07_entire_references_exact=True)
+                if cfg.group_refine_probe:
+                    from pprtp.group_refine import evaluate_refine
+                    old=json.loads((Path('research_log/H09A/full/artifacts/experiment')/f'fedgh_seed{seed}'/'final.json').read_text())['dual_space_probe']
+                    assert record['dual_space_probe']==old
+                    refined=evaluate_refine(clients,server_head,test,construction,tensor_hash,metrics)
+                    assert refined['shared_per_client']==aligned['per_client']
+                    assert refined['isolation']['state_before']==refined['isolation']['state_after']==dual['state_before']
+                    for key in ('global_hash','transform_hashes','owner_raw_hashes'):
+                        assert refined[key]==dual[key]
+                    for c,v,ref in zip(clients,refined['per_client'],aligned['per_client']):
+                        assert sum(v['class_correct'][k] for k in range(10) if k not in c.class_set)==sum(ref['class_correct'][k] for k in range(10) if k not in c.class_set)
+                    record['group_refine_probe']=dict(aligned_group_gate_native_owner_refine=refined,h09a_entire_reference_exact=True)
                 if cfg.radius_router_probe:
                     from pprtp.router import calibrate_radii,evaluate_router
                     old=json.loads((Path('research_log/H09A/full/artifacts/experiment')/f'fedgh_seed{seed}'/'final.json').read_text())['dual_space_probe']
@@ -553,6 +565,7 @@ def main():
     parser.add_argument('--cross-seed-probe',action='store_true')
     parser.add_argument('--relation-probe',action='store_true')
     parser.add_argument('--conditioning-probe',action='store_true')
+    parser.add_argument('--group-refine-probe',action='store_true')
     parser.add_argument('--radius-router-probe',action='store_true')
     parser.add_argument('--centered-dual-probe',action='store_true')
     parser.add_argument('--dual-space-probe',action='store_true')

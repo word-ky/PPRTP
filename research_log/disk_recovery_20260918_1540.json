@@ -1,0 +1,174 @@
+{
+  "reason": "ENOSPC blocks H10-B; canonical tracked byte-identical evidence retained",
+  "total_bytes": 2019070,
+  "pairs": [
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113545-h01d-full\\artifacts\\experiment\\fedproto_seed0\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\full\\receipts\\fedproto_seed0\\rounds.jsonl",
+      "sha256": "B31C8E482D5E2DCF53B4A916D4AB730FA5D18AA9FF9B0DF4A481352ED0403614",
+      "bytes": 124412
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113545-h01d-full\\artifacts\\experiment\\fedproto_seed2\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\full\\receipts\\fedproto_seed2\\rounds.jsonl",
+      "sha256": "6446AFF1D8CE40B8595E441B4DD1B6926D838015DE063B653BFD55325772C6DF",
+      "bytes": 124382
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113545-h01d-full\\artifacts\\experiment\\gpc_seen_match_seed1\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\full\\receipts\\gpc_seen_match_seed1\\rounds.jsonl",
+      "sha256": "3241D5B3040EBAD7CA187447A3583EE0850D97543864089F840097776DC02D26",
+      "bytes": 124364
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113545-h01d-full\\artifacts\\experiment\\gpc_all_match_seed0\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\full\\receipts\\gpc_all_match_seed0\\rounds.jsonl",
+      "sha256": "6725D7E787926B4C4894356751DB320CB8A98C175FC52E23207DB8BDFDB75A25",
+      "bytes": 124343
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113545-h01d-full\\artifacts\\experiment\\gpc_seen_match_seed0\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\full\\receipts\\gpc_seen_match_seed0\\rounds.jsonl",
+      "sha256": "64C1BA93E37F43F2D63A09510C7E1A8570BC9A3FC4380E29190249CD8BAFE773",
+      "bytes": 124295
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-000820-h01b-seeds12\\artifacts\\experiment\\gpc_seed2\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01B\\receipts\\gpc_seed2\\rounds.jsonl",
+      "sha256": "D17AA641291C543E43D4EE1D8A57F24D28CD19F9656BB713816BB5424F5ACEB7",
+      "bytes": 116372
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-000820-h01b-seeds12\\artifacts\\experiment\\gpc_seed1\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01B\\receipts\\gpc_seed1\\rounds.jsonl",
+      "sha256": "78E2910D2533F9E273C2E50CDBEE1BA17886062EA46EEE29EB6D1F424CA0DF8F",
+      "bytes": 116277
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-000820-h01b-seeds12\\artifacts\\experiment\\fedproto_seed1\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01B\\receipts\\fedproto_seed1\\rounds.jsonl",
+      "sha256": "F43102108CFCBA3D982D4AD15B9EB10671DF30C19EE612879D04848FB6A33C73",
+      "bytes": 116243
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-000651-h01b-seed0\\artifacts\\experiment\\fedproto_seed0\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01B\\receipts\\fedproto_seed0\\rounds.jsonl",
+      "sha256": "64669295DE2F113078B2C187BD6B688504244096AF4FAD0AD0554B5D3C58578C",
+      "bytes": 115955
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-000651-h01b-seed0\\artifacts\\experiment\\gpc_seed0\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01B\\receipts\\gpc_seed0\\rounds.jsonl",
+      "sha256": "A3028E77B48C454D1537C195959B550566DA98784FB9904DFAB20B1AE01DDA54",
+      "bytes": 115947
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-000820-h01b-seeds12\\artifacts\\experiment\\fedproto_seed2\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01B\\receipts\\fedproto_seed2\\rounds.jsonl",
+      "sha256": "8147D1449C13CE9DBE2068E86E560EAE88F78A5FC575B2D7CD6B7868889C6C37",
+      "bytes": 115935
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-000820-h01b-seeds12\\artifacts\\experiment\\local_seed2\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01B\\receipts\\local_seed2\\rounds.jsonl",
+      "sha256": "6CCEBAF1CC0F33B3A01D618FE24997146CD4BF1C59F007F287A84812A36306EA",
+      "bytes": 114283
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-000820-h01b-seeds12\\artifacts\\experiment\\local_seed1\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01B\\receipts\\local_seed1\\rounds.jsonl",
+      "sha256": "A1B6633A76E1FA63D07BA0C3D2BCEB8197D4C8D1B7E66F3054D565FAD3DAA9D0",
+      "bytes": 114269
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-000651-h01b-seed0\\artifacts\\experiment\\local_seed0\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01B\\receipts\\local_seed0\\rounds.jsonl",
+      "sha256": "C412A2311FFE1F38B23603C4011FFF23B3603081208AD91CA7B8C249ADDD43CB",
+      "bytes": 114168
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113545-h01d-full\\train.log",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\full\\train.log",
+      "sha256": "F22F8B160AAB5941840FFADF8AC3D4CB41866082314358692EA12399827FCC47",
+      "bytes": 41259
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-000820-h01b-seeds12\\train.log",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01B\\20260917-000820-h01b-seeds12_train.log",
+      "sha256": "BF43014BFE3390DA370095A292C456EE4B4DF219EF3E65354F4ACC8BE2C7F0DC",
+      "bytes": 27429
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113423-h01d-gate\\artifacts\\experiment\\fedproto_seed0\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\gate\\receipts\\fedproto_seed0\\rounds.jsonl",
+      "sha256": "7993474949AF98A84F245EA838D6EA3CF13BA494D5236E5EA8634D33926E7CC7",
+      "bytes": 25063
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113423-h01d-gate\\artifacts\\experiment\\gpc_seen_match_seed0\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\gate\\receipts\\gpc_seen_match_seed0\\rounds.jsonl",
+      "sha256": "0059E51EAF963C624B74AA9BF6885774DC223F7BC1D4B0A3456CFD96376D0C3C",
+      "bytes": 25060
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113423-h01d-gate\\artifacts\\experiment\\gpc_all_match_seed0\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\gate\\receipts\\gpc_all_match_seed0\\rounds.jsonl",
+      "sha256": "EE7E97E2F439E91A44E5616802CE1C75E9F8F829004953FC4F7F1256809BBE25",
+      "bytes": 24985
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-102726-h01c-gate\\artifacts\\experiment\\fedproto_seed0\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01C\\receipts\\fedproto_seed0\\rounds.jsonl",
+      "sha256": "1611B926B0EADF9132A17F44768E12356A82277AFF6C91CDB268F8CB65FCD613",
+      "bytes": 24879
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-102726-h01c-gate\\artifacts\\experiment\\gpc_seen_match_seed0\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01C\\receipts\\gpc_seen_match_seed0\\rounds.jsonl",
+      "sha256": "13CC389F87493AD1B7F80D47E3AE03CE8A1EDA8D9410503450C7C9A5DFD73447",
+      "bytes": 24807
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-102726-h01c-gate\\artifacts\\experiment\\gpc_all_match_seed0\\rounds.jsonl",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01C\\receipts\\gpc_all_match_seed0\\rounds.jsonl",
+      "sha256": "9682986B5C6F51B34EAF40E5759BE2792437F8FA1DBB99A3DFA5BD44DDB795C9",
+      "bytes": 24801
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113545-h01d-full\\artifacts\\experiment\\gpc_seen_match_seed2\\final.json",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\full\\receipts\\gpc_seen_match_seed2\\final.json",
+      "sha256": "FCBBD9B8CFD9D666D6FEDE60B246F0F93D48154BA049C735B989117ECA6DD4CE",
+      "bytes": 23278
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113545-h01d-full\\artifacts\\experiment\\fedproto_seed1\\final.json",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\full\\receipts\\fedproto_seed1\\final.json",
+      "sha256": "25E8750F8B192A3011D88B058FCD4C96E9B9E7F9501C387A47B0F0FA3CACA43D",
+      "bytes": 23267
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113423-h01d-gate\\artifacts\\experiment\\fedproto_seed0\\final.json",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\gate\\receipts\\fedproto_seed0\\final.json",
+      "sha256": "04D185066A5A8381025A9025C2C184BBFBC730C1D7351167E6601112D0D8C2F4",
+      "bytes": 23259
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113423-h01d-gate\\artifacts\\experiment\\gpc_seen_match_seed0\\final.json",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\gate\\receipts\\gpc_seen_match_seed0\\final.json",
+      "sha256": "DD5501F081F7D39BD0389E985304221FE8C93F4D2848EFB10599AD861B816372",
+      "bytes": 23256
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113545-h01d-full\\artifacts\\experiment\\gpc_all_match_seed2\\final.json",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\full\\receipts\\gpc_all_match_seed2\\final.json",
+      "sha256": "11577ED549D3BACD18B0AA31034348EE77B6B239A46867452BF7F70BC8ED6A41",
+      "bytes": 23245
+    },
+    {
+      "duplicate": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\remote_runs\\20260917-113545-h01d-full\\artifacts\\experiment\\gpc_seen_match_seed1\\final.json",
+      "canonical": "D:\\work\\fightccfa-agin\\CVPR2027\\personalized prototype\\research_log\\H01D\\full\\receipts\\gpc_seen_match_seed1\\final.json",
+      "sha256": "6A86843406B2E01B76E0B6283A7DEA01A8A768523EF0D9B54882DE8A5FE7D549",
+      "bytes": 23237
+    }
+  ]
+}
