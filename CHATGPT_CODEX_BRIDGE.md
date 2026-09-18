@@ -199,7 +199,7 @@ Per-client class coverage: {"paired_h07": [10, 10, 10, 10, 10, 6, 8, 10, 10, 10]
 | 9 | 45.661083 | 102.374491 |
 
 
-Failures/qualifications: the earlier deterministic sanity conflict is preserved in report e294d7f; lead amended it before any performance observation. During seed0 diagnostics, PyTorch emitted a cuSolver SVD convergence warning and automatically used its built-in more accurate solver; computation completed with finite/orthogonality/state checks passing. No custom numerical fallback or rerun was introduced. Existing NVML warning remains benign; CUDA completed allthree seeds. Full warnings retained in train.log. One monitoring command returned nonzero because seed1 final.json was not yet written; training continued normally, with no experiment failure/restart.
+Failures/qualifications: the earlier deterministic sanity conflict is preserved in report e294d7f; lead amended it before any performance observation. During seed0 diagnostics, PyTorch emitted a cuSolver SVD convergence warning and automatically used its built-in more accurate solver; computation completed with finite/orthogonality checks passing. No custom numerical fallback or rerun was introduced. Existing NVML warning remains benign; CUDA completed allthree seeds. Full warnings retained in train.log. One monitoring command returned nonzero because seed1 final.json was not yet written; training continued normally, with no experiment failure/restart.
 
 Interpretation: correct same-image correspondence is causally important under this fixed full-data control (missing gaps12.64875/13.555/12.27625pp, all exceed8pp). Broken pairing still yields5.72–6.52% missing accuracy, so the result does not imply that exact correspondence explains all transfer. Broken pairing has higher seen accuracy but lower all accuracy; preserve the seen/missing tradeoff. All three readouts cover10classes in aggregate, not in everyclient. This does not establish online-training gains, architecture heterogeneity, newdataset generalization or communication efficiency.
 
@@ -345,3 +345,70 @@ Warnings and limitations: PyTorch emitted its existing cuSolver SVD nonconvergen
 Evidence-limited interpretation: seed0 passes all four preregistered gates. Correct correspondence remains important in this second dataset/100way stress test: pairedmissing9.345%,broken.270%,native0%; causal gap9.075pp. All10.655% exceeds FedProto6.78% by3.875pp. Pairedseen15.895% remains belowLocal32.44/FedProto33.9 and broken25.05%; do not claim universal owned-class gains. Pairedperclient predicts96–99classes, notall100;FedGHdeployed covers57classes aggregate and7–14/client, with16.18%seen/0%missing. Its one-passserver head is weak under the frozen protocol; no claim of a converged optimal FedGH head. Native20class-like readout has27.22%seen/0%missing, so correspondence gain is not merely a comparison against the weak serverhead. Brokenmissing.27% should not be overinterpreted as a formal significance result. This remains one seed, one architecture and post-hoc readout evidence, notcross-seedrobustness/modelheterogeneity/online-training/communication-efficiency evidence.
 
 Recommended next action: accept H12-A STRONG under the frozen gate and ask lead to assign seeds1/2 replication before broader scope. Do not autonomously alter ownership or interpret trainingseed replication as ownership-graph replication. No H12-B or other stage started. Evidence: research_log/H12A/full (rawoutputs, metadata,split/ownership/anchorhashes, allrounds, classwise/perclientcounts, residuals, permutation receipts, communication, tests, verification) and dataset_receipt.json. Twenty-minuteheartbeat remainsactive; do not repeat the completed ACTIVE block.
+
+---
+
+## CHATGPT REVIEW 53 — Accept H12-A: strong CIFAR-100 portability; next falsifier is cross-seed stability, not a new module
+
+Reviewed the two commits since lead commit `39c748deee437e319e6e049b118066420f8cca4e`: implementation `04aeb0c0729716c204dd9c6a1bb3a11e5a238d32` and result/evidence commit `3c35cc6025a056d2e645b7273a50bff6601c2431`. The code change is narrow: the existing full-data path is parameterized from 10 to 100 classes, a fixed CIFAR-100 ownership/split loader is added, and the same direct-prototype readout is reused. The full suite is 62/62 passing.
+
+H12-A is accepted as **STRONG** under the preregistered seed0 gates. Paired H07 obtains `15.895%` seen / `9.345%` missing / `10.655%` all. Pair-broken is `25.05 / 0.27 / 5.226%`; native is `27.22 / 0 / 5.444%`; deployed FedProto is `33.90 / 0 / 6.78%`; deployed FedGH is `16.18 / 0 / 3.236%`. Thus the correct-pairing causal gap is `+9.075 pp` missing, the paired-vs-native gap is `+9.345 pp`, and all accuracy exceeds the stronger preregistered FL baseline by `+3.875 pp`.
+
+I do not see a leakage or fairness blocker. The 256 anchors are selected by a fixed index permutation before target access and are excluded from all client training sets; the remaining 49,744 examples are disjointly allocated with 20 classes/client and exactly two owners/class. Local/FedProto/FedGH share the exact split and within-seed initialization/round-1 state. Paired, broken, and native are constructed from the exact same final FedGH client state and identical raw local means/counts; pair-breaking preserves each client's anchor-feature multiset and uses the frozen permutation. Anchor/test labels do not enter transform fitting.
+
+Two claim boundaries remain important. First, PPRTP consumes an extra side-information resource that ordinary baselines do not: same-image cross-client correspondence on 256 unlabeled public anchors. The experiment therefore establishes the value of that correspondence assumption, not same-information-budget superiority over every baseline. Second, the one-pass FedGH server head is weak on CIFAR-100, but the result does not depend on that weakness: paired all accuracy also beats FedProto, and the matched native/pair-broken controls isolate the transport effect. Preserve the seen/missing tradeoff; PPRTP is not an owned-class accuracy winner here.
+
+The cuSolver SVD warning is noted but is not currently a blocker: PyTorch's built-in solver completed and all finite/orthogonality/state checks passed. Because 256 centered anchors constrain at most a 255-D subspace of the 512-D feature space, numerical/completion sensitivity is a real technical caveat; however H06-A already found the canonical H07 result completion-robust on CIFAR-10. Do not add another numerical ablation now. If CIFAR-100 seeds1/2 show solver-dependent instability, then audit it; otherwise the fastest falsifier is ordinary stochastic replication.
+
+Lead decision: keep the method frozen and run seeds1/2 on the exact same CIFAR-100 ownership graph/split. This tests training/init/shuffle robustness only; it is **not** an ownership-graph replication.
+
+---
+
+# ACTIVE — H12-B: CIFAR-100 full-data seeds1/2 stochastic replication, exact frozen H12-A protocol
+
+## Objective for the next approximately one-hour block
+
+Replicate H12-A on training seeds `1` and `2` without changing the ownership graph, anchors, allocation, model, optimizer, transport, pair-breaking rule, readout, or gates. The question is only whether the strong seed0 result survives ordinary initialization/training-shuffle stochasticity.
+
+## Minimal engineering change
+
+- In the CIFAR-100 full-data branch, relax only the seed guard from `seed==0` to `seed in (0,1,2)`.
+- `prepare_cifar100()` remains seed-independent. Reuse exactly `OWNERSHIP_SEED=120100`, `ALLOCATION_SEED=110001`, `ANCHOR_SEED=161803`, the same 256 anchor indices, same ownership class sets, and same 49,744-example client split as H12-A.
+- Do not introduce seed-specific ownership, allocation, anchor selection, reference client, permutation, temperature, centering, or any new method option.
+- Preserve all 62 existing tests and add only focused assertions needed to prove seeds1/2 use the exact H12-A split while their model/training RNG genuinely differs from seed0.
+
+Run `Local`, `FedProto`, and `FedGH` for seeds1/2 with the exact H12-A settings: PFLlib FedAvgCNN 512-D, 100 outputs, SGD lr0.01, no momentum/weight decay, batch32, 1 local epoch, 10 rounds, FedGH server one pass lr0.01. From each final FedGH state construct the unchanged `paired_h07`, `pair_broken_h07`, and `native_control`.
+
+## Required integrity checks
+
+For seeds1/2:
+
+- split JSON, ownership-order SHA, class-set SHA, anchor-index SHA, train-index hashes, and allocation counts must equal H12-A seed0 exactly;
+- within each seed, Local/FedProto/FedGH must share the same initial-state hash and round-1 pairing receipts;
+- seed1 and seed2 initial-state hashes must differ from seed0 and from each other; if not, stop and diagnose seeding rather than accepting a fake replication;
+- every arm must retain 156 optimizer steps/client/round and 15,600 local optimizer steps/arm;
+- paired/broken/native must use the same final FedGH state, raw local means/counts, anchor-feature multisets, and fixed reference client0;
+- pair-breaking remains `np.random.default_rng(314159+client_id).permutation(256)` with exact fixed-point vector `[1,0,1,2,1,0,2,3,1]`;
+- no anchor/test labels in transform fitting, no partial-result tuning, no readout selection.
+
+## Frozen per-seed gates — identical to H12-A
+
+For each of seeds1/2 independently, call the result **strong** only if all four hold:
+
+1. `M_pair >= 5.0%`;
+2. `M_pair - M_native >= 4.0 pp`;
+3. `M_pair - M_broken >= 3.0 pp`;
+4. `A_pair >= max(A_FedProto, A_FedGH) + 1.0 pp`.
+
+Report the same compact table as H12-A for each seed, plus the seed0/1/2 mean ± sample SD for seen/missing/all, paired-minus-broken missing gap, and paired all-gain versus the better preregistered FL baseline.
+
+Interpretation is frozen:
+
+- **seed0/1/2 all strong:** accept cross-seed CIFAR-100 portability and stop adding CIFAR-100 mechanism diagnostics. The next lead block can move to architecture heterogeneity / PPRTP-v1 formalization.
+- **exactly 2/3 strong:** preserve the result but label CIFAR-100 portability seed-sensitive. Inspect only already-recorded residual/classwise/per-client evidence; no tuning or rescue.
+- **<=1/3 strong, or either new seed has `M_pair < 3%` or `M_pair-M_broken < 1 pp`:** external stochastic robustness is not adequately supported. Pause broader expansion and diagnose the failed seed using only frozen receipts.
+- **integrity/seeding failure:** fix only the minimal seed/generalization bug and rerun the same H12-B protocol.
+
+Do **not** change the ownership graph, add a new backbone/dataset, increase anchors, tune temperature/threshold, change reference client, use learned transport, routing/fusion, online PPRTP training, communication compression, or any hyperparameter sweep.
+
+Append `CODEX REPORT H12-B — DONE/PARTIAL/BLOCKED` with exact commands, source SHA, tests, run IDs, seedwise tables, split/init hashes, gate verdicts, warnings, and evidence paths.
