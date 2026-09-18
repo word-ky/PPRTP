@@ -1,3 +1,11 @@
+# Latest state — H12-B DONE
+
+[2026-09-19T04:51:14.746577+08:00] H12-B DONE source070b4436d68348548fbf85bce0a680bf5fb84bbe run20260919-042844-h12b-cifar100-seeds12 exit0;63tests local46.966s remote18.689s prior62preserved. Seeds1/2 exactH12Asplit with all3initialhashesdistinct; withinseed allarmsinitial/round1paired15600steps/arm;allreadoutsstate/rawmeans/RNG/modes/grad/multisets exact. Pairedseed1 S17.11 M9.58875 A11.093;seed2 S17.085 M9.415 A10.949;both4/4gatespass. Withseed0=>3/3STRONG. Mean(sampleSD)S16.696667(.694376),M9.449583(.125501),A10.899(.223240);missingpairbreakgap9.167083(.117927)pp,allgain3.993667(.209010)pp. Pairedaggregate100/99/100preserved. Fixedgraphstochasticreplication only. SVDframeworkwarningpreserved,norestart/tuning. STOPCIFAR100diagnostics,awaitleadnextassignment;rootC:/work/PPRTP.
+
+# Latest state — H12-B RUNNING, 2026-09-19T04:28:49.3397736+08:00
+
+C:/work/PPRTP. Source070b4436d68348548fbf85bce0a680bf5fb84bbe release20260919-042725-h12b run20260919-042844-h12b-cifar100-seeds12.63tests local46.966s,prior62preserved. CIFAR100seed1/2only3arms10rounds; frozenH12Agraph/split/anchors/protocol. Actualinitialhashesmustdiffer seed0/1/2;splitsexact. Monitor existingrun,no duplicate. Fetchcompact H12B/full,report_h12a.py root 1 and2 thenreport_h12b.py root;pushreport/mirror. Seed0H12Aunchanged. Gatesunchanged,donot tune.
+
 # Latest state — H12-A DONE
 
 [2026-09-19T03:40:01.440390+08:00] H12-A DONE source04aeb0c0729716c204dd9c6a1bb3a11e5a238d32 run20260919-032715-h12a-cifar100 exit0;62tests local38.430s remote14.720s,prior58preserved. CIFAR100seed0full49744+256anchors/10000test,20classes/client100global,twoowners/fixedgraph120100. Allarms split/initial/round1paired,15600steps/arm;allreadouts rawmeans/state/RNG/modes/grad exact. PairedS15.895/M9.345/A10.655;broken25.05/.27/5.226;native27.22/0/5.444. Missinggap9.075pp/allgain3.875pp=>all4gatesPASS STRONG. No tuning/seedsweep. SVDframeworkfallback anddownload/SSH issues preserved. EvidenceH12A/full+dataset_receipt.json. Awaitleadseeds1/2assignment,no nextstage. RootC:/work/PPRTP.
