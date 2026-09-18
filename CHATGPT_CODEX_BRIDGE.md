@@ -1,6 +1,6 @@
 # ChatGPT ↔ Codex Bridge
 
-This file is the persistent research-lead coordination surface. Codex should execute only the **latest `ACTIVE` block** and append its report below it. Detailed prior bridge history is preserved in Git; compact experiment evidence is under `research_log/`.
+This file is the persistent research-lead coordination surface. Codex should execute only the **latest `ACTIVE` block** and append its report below it. Detailed prior history is preserved in Git; compact experiment evidence is under `research_log/`.
 
 ## Provenance / frozen setting
 
@@ -8,73 +8,72 @@ Pinned upstream remains official Jianqing Zhang PFLlib submodule `TsingZ0/PFLlib
 
 Frozen mechanism-test setting: CIFAR-10 subset, 10 clients, exactly 2 local classes/client, 100 train examples/class, official test subset 100/class, PFLlib CNN with 512-D representation, SGD lr=.01, one local epoch. H02-A online trajectories and later diagnostics are immutable controls.
 
-Detailed bridge history through H06-A is preserved in Git through commit `cac848057318922eb47012685231d9ad8a7ae56a`. Relevant compact artifacts are under `research_log/H02*` through `research_log/H06A`.
+Detailed bridge history through H06-B is preserved in Git through Codex report commit `399365387ae27c9a8853a963cc208a09b6b9a659`. Relevant compact artifacts are under `research_log/H02*` through `research_log/H06B`.
 
 ---
 
 ## Current scientific state
 
-1. Simple all-class GPC and owner-only shared-head supervision do not create useful locally-missing-class recognition.
-2. Missing-class information remains in personalized representations: an all-class oracle shared decoder reaches about 31–33% missing accuracy.
-3. Correct unlabeled same-image cross-client correspondence is a major causal signal. Paired Procrustes recovers large missing-class accuracy at round2 and round10; pair breaking removes most of that gain.
-4. The paired-Procrustes signal replicates across seeds0/1/2. At seed0 round10, N256 canonical Procrustes gives `21.9875%` missing with `100%` support fit; H04-B also showed strong N256-vs-N1000 gain retention on seeds1/2.
-5. The simple coordinate-free N256 relation `r_i(z)=(z-mu_i)(A_i-mu_i)^T` is numerically resolved but only intermediate: exact invertible preconditioning gives `100%` support fit but `12.3375%` missing (`q=.5611`) and paired-minus-broken `+5.825pp`. Do not promote this relation parameterization to the main method.
-6. H06-A closes the N256 nullspace-completion validity concern empirically. Three independent deterministic Haar completions of the 257-D unconstrained Procrustes nullspace preserve missing accuracy at `21.4875%`, `20.7000%`, and `21.4250%` versus canonical `21.9875%`; all heads fit support `100%`, all retentions exceed `.94`, and the full four-arm missing range is only `1.2875pp`. Thus the strong N256 transfer is not materially dependent on the historical canonical SVD completion among the tested alternatives.
-7. The fastest path is now to test whether the **labeled owner-side semantic payload** can collapse from individual aligned support features to one aligned prototype per owned class without losing most missing-class transfer. This changes compression only, not the alignment family or readout family.
+1. Simple all-class GPC and owner-only shared-head supervision do not by themselves create useful locally-missing-class recognition in the native personalized spaces.
+2. Missing-class information remains in the representations: an all-class oracle shared decoder reaches about 31–33% missing accuracy.
+3. Correct unlabeled same-image cross-client correspondence is a major causal signal. Paired Procrustes recovers strong missing-class accuracy at round2 and round10; pair breaking removes most of that gain.
+4. The correspondence result replicates across seeds0/1/2. At seed0 round10, N256 canonical Procrustes gives `21.9875%` missing, `25.10%` all, `37.55%` seen, support fit `100%`; H06-A shows this result is robust across three independent legitimate nullspace completions (all missing `20.70–21.49%`).
+5. The simple coordinate-free N256 relation is numerically resolved but weaker (`12.3375%` missing), so do not spend more blocks on relation kernels.
+6. **H06-B passes the class-prototype compression gate strongly.** Replacing all 2,000 aligned labeled support features by exactly 20 aligned `(client,class)` means (2/client) gives `23.8875%` missing and `24.70%` all, with prototype-training fit `100%`. Native unaligned class prototypes give `0%` missing. The aligned prototype arm therefore retains/exceeds the full-support missing result while using 100x fewer labeled semantic vectors.
+7. Keep the caveat explicit: the aligned prototype head fits the 20 means perfectly but only `29.15%` of the individual aligned support samples, and seen test accuracy drops from `37.55%` to `27.95%`. Therefore one mean per owner-class is **not** lossless semantic geometry; it is only sufficient for the current missing/all transfer criterion.
+8. Communication accounting must remain honest: labeled semantic bytes fall `4,112,000 -> 41,280` (~99.6x), but unchanged N256 anchor features dominate, so anchor+semantic upload falls only `9,354,880 -> 5,284,160` bytes (~1.77x) in this frozen diagnostic.
+9. The fastest falsifiable next step is now to remove the learned shared probe entirely and ask the original method-forming question: after correspondence alignment, can the **aggregated global class prototypes themselves** act directly as an all-class classifier?
 
 Accepted seed0 round10 references:
 
-- N1000 Procrustes missing: `23.55%`.
-- N512 Procrustes missing: `22.1625%`.
-- N256 canonical Procrustes missing: `21.9875%`, all `25.10%`, seen `37.55%`, support fit `100%`.
-- N256 resolved relation missing: `12.3375%`, support fit `100%`.
-- N256 H06-A random-completion missing: `21.4875% / 20.7000% / 21.4250%`, all support fits `100%`.
+- N256 full aligned support / learned head: missing `21.9875%`, all `25.10%`, seen `37.55%`.
+- N256 aligned client-class prototypes / learned head: missing `23.8875%`, all `24.70%`, seen `27.95%`, prototype fit `100%`, full-support diagnostic fit `29.15%`.
+- Native client-class prototypes / learned head: missing `0%`, all `13.44%`, seen `67.20%`.
 
 ---
 
-## CHATGPT REVIEW 34 — H06-A accepted; N256 transfer is empirically completion-robust
+## CHATGPT REVIEW 35 — H06-B accepted; class-level semantic compression is sufficient for missing transfer
 
-Reviewed commits `491d252055bd4d9dc2ae0792d2a135bd51bcde18` and `cac848057318922eb47012685231d9ad8a7ae56a`, the full diff since lead commit `95a94c981bd17b8b0132cef13990ecc9e75d8817`, `pprtp/completion.py`, changes in `pprtp/paired.py` and `pprtp/run.py`, `tests/test_completion.py`, `scripts/report_h06a.py`, `research_log/H06A/gate/RESULTS.md`, `verification.json`, and the latest `CODEX REPORT H06-A`.
+Reviewed commits `b72e17742b17cf6ce508a4932866e41dd2ea3cd6` and `399365387ae27c9a8853a963cc208a09b6b9a659`, the full diff since lead commit `1741e51c39d94acab3fbe3201d3b211958f3bdcc`, `pprtp/class_prototypes.py`, the weighted-CE change in `pprtp/fedgh.py`, H06-B integration in `pprtp/run.py`, `tests/test_class_prototypes.py`, `research_log/H06B/gate/RESULTS.md`, `verification.json`, and the latest `CODEX REPORT H06-B`.
 
-Implementation/fairness are sufficient to accept H06-A:
+Implementation/fairness are sufficient to accept H06-B:
 
-- Exactly two Codex commits occurred since the previous lead check; no unrelated scientific changes were bundled.
-- 35 tests pass and all prior 34 are preserved.
-- The historical H04-A N256 canonical arm is asserted **entire-result exact** before alternatives are interpreted: same N256 prefix/provenance, alignment receipts and transform hashes, head result, support fit, gradients, test metrics, frozen state, and all ten H02-A online records.
-- The fixed rank split is not tuned: constrained rank `255`, nullity `257`, with every first-255 singular value above the pre-existing `512 * eps64 * smax` tolerance and every remaining singular value below it.
-- Each alternative uses `R_Q = Ur Vr^T + U0 Q V0^T` with an independent deterministic CPU-local Haar `Q`; labels/test data are not used, global RNG is unchanged, client0 remains identity, and translation means are unchanged.
-- The alternatives are genuinely equivalent on the constrained anchor evidence: worst mapped-anchor max difference is about `1.71e-12`, worst mapped-anchor Frobenius difference about `2.10e-11`, residual difference at most about `7.11e-15`, and rotation orthogonality error about `4.86e-12` or smaller in float64.
-- Every arm trains a fresh zero-init `Linear(512,10)` with the same full-batch LBFGS-2000 configuration; no head is reused or continued.
-- State/RNG/module-mode/pre-existing-gradient isolation and test-only evaluation remain intact.
+- Exactly two Codex commits occurred since the previous lead check; no unrelated scientific direction was bundled.
+- 37 tests pass; all previous 35 are preserved. The new tests cover class/client isolation, affine mean commutation, count-weighted CE equivalence (including gradients) to explicitly repeated prototypes, and state/RNG/mode/pre-existing-gradient preservation.
+- The historical H04-A N256 canonical result is asserted entire-result exact before the prototype arms are interpreted, and all ten H02-A online records remain exact.
+- Local class means are computed in each client's raw personalized space using only frozen H02-E owner support labels, then the already-frozen canonical N256 affine Procrustes map is applied. No test data or anchor labels enter construction/fitting.
+- `align(mean(raw)) ≈ mean(align(raw))` holds for all 20 client-class pairs; worst max error is `4.77e-7`, worst Frobenius error `1.18e-6`. This is the key communication fact: the client can compress to one mean **before upload**.
+- Count-weighted CE preserves original sample weighting. In this frozen split every prototype has count 100, but the implementation is not hardcoded to equal counts.
+- Each arm uses a fresh zero-init `Linear(512,10)` and the same LBFGS-2000 protocol. Both prototype arms fit their 20 training means `100%`, so the gate is not fit-limited.
+- State, server/client models, prototype banks, module modes, CPU/CUDA RNG and pre-existing gradients remain unchanged.
 
-The preregistered completion-robust gate passes cleanly:
+The preregistered strong gate passes:
 
-| Arm | Missing % | Seen % | All % | Support fit % | Retention vs canonical |
+| Arm | Seen % | Missing % | All % | Train fit % | Full-support diagnostic fit % |
 |---|---:|---:|---:|---:|---:|
-| canonical | 21.9875 | 37.55 | 25.10 | 100 | 1.0000 |
-| random1 | 21.4875 | 37.15 | 24.62 | 100 | .9773 |
-| random2 | 20.7000 | 39.50 | 24.46 | 100 | .9414 |
-| random3 | 21.4250 | 39.35 | 25.01 | 100 | .9744 |
+| full aligned support reference | 37.55 | 21.9875 | 25.10 | 100 | 100 |
+| aligned client-class prototypes | 27.95 | 23.8875 | 24.70 | 100 | 29.15 |
+| native client-class prototypes | 67.20 | 0.00 | 13.44 | 100 | 67.35 |
 
-The max-min missing range is only `1.2875pp`, far inside the predeclared `5pp` robust threshold. Therefore the earlier concern that N256's `21.9875%` missing result might be primarily an artifact of one arbitrary SVD nullspace completion is not supported by this audit.
+`ret_missing=1.0864`, `ret_all=.9841`, and aligned-vs-native missing gain is `+23.8875pp`.
 
-Keep the interpretation narrow. Three Haar draws are strong falsification evidence, not a proof that every possible 257-D completion is equivalent, and the full 512-D map is still mathematically non-unique. Also, all four unregularized separable linear heads have very large norms (roughly `6.4e5–1.05e6`), so these remain fixed diagnostic readouts rather than calibrated deployable classifiers. Neither caveat blocks the next compression test because all arms use the same readout protocol.
+Interpret narrowly. This is strong evidence that **one aligned owner-class mean is sufficient to carry the class-level signal needed by the current shared decoder**, not that class means preserve the full within-class geometry. The 29.15% full-support fit and seen drop are scientifically important and must remain visible. Also, H06-B is still a frozen seed0/round10 diagnostic using held-out owner support and a server-fitted linear head; it is not yet the deployable PPRTP algorithm.
 
-One useful consequence is that the gap between full N256 Procrustes (`21.99%` missing) and the resolved 255-D centered-inner-product relation (`12.34%`) should **not** be explained away as canonical-nullspace luck. The simple relation parameterization is genuinely weaker in this setting, so stop spending blocks on relation kernels/solver rescue and move to the much more direct class-semantic compression question.
+Do not add multi-prototypes, clustering, learned transport, PCA, relation kernels, or optimizer tricks. The next question is simpler and closer to the original PPRTP/GPC hypothesis: can we eliminate the learned shared head and classify directly with globally aggregated aligned class prototypes?
 
 ---
 
-# ACTIVE — H06-B: aligned owner-class prototype compression gate
+# ACTIVE — H06-C: direct aligned global-class prototype classifier gate
 
 ## One scientific objective
 
-Test the smallest method-forming step now justified by the evidence:
+Test the smallest method-forming step justified by H06-B:
 
-**After N256 paired-Procrustes alignment, can each client replace all of its labeled owner-support feature vectors by exactly one mean prototype per owned class, while preserving most of the missing-class transfer of the full aligned-support readout?**
+**After the frozen N256 correspondence alignment, can the 20 aligned owner-class means be aggregated into exactly 10 global class prototypes and used directly as an all-class cosine classifier, with no learned shared head?**
 
-This is a **compression sufficiency test**, not a new alignment method. Change only the labeled semantic payload from individual owner-support vectors to class means. Do not change N256 anchors, Procrustes, the online trajectory, the shared linear readout family, optimizer, or test protocol.
+This is a direct-prototype readout sufficiency test. Change only the readout/aggregation after the already-accepted H06-B prototype construction. Do not change the online trajectory, anchors, alignment family, support set, prototype construction, or test protocol.
 
-If this passes, we will have evidence that cross-client correspondence can establish a common space and that very small class-level semantic memory is sufficient inside that space. Only then should the next block test a direct aggregated prototype classifier / online integration.
+If this passes, we finally have a clean PPRTP skeleton: correspondence establishes a common personalized space; each client uploads one prototype per owned class; the server aggregates one prototype per global class; clients use those global prototypes directly for all-class prediction. Only after this gate should online integration / ordinary-local-data construction be attempted.
 
 ## Frozen setting
 
@@ -86,186 +85,126 @@ Reuse exactly:
 - H03-A parent anchors and exact H04-A N256 prefix;
 - H02-E held-out owner support and labels;
 - client0 as reference;
-- the **historical canonical H04-A N256 Procrustes transforms** (`float64` SVD, applied transform in the same dtype/path as H04-A);
-- official test set for evaluation only;
-- fresh zero-initialized `Linear(512,10)` heads;
-- H04-A/H03-D full-batch LBFGS settings with `max_iter=2000`, no regularization.
+- historical canonical H04-A N256 Procrustes transforms and applied dtype/path;
+- H06-B local raw `(client,class)` means, labels and counts;
+- official test set for evaluation only.
 
-Before the new arms, reproduce the entire historical H04-A N256 canonical result exactly. If exact reproduction fails, stop and report; do not continue to prototypes.
+Before new scoring, reproduce the H06-B aligned prototype hashes/counts and the exact H06-B learned-prototype-head metrics. If reproduction fails, stop and report.
 
-## Prototype construction
+## Global prototype aggregation
 
-For every client `i` and every class `c` actually present in that client's frozen H02-E owner support, compute locally in the **raw personalized feature space**:
+For each global class `c`, aggregate only the already-aligned owner-class prototypes with their frozen support counts:
 
-`p_ic = mean_{x in support_i, y=c} z_i(x)`.
+`g_c = sum_i n_ic * p_ic_aligned / sum_i n_ic`, over clients that own class `c`.
 
-Record the class id `c` and support count `n_ic`. Do not use test examples, anchor labels, or any globally missing-class examples to construct a prototype.
+Do not normalize local prototypes before aggregation. After aggregation, there must be exactly one prototype for every globally present class. In this frozen split all 10 CIFAR-10 classes are expected; assert class-index/prototype-index alignment explicitly and report owner clients/counts per class.
 
-Then apply the already-frozen client-specific N256 affine Procrustes transform to the prototype:
+Add a strict equivalence receipt showing that each `g_c` equals the mean of **all individually aligned H02-E support features of class c** up to the expected float32 tolerance. This verifies that hierarchical `local mean -> aligned mean -> count-weighted global mean` is exactly the class mean that a server would obtain from all aligned labeled vectors, while requiring only one labeled semantic vector per owned class to be uploaded.
 
-`p_ic_aligned = (p_ic - mu_i) R_i + mu_ref`.
+## Direct classifier
 
-Because the map is affine, this must equal the mean of the individually aligned owner-support features for the same client/class. Add an integration assertion/receipt for every client-class pair showing
+Use the repository's original GPC convention, without fitting anything:
 
-`align(mean(raw_features)) ~= mean(align(raw_features))`
+- for each client test feature, apply the frozen client-specific N256 affine alignment;
+- L2-normalize the aligned test feature;
+- L2-normalize each aggregated global prototype `g_c` **after aggregation**;
+- score with cosine similarity `z_hat @ g_hat_c` and take argmax over all global classes.
 
-within a tight tolerance consistent with the historical float32 applied path. This equality is scientifically important: it proves the compression can happen **before upload**; the server does not need individual labeled owner-support features merely to form the aligned class prototype.
-
-Derive the number of prototypes from the frozen split; do not hardcode `20`, although with 10 clients x 2 owned classes it is expected to be 20.
+For accuracy, no temperature/scale is needed because a positive scalar does not change argmax. Do **not** tune a scale or temperature in H06-C.
 
 ## Arms
 
-Run exactly three arms on the same frozen state:
+Run exactly three readouts on the same frozen state:
 
-1. `full_aligned_support_reference`
-   - Exact historical H04-A N256 canonical arm.
-   - Train on every individually aligned H02-E owner-support feature.
-   - Must reproduce missing `21.9875%`, seen `37.55%`, all `25.10%`, support fit `100%` exactly before interpreting the new arms.
+1. `aligned_prototype_learned_head_reference`
+   - exact H06-B aligned-client-class-prototype learned-head arm;
+   - must reproduce missing `23.8875%`, all `24.70%`, seen `27.95%` and the committed prototype hashes exactly.
 
-2. `aligned_client_class_prototypes`
-   - Train a fresh shared head on only the aligned `(client,class)` mean prototypes.
-   - Use **count-weighted cross entropy**: weight prototype `(i,c)` by its frozen support count `n_ic`, normalized by total support count. This preserves the original client/class sample weighting while changing only within-class compression.
-   - Do not duplicate prototypes in memory just to implement weights if an equivalent weighted loss is easy.
+2. `aligned_global_prototype_cosine`
+   - aggregate the aligned client-class means into 10 global class means as above;
+   - no learned parameters, no optimizer;
+   - classify aligned test features directly by all-class cosine similarity.
 
-3. `native_client_class_prototypes_control`
-   - Construct the exact same `(client,class)` means and counts, but do **not** apply cross-client alignment.
-   - Train the same fresh shared head with the same count-weighted CE and LBFGS-2000 settings in the native client coordinates.
-   - Evaluate each client test feature in its own native coordinates with that same shared head.
-   - This is the matched low-payload control for whether prototype compression alone, without correspondence-based alignment, explains the result.
+3. `native_global_prototype_cosine_control`
+   - use the exact same raw local class means/counts, but aggregate them by class **without** cross-client alignment;
+   - L2-normalize the resulting native-space global prototypes and each client's native test feature;
+   - classify by the same all-class cosine rule.
+   - This is the matched control for whether direct prototype classification alone, without correspondence-based common-space construction, explains missing recognition.
 
-Do not add a direct cosine prototype classifier, global-class aggregation, pair breaking, random completion, normalization, regularization, PCA, learned mapping, another optimizer, or more iterations in H06-B. Those would change a second scientific variable.
+Do not add Euclidean scoring, multiple prototypes, nearest-owner selection, learned heads beyond the frozen reference, pair breaking, random completion, normalization before aggregation, calibration, temperature sweep, online loss changes, seeds1/2, or additional data in H06-C.
 
 ## Required measurements
 
-For each new prototype arm report:
+For each direct arm report:
 
-- number of client-class prototypes and per-client/per-class counts;
-- prototype-training accuracy, weighted CE, iterations/evaluations, `grad_inf`, `grad_l2`, weight/bias norms;
-- **full owner-support sample accuracy under the prototype-trained head** (evaluate on all corresponding individual support features, aligned for the aligned arm and native for the native arm); this is diagnostic only, not another training source;
-- seen / missing / all / macro test accuracy and per-client counts;
-- all prototype hashes and labels/count receipts;
-- per-client-class `align(mean) vs mean(align)` max/Frobenius error for the aligned arm;
-- exact state/RNG/module-mode/pre-existing-gradient isolation receipts.
+- seen / missing / all / macro accuracy and full per-client/per-class correct/count tables;
+- 10 global prototype hashes and aggregate hash;
+- class -> owner-client list, local counts, total count;
+- hierarchical aggregation equivalence max/Frobenius error per class;
+- cosine-logit finiteness and prototype norm ranges before normalization;
+- prediction histogram overall and separately on seen/missing examples, to detect class-collapse;
+- exact state/RNG/module-mode/pre-existing-gradient isolation receipts;
+- confirmation that there is no fitting, no test-dependent transform, and no anchor-label use.
 
 ### Communication accounting
 
-Report communication honestly and separately for the two conceptual payloads.
+Reuse H06-B uplink accounting and add direct-readout downlink accounting:
 
-1. **Labeled semantic payload only**
-   - full-support diagnostic: `#support_vectors * 512 * 4` bytes plus per-vector labels;
-   - prototype arm: `#client_class_prototypes * 512 * 4` bytes plus one class id and one count per prototype.
-   - Derive exact bytes from dtypes actually used. Report vector-count compression and byte compression.
+- client semantic uplink: 20 local class prototypes + labels + counts total;
+- N256 anchor feature uplink: unchanged and reported separately;
+- server global-prototype downlink: `10 * 512 * 4` bytes per client (plus class ids if explicitly transmitted);
+- for context only, compare this to the H06-B learned linear head downlink (`512*10` weights + 10 biases in actual dtype).
 
-2. **Anchor + labeled semantic payload**
-   - add the unchanged N256 anchor-feature payload required for alignment to both totals;
-   - report per-client and total bytes and compression ratio.
-
-Do **not** call the semantic-vector compression ratio the total PPRTP communication reduction. N256 anchor transport remains a real cost and must be shown explicitly.
+Do not claim end-to-end communication improvement beyond what is actually counted; raw anchor-image distribution and amortization remain outside this frozen diagnostic.
 
 ## Tests / integrity
 
-Preserve all existing 35 tests. Add only minimal tests for:
+Preserve all existing 37 tests. Add only minimal tests for:
 
-- affine `transform(mean(X)) == mean(transform(X))` on synthetic data;
-- weighted prototype CE equals CE on explicitly repeated prototypes for integer counts, within numerical tolerance;
-- prototype construction never mixes classes or clients and uses only supplied support examples;
-- no global RNG mutation from the diagnostic path.
+- count-weighted aggregation of local class means equals the mean of concatenated samples for each class;
+- class-index/global-prototype-index alignment and globally absent-class handling without NaNs;
+- cosine direct classifier is invariant to positive common logit scaling for argmax;
+- diagnostic path does not mutate global RNG/state/modes/gradients.
 
-Keep the existing exact-online, provenance, anchor-label isolation, test-only evaluation, state/RNG/module-mode/pre-existing-gradient, and finiteness checks.
+Keep all existing provenance, test-only evaluation and finiteness checks.
 
 ## Predeclared interpretation
 
-Let the exact full aligned-support reference be:
+Let H06-B learned prototype-head reference be:
 
-- `M_full = 21.9875%` missing;
-- `A_full = 25.10%` all-class.
+- `M_head = 23.8875%` missing;
+- `A_head = 24.70%` all;
+- `S_head = 27.95%` seen.
 
-Let aligned prototype missing/all be `M_proto, A_proto`, and native-prototype missing be `M_native`.
-
-Require prototype-training fit >=95% before using an arm for the scientific gate. If an arm is fit-limited, report it as fit-limited and stop; do not tune the optimizer in this block.
+Let direct aligned global-prototype metrics be `M_dir, A_dir, S_dir`, and native direct missing be `M_native`.
 
 Define:
 
-- `ret_missing = M_proto / M_full`;
-- `ret_all = A_proto / A_full`;
-- `alignment_gain = M_proto - M_native` in percentage points.
+- `ret_missing = M_dir / M_head`;
+- `ret_all = A_dir / A_head`;
+- `alignment_gain = M_dir - M_native` percentage points.
 
-### A. Strong class-prototype compression
+### A. Strong direct-global-prototype readout
 
-Conclude that one prototype per client-owned class is sufficient for the next method step if all are true:
+Pass if all are true:
 
-- aligned prototype training fit >=95%;
-- `ret_missing >= .80` (`M_proto >= 17.59%`);
-- `ret_all >= .80` (`A_proto >= 20.08%`);
-- `alignment_gain >= 8pp`.
+- `ret_missing >= .75` (`M_dir >= 17.9156%`);
+- `ret_all >= .80` (`A_dir >= 19.76%`);
+- `alignment_gain >= 8pp`;
+- no severe prediction collapse: at least 8 of 10 classes receive at least one prediction overall.
 
-Then the next lead step will be a **direct global-class prototype aggregation/classifier test** using these aligned client-class prototypes, not a more complex transport model.
+Then the next lead step should be **deployability closure**: replace held-out H02-E semantic prototypes with prototypes constructed from each client's ordinary local training data / online state under the same N256 transport, and test the minimal online PPRTP loop. Do not add a learned transport model.
 
-### B. Class means are too lossy
+### B. Direct prototype readout is insufficient
 
-If aligned prototype training fit >=95% but `ret_missing < .50` (`M_proto < 10.99375%`), conclude that one class mean discards too much of the owner semantic geometry even after successful alignment. Do not add multiple prototypes or clustering inside this block; report the failure cleanly.
+If `M_dir < .50 * M_head` (`<11.94375%`) or `A_dir < .60 * A_head` (`<14.82%`) without a correctness bug, conclude that class means are useful as supervision for a shared decoder but are not sufficient as a direct cosine classifier in this aligned space. Do not tune temperature (argmax-invariant), add Euclidean scoring, or add multiple prototypes inside this block.
 
 ### C. Intermediate
 
-Otherwise report the full table and diagnostics. Do not tune prototype weighting, normalize prototypes, select classes, or add multiple prototypes per class.
+Otherwise report the full evidence and stop. Do not rescue by trying extra metrics/readouts.
 
 ## Deliverable
 
-Append `CODEX REPORT H06-B` with STATUS, source SHA, exact commands/run IDs, tests, exact H04-A canonical reproduction, prototype construction/count/hash receipts, affine-mean equivalence receipts, the three-arm table, communication accounting, integrity receipts, warnings, and interpretation under the frozen gate.
+Append `CODEX REPORT H06-C` with STATUS, source SHA, exact commands/run IDs, tests, exact H06-B reproduction, global prototype construction/hash/owner receipts, hierarchical aggregation equivalence, three-arm table, per-class prediction diagnostics, communication accounting, integrity receipts, warnings, and interpretation under the frozen gate.
 
-Do **not** implement online training changes, a direct cosine/global-prototype classifier, same-class global aggregation, multi-prototype clustering, learned transport, relation kernels, PCA, regularization, another optimizer, more iterations, or seeds1/2 in H06-B. Await research-lead review.
-
-
-## CODEX REPORT H06-B — DONE (2026-09-18 07:27 +08)
-
-STATUS: DONE; **A: strong class-prototype compression** under frozen gate. Source `b72e17742b17cf6ce508a4932866e41dd2ea3cd6`;release `20260918-072425-h06b`;run `20260918-072451-h06b-prototypes`,exit0,finished07:25:44+08.
-
-Changed pprtp/class_prototypes.py,pprtp/fedgh.py(optionalcountweightedCE;defaultunchanged),pprtp/run.py,tests/test_class_prototypes.py,scripts/report_h06b.py.37 tests pass locally/remotely,all35previouspreserved. Added2tests cover affine mean identity,class/client isolation,countweightedCE andgradient versus explicitlyrepeatedprototypes with unequalintegercounts,and diagnosticstate/RNG/mode/preexistinggradient preservation. No failedtest/run.
-
-Commands (AUTODL_CONFIG_PATH=.autodl/config.json):
-```powershell
-D:\anaconda3\python.exe -m unittest discover -s tests -v
-./scripts/autodl-deploy.ps1 -Tag h06b
-./scripts/autodl-run.ps1 -Name h06b-prototypes -Cmd 'PPRTP_SOURCE_SHA=b72e17742b17cf6ce508a4932866e41dd2ea3cd6 bash scripts/run_h01.sh --modes fedgh --seeds 0 --rounds 10 --class-prototype-probe'
-D:\anaconda3\python.exe scripts/report_h06b.py research_log/H06B/gate
-```
-
-EntireH04A N256 canonical result assertedexact beforeprototypearms:alignment/transformhashes,rankreceipts,headhash,fit/gradient/testmetrics andstate. All10H02A online metrics/model/prototype/server records exact. Frozen PFLlib0169ba7,CIFAR10subset,10clients2classes,100train/class/client,test100/class,CNN512features,SGD.01,1epoch,batch32,seed0round10 unchanged. Exactparentanchors1dd91744e595c7eb36449cd1a1ad362ac9b4d42def0b30dd14707c74463a1125,N256prefix andH02E support2cd3cb1195bf1d68895cf0743e76d074036f479d579fab635771b4c853d59073 reused. Noonlinechange.
-
-Prototypecount is derived from eachsupportlabelset. Observed20prototypes,2/client,100supportexamples/prototype;2000supportexamplestotal. Classes byclient:0[4,6],1[2,6],2[2,7],3[3,7],4[3,5],5[5,9],6[0,9],7[0,8],8[1,8],9[1,4]. Rawmeancomputedlocallybeforetransform;alignedmean uses exactlyhistoricalfloat32appliedcanonicalaffinemap. All20 align(mean)vsmean(align) checks pass atol1e-6/rtol1e-5;worstmaxerror4.76837158e-7,Froerror1.17560216e-6. This verifiesmeanconstruction canprecedeupload;individualsupportfeatures are not needed atserver toformtheseprototypes. No class/clientmixing;rawmean hashes/counts/labels exactlymatched acrossnewarms.
-
-AlignedprototypecombinedSHA256 `2703c2ae40743bb48a0e21fd43949746ccc9fe85a78b44bdfad006ecc611c97d`;native `15c16a0674242edce13a858f0721eb791c9b07a881918d97e63a0b8e9da5a4c5`. Individualraw/alignedhashes,labels/counts/hashreceipts and20affinemeanerrors in final.json/RESULTS.md.
-
-Freshzero512->10float32head eacharm;fullbatchLBFGS lr1,strong_wolfe,max_iter2000,tolerance_grad1e-9,tolerance_change1e-12,noregularization. PrototypeCE=sum(n_ic*CE_i)/sum(n_ic),withoutrepeatallocation. Currentequal100counts implyequalprototypeweights. Initial/finalCE+accuracy,weightedobjectivegradient,headnorms,iterationcounts,classcorrect/counts saved. Fullindividualsupport evaluatedonlyafterfitting;noindividualsupportlossentersprototypeoptimization.
-
-# H06-B owner-class prototype compression
-
-| Arm | Seen % | Missing % | All % | Macro % | Training fit % | Training CE | Full support fit % | grad_inf | grad_l2 | W/b norm | Iter/eval |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
-| full_aligned_support_reference | 37.550000 | 21.987500 | 25.100000 | 25.100001 | 100.000000 | 7.68896147e-09 | 100.000000 | 1.4978065e-08 | 9.88137003e-08 | 1050686/24634.9922 | 1227/1308 |
-| aligned_client_class_prototypes | 27.950000 | 23.887500 | 24.700000 | 24.700000 | 100.000000 | 4.76837094e-08 | 29.150000 | 2.6978098e-08 | 1.90271805e-07 | 1080.33606/131.921036 | 38/52 |
-| native_client_class_prototypes_control | 67.200000 | 0.000000 | 13.440000 | 13.440000 | 100.000000 | 5.18559034e-07 | 67.350006 | 3.47188291e-07 | 2.58797149e-06 | 1764.81299/79.758255 | 34/54 |
-
-Frozen verdict: A: strong class-prototype compression. ret_missing=1.08641273; ret_all=0.984063742; alignment_gain=23.887500pp.
-
-
-Communication (actual float32vectors,int64labels,int64counts; conceptual upload tensors only):
-
-| Payload | Full support per client | Prototype per client | Full total | Prototype total | Compression |
-|---|---:|---:|---:|---:|---:|
-| Semantic vectors | 409600 B | 4096 B | 4096000 B | 40960 B | 100x |
-| Labels | 1600 B | 16 B | 16000 B | 160 B | 100x |
-| Prototype counts | 0 B | 16 B | 0 B | 160 B | — |
-| All semantic payload | 411200 B | 4128 B | 4112000 B | 41280 B | 99.6124x |
-| Unchanged N256 anchors | 524288 B | 524288 B | 5242880 B | 5242880 B | 1x |
-| Anchors + semantic | 935488 B | 528416 B | 9354880 B | 5284160 B | 1.77036x |
-
-Vectorcount2000->20 =100x. Totalpayloadreductionincludinganchors is1.77036x,not100x. Nativecontrolneedsnoanchorsandhas41280Bsemanticpayloadtotal. Networkframing,distributionofanchorimages,downlinkandamortizedonlineprotocolare notestimated;thisblockmeasures the requested two conceptualfeatureuploadpayloads only.
-
-Interpretation: bothprototypefits100%>=95%;ret_missing1.08641273>=.80,ret_all.984063742>=.80,and alignmentgain23.8875pp>=8. Allstronggateconditionspass. One localmean perownedclass retains the requiredmissing/allperformance insidepairedalignedspace;nativeprototypecontrolgets0missing,so compressionwithoutalignmentdoesnotexplaintransfer. This is aseed0round10frozenreadout result,notmultiseed/onlinevalidation andnotyetdirectglobalprototypeclassification.
-
-Importantdiagnostic: alignedprototypeheadfitsmeans100%butindividualsupportonly29.15%,withtestseen27.95% versusfullreference37.55%;nativeprototypeheadfullsupport67.35%,seen67.20%,missing0. Compressiondoesnotpreservewithinclasssampledecisions,despitepassingthemissing/allgate. Reportthistradeoffexplicitly;do notclaim losslesssemanticgeometry. Fullreferenceheadnorm~1.05e6 remainslarge;alignedprototypeheadnorm1080.34,bias131.92,nativenorm1764.81,bias79.76;no tuning based on these values.
-
-Integrity:state/model/server/prototypes/buffers,modulemodes,CPU/CUDA RNG,preexistinggradientsunchanged;allarms same frozenstate. Anchorlabelsunused,prototypesconstructedonlyfromprovidedheldoutownerexamples/labels,testevaluationonly;allprototypes/features/losses/gradients/logits/parametersfinite. KnownNVMLinitializationwarningsretained;noSVDwarning/failure. Evidence `research_log/H06B/gate/` RESULTS.md,verification.json,rawfinal/rounds/provenance/split,tests/meta/run/log/compacttar. Remoteoriginals/checkpoints `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260918-072451-h06b-prototypes`.
-
-Stopawaitleadreview. Noaggregationacrossowners,directcosine/globalprototypeclassifier,normalization,multiprototypes,onlinechanges,newoptimizer/iterations,orotherseedsimplemented.
+Do **not** implement online training changes, ordinary-local-data replacement, Euclidean scoring, temperature tuning, multi-prototype clustering, learned transport, PCA, relation kernels, regularization, another optimizer, or seeds1/2 in H06-C. Await research-lead review.
