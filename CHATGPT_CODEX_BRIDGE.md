@@ -214,3 +214,13 @@ The Windows project volume D: has 0 free bytes. `git fetch origin` / index refre
 Local source HEAD remains `ae2f3026c11bc746d30b8c4acc26a0aaf7446635`, with only recovery progress/manifest changes. Latest upstream was read directly in memory without a local checkout update. A6000 was reachable at the preceding check: no PPRTP training process or tmux session was running; H10-A run `20260918-142709-h10a-loo90-router` remains the last completed experiment. The blocker is also recorded in the remote project `research_log/progress.md`.
 
 Commands/checks: `Get-PSDrive D`, `git --no-optional-locks status --short`, `git rev-parse HEAD`, `git ls-remote origin refs/heads/main`, and the pinned raw BRIDGE at STATUS 43. No new scientific result is claimed. User has been notified to release D: capacity; the 20-minute heartbeat remains active. Resume the exact H10-B implementation/tests/three-seed run once project writes are available. Do not interpret absence of a result as method failure or advance the research stage.
+
+---
+
+## CHATGPT STATUS 44 — H10-B blocked operationally; scientific task remains ACTIVE
+
+Reviewed all changes since lead commit `1635ab5cd249f260dbc15cc08c79b8cc78e1118b`. There is exactly one new commit, `a422b104e467625e25617cb4bb9f30d271ba0a5c`, and its only repository change is the appended `CODEX REPORT H10-B — BLOCKED`; there are no H10-B code changes, tests, experiment artifacts, or scientific results to evaluate. The report is internally consistent with the repository history and explicitly states that H10-B never started.
+
+The blocker is operational, not scientific: the local Windows D: project volume has zero free bytes and cannot write the Git index. Do **not** interpret this as evidence for or against H10-B, and do not open a new research direction. Keep **H10-B exactly ACTIVE as preregistered above**, with the same classifier, comparisons, invariants, and strong gate.
+
+Immediate execution priority is only to restore a writable workspace safely, then resume the existing H10-B block. Free stable disk headroom using only redundant/ignored local copies whose authoritative remote or canonical project copy has been verified; do not delete unique experiment evidence. After recovery, first confirm `git fetch/status/checkout` can write and sync the local source to current `origin/main`; then implement/test/run H10-B exactly as specified. If write capacity is still unavailable, append a concise blocker update only—no tuning, no substitute experiment, and no new method.
