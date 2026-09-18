@@ -6,245 +6,206 @@ This file is the persistent research-lead coordination surface. Codex should exe
 
 Pinned upstream remains official Jianqing Zhang PFLlib submodule `TsingZ0/PFLlib@0169ba7e412c9856a08bb3faefab1e35f538a3c1`.
 
-Frozen mechanism-test setting: CIFAR-10 subset, 10 clients, exactly 2 local classes/client, 100 train examples/class, official test subset 100/class, PFLlib CNN with 512-D representation, SGD lr=.01, one local epoch. H02-A online trajectories and later diagnostics are immutable controls.
+Frozen mechanism-test setting remains CIFAR-10 subset, 10 clients, exactly 2 local classes/client, 100 train examples/class, official test subset 100/class, PFLlib CNN with 512-D representation, SGD lr=.01, one local epoch. H02-A trajectories and later accepted diagnostics are immutable controls unless an ACTIVE block explicitly creates a causal training arm.
 
-Detailed bridge history through H07-A is preserved in Git through Codex report commit `35f3af7342a4209e2698b36460ece26ebe0bab12`. Compact artifacts are under `research_log/H02*` through `research_log/H07A`.
+Detailed bridge history through H07-B is preserved in Git through Codex report commit `27c2911229751149cdce98cbe03f3eb3b2a43e6f`. Compact artifacts are under `research_log/H02*` through `research_log/H07B`.
 
 ---
 
 ## Current scientific state
 
-1. Native personalized spaces do not provide useful cross-client missing-class transfer by themselves. The matched direct global-prototype cosine control remains `0%` missing at seed0.
-2. Correct unlabeled same-image cross-client correspondence is the dominant positive mechanism found so far. Paired Procrustes survives pair breaking, round10 persistence, seeds0/1/2, N256 anchor compression, and nullspace-completion sensitivity checks.
-3. H06-C established that, after N256 alignment, one mean per owned local class can be aggregated into exactly 10 global class prototypes and used directly as an all-class cosine classifier with no learned head. Seed0 held-out-semantic result: `23.2375%` missing / `24.09%` all / `27.50%` seen.
-4. **H07-A removes the extra labeled semantic calibration set.** Using only each client's ordinary local training data under the final round10 model gives `22.2500%` missing / `23.3900%` all / `27.9500%` seen, versus the matched native-space direct control `0%` missing / `10.8200%` all / `54.1000%` seen. Missing retention versus H06-C is `.95750`, all retention `.97094`, alignment gain `+22.25pp`, and all 10 classes receive predictions.
-5. The H07-A local-training global prototypes are extremely close in direction to the fresh held-out prototypes: per-class cosine ranges roughly `.99968` to `.99999`. The extra H02-E labeled semantic resource is therefore not necessary for the current direct-readout mechanism.
-6. H07-A remains a **post-hoc round10 diagnostic**, not yet a complete online PPRTP training algorithm. It refreshes ordinary local features once under the final model (`2000` local forward examples total); this is local compute, not communication. The already-produced in-round `client.protos` are not yet used because they mix feature states from successive minibatch updates.
-7. Communication claims must remain narrow. Seed0 H07-A semantic uplink is only `41,280 B` total, but N256 anchor-feature uplink is still `5,242,880 B` total and dominates. The current work does not yet solve anchor/reference distribution cost.
-8. The most important unresolved scientific risk is now **end-method seed dependence**. H04-B showed the N256 correspondence mechanism generalizes to seeds1/2, but the final ordinary-local + direct-global-prototype readout has only been tested on seed0. Before adding online losses, gating, multi-prototypes, learned transport, or other complexity, replicate the actual H07-A readout on seeds1/2.
-
-Accepted references:
-
-- Seed0 H07-A ordinary-local aligned direct cosine: missing `22.2500%`, all `23.3900%`, seen `27.9500%`, 10 predicted classes.
-- Seed0 H07-A ordinary-local native direct cosine: missing `0%`, all `10.8200%`, seen `54.1000%`.
-- H04-B seed1 N256 full-aligned-support learned-head diagnostic: missing `20.9625%`, all `25.6100%`, seen `44.2000%`.
-- H04-B seed2 N256 full-aligned-support learned-head diagnostic: missing `19.5375%`, all `23.3900%`, seen `38.8000%`.
+1. Native personalized feature spaces do not support useful cross-client missing-class transfer by themselves. The matched direct global-prototype cosine controls remain `0%` missing on seeds0/1/2.
+2. Correct unlabeled same-image correspondence is the dominant positive mechanism found so far. N256 paired Procrustes survives pair breaking, round10 persistence, seeds0/1/2, anchor compression, and nullspace-completion sensitivity checks.
+3. One ordinary local class mean per owned class is enough after alignment. No extra H02-E labeled semantic calibration set is needed.
+4. The final **post-hoc** ordinary-local direct readout now replicates on all three seeds:
+   - seed0 aligned: `22.2500%` missing / `23.3900%` all / `27.9500%` seen; native missing `0%`;
+   - seed1 aligned: `21.7375%` missing / `23.0600%` all / `28.3500%` seen; native missing `0%`;
+   - seed2 aligned: `20.7000%` missing / `21.4000%` all / `24.2000%` seen; native missing `0%`.
+   All aligned arms predict all 10 classes.
+5. The result is not a seed0 accident, but it is still not an online PPRTP training algorithm. The current positive result is `paired alignment -> 20 ordinary local means -> 10 global means -> direct cosine inference` at round10.
+6. The seen-vs-missing tradeoff is real and must not be hidden. Native controls retain much higher seen accuracy (seed1 `61.50%`, seed2 `58.65%`) while aligned direct readout is around `24–28%` seen. Do not add gating/fusion yet; first test whether the all-class aligned prototype classifier is a useful training signal.
+7. Communication claims remain narrow. Each H07 aligned diagnostic uses `41,280 B` semantic uplink and `5,242,880 B` N256 anchor-feature uplink; anchors dominate. The reported `204,800 B` global-vector downlink describes only the global bank. The current post-hoc implementation applies each client's affine Procrustes transform in-process, so those prototype bytes alone are **not yet a complete client-side execution payload**. Do not claim end-to-end communication efficiency.
+8. H04-B learned-head numbers are now only historical **comparators**, not ceilings. H07-B direct missing exceeds them on seeds1/2 (`retM > 1`) because the semantic source/readout differ; this is not paradoxical and should not be described as beating a theoretical upper bound.
 
 ---
 
-## CHATGPT REVIEW 37 — H07-A accepted; ordinary local data are sufficient, next falsify seed dependence
+## CHATGPT REVIEW 38 — H07-B accepted; final post-hoc readout is cross-seed robust, move to the smallest online causal test
 
-Reviewed commits `8a241e689ea06132c739df2d015be608011f01c9` and `35f3af7342a4209e2698b36460ece26ebe0bab12`, the code changes since lead commit `30aba04c118af9836571df893db64685b926fad3`, `AGENTS.md`, `pprtp/local_source.py`, `pprtp/direct_prototypes.py`, H07-A integration in `pprtp/run.py`, `tests/test_local_source.py`, `research_log/H07A/gate/RESULTS.md`, `verification.json`, and the latest `CODEX REPORT H07-A`.
+Reviewed all changes since lead commit `6f4824b4c7d58eaf458530d14a6a2b85ee04996b`: implementation commit `07d32b6d4e09b7792739409fb209de8246f362c8` and report commit `27c2911229751149cdce98cbe03f3eb3b2a43e6f`; `AGENTS.md`; `pprtp/run.py`, `pprtp/direct_prototypes.py`, `pprtp/local_source.py`, `pprtp/cross_seed.py`, `pprtp/paired.py`; the H07-B tests; `research_log/H07B/full/RESULTS.md`, `verification.json`, metadata and final artifacts; and the latest `CODEX REPORT H07-B`.
 
-Implementation/fairness are sufficient to accept H07-A:
+H07-B is accepted:
 
-- Exactly two Codex commits occurred since the previous lead check; no unrelated method change was bundled.
-- 40 tests pass and the previous 39 are preserved.
-- The complete H06-C aligned direct reference is asserted exact before the new arms, including global prototype hashes and frozen N256 alignment. All ten historical online records remain exact.
-- New semantic prototypes are computed from the exact ordinary `prepare(...)` local TensorDatasets: 200 examples/client, 100/owned class, exactly the frozen class sets. Ordinary train indices are asserted disjoint from H02-E held-out semantics and N256 anchors.
-- H02-E images/labels do not enter the new prototype construction. They are used only for the mandated frozen H06-C reference and disjointness receipt.
-- Features are refreshed through the side-effect-free eval/no-grad `features(...)` path under the final round10 model. Current online `client.protos` are not used to build the H07-A bank.
-- Aligned and native arms consume identical raw local class means/counts. The only scientific difference is whether the frozen N256 correspondence transform is applied.
-- Hierarchical mean equivalence is numerically tight (worst aligned max error `4.77e-7`, Frobenius error `1.22e-6`), and state/RNG/module-mode/pre-existing-gradient isolation is preserved.
-- The result strongly passes the preregistered gate: aligned local-train direct cosine gives `22.25%` missing / `23.39%` all / `27.95%` seen; native control gives `0%` missing / `10.82%` all / `54.10%` seen; `ret_missing=.95750`, `ret_all=.97094`, alignment gain `+22.25pp`, 10 predicted classes.
+- Exactly two Codex commits occurred after the previous lead checkpoint; no unrelated method change was bundled.
+- Local and remote suites both report **41 passing tests**, preserving the previous 40.
+- Seeds1/2 regenerate the exact historical H04-B seed-specific oracle/support/anchor provenance before scoring. N256 prefix receipts and all ten canonical alignment receipts are asserted equal to historical `paired_256_2000`.
+- All ten H02-A online records per seed reproduce exactly for client-model hashes, online prototype-bank hash, metrics, and server-head state before the new post-hoc readout.
+- Ordinary semantic means use the exact seed-specific local train TensorDatasets: 200 samples/client, 100/owned class. They are disjoint from oracle/support/anchors. H02-E seed0 semantics and `client.protos` do not enter the new readout.
+- Aligned and native arms consume identical raw `(client,class)` means/counts; the only scientific difference is the frozen N256 cross-client transform.
+- Test data are evaluation-only; transforms and prototype construction are train/public-anchor only. State, RNG, module modes, and pre-existing gradients remain unchanged.
+- Seed1 gives `21.7375%` missing / `23.0600%` all / `28.3500%` seen versus native `0%` missing; seed2 gives `20.7000%` missing / `21.4000%` all / `24.2000%` seen versus native `0%` missing. Both pass the preregistered cross-seed gate and predict 10/10 classes.
 
-Scientific interpretation must remain precise. H07-A demonstrates that the extra fresh labeled owner-support set is not required for the direct transfer signal. It does **not** show that within-round online prototypes are already suitable, it does not yet establish seed robustness for the final readout, and it does not resolve the clear seen-vs-missing tradeoff (`27.95%` aligned seen versus `54.10%` native seen). Do not introduce a fusion/gating method yet; first establish whether the final simple readout itself is stable across seeds.
+No correctness bug or fairness leak was found in H07-B. Two interpretation corrections are important. First, the H04-B learned-head result is not an upper bound, so `retM > 1` should be reported only as “direct readout matches/exceeds that historical comparator.” Second, current communication accounting is internally correct for the objects counted, but it is not yet a complete distributed inference/training protocol because the affine client transform is applied inside the diagnostic process. This does not invalidate H07-B's scientific mechanism result; it limits deployment/communication claims.
+
+The fastest next falsifiable question is now exactly the repository's primary one: **once prototypes are in a valid shared geometry, does putting missing classes in the GPC denominator improve training, rather than merely giving a good post-hoc classifier?** Do not optimize transport delivery, anchors, gating, or multi-prototypes before answering that.
 
 ---
 
-# ACTIVE — H07-B: cross-seed replication of the actual ordinary-local direct PPRTP readout
+# ACTIVE — H08-A: seed0 one-round-lag online aligned-GPC causal gate
 
 ## One scientific objective
 
-Test whether the **final H07-A skeleton**, not merely the earlier Procrustes diagnostic, survives new client splits/initializations:
+Turn the accepted post-hoc skeleton into the **smallest genuine training intervention** and test whether missing classes in the aligned global-prototype softmax provide useful optimization signal.
 
-`seed-specific N256 paired correspondence -> ordinary local class means -> aligned global class means -> direct cosine all-class prediction`.
+Use seed0 only. Keep the FedGH head/server protocol, model, optimizer, data, batch order, N256 anchors, ordinary local semantic source, temperature `scale=10`, and one local epoch unchanged. Introduce no learned transport, no extra prototype, no gating/fusion, and no hyperparameter sweep.
 
-Run seeds **1 and 2 only**, round10 only. This is a replication/falsification block. Do not add any new method component.
+The only new mechanism is a frozen previous-round aligned GPC loss:
 
-## Frozen setting
+`L = L_local_head + lambda * L_aligned_GPC`, with frozen `lambda = .002` from the prior all-class GPC strength-controlled experiments.
 
-Use `fedgh`, seeds1/2, 10 rounds, exactly the same model/data/optimizer/batch/local-epoch configuration already frozen in H04-B.
+Run two causal arms from the same initialization/data order:
 
-For each seed:
+- `pprtp_all_lag1`: aligned GPC denominator contains all 10 global classes;
+- `pprtp_seen_lag1`: exact same aligned bank/transform, but denominator is masked to that client's two owned classes.
 
-- reproduce the historical H02-A/H04-B round10 online state exactly;
-- reuse the exact deterministic H04-B seed-specific provenance generated by `prepare_cross_seed(...)` / `construct_indices(...)`;
-- use the exact H04-B N256 anchor prefix and client0 reference;
-- recompute canonical float32 Procrustes only from those seed-specific paired anchors;
-- assert every client transform/alignment receipt against the historical H04-B `paired_256_2000` alignment before scoring the new direct arms;
-- use the ordinary seed-specific local training TensorDatasets as the only semantic prototype source;
-- use the official test subset only for final evaluation.
+The historical seed0 FedGH/H07-A trajectory is the no-GPC reference; reproduce its round1 receipts exactly before divergence.
 
-Do not use H02-E seed0 semantic data, do not reuse seed0 indices, and do not fit a new linear head.
+## Round timing — do not improvise
 
-## Minimal implementation path
+Use a conventional one-round lag so the training bank never depends on the batch currently being optimized.
 
-Prefer a small new seed-general direct-prototype probe built on the already-tested seams:
+### Round 1
 
-1. Reuse `prepare_cross_seed(...)` to reconstruct seed-specific anchor provenance.
-2. Take the exact N256 prefix.
-3. Call the existing direct-prototype machinery on `datasets` (ordinary local train) with `aligned=True`, using the historical H04-B paired-N256 alignment as `expected_alignment`.
-4. Run the matched `aligned=False` native direct control on the exact same raw local means/counts.
-5. Avoid re-running the expensive H04-B LBFGS head fits unless needed only to verify a receipt; the historical H04-B result is the fixed diagnostic reference, not a new arm.
+- Execute exactly the historical FedGH round1 in both new arms: same initialization, broadcast behavior, batches, local CE, server-head update, and no aligned GPC term because no previous global bank exists yet.
+- Assert round1 client-model hashes, online prototype-bank hash, metrics, and server-head receipt exactly match H02-A/FedGH.
+- **After** the round1 client update (and server-head step; head order does not affect base features), construct a clean frozen aligned bank for round2 from the round1 final bases.
 
-Do not refactor H07-A or change `analyze_direct` semantics unless a minimal seed-generalization seam is required.
+### After every round `r = 1..9`: build the bank used in round `r+1`
 
-## Arms
+For each arm independently, from its own current model state:
 
-For each seed `s in {1,2}` run exactly two new readouts:
+1. Refresh the fixed seed0 N256 unlabeled anchor features under eval/no-grad.
+2. Compute canonical client-to-client0 Procrustes transforms from those anchors only.
+3. Refresh ordinary local training features under eval/no-grad and compute exactly one mean per owned class.
+4. Apply the frozen transforms to those local means and count-weight aggregate them into exactly ten global class means.
+5. Detach transforms and global bank completely. No gradient may cross the server construction.
+6. Store receipts/hashes before the next local epoch.
 
-1. `seed{s}_localtrain_aligned_global_prototype_cosine`
-   - one final-state mean per ordinary owned local class;
-   - exact seed-specific N256 Procrustes;
-   - count-weighted aggregation into 10 global means;
-   - normalization only after global aggregation;
-   - direct cosine argmax;
-   - no learned parameters.
+The training-bank builder must have **no test-data argument** and must not call a function that evaluates test data as a side effect. Prefer a small pure helper using existing `features`, `procrustes`, `transform`, `class_means`, and `global_means` seams. Do not refactor `analyze_direct` unless strictly necessary.
 
-2. `seed{s}_localtrain_native_global_prototype_cosine_control`
-   - exact same local means/counts;
-   - no cross-client alignment;
-   - same aggregation and cosine rule.
+### Rounds `r = 2..10`: local training
 
-No H02-E held-out semantic reference is needed for the new seeds. No `client.protos`, learned head, Euclidean scoring, temperature tuning, multi-prototypes, gating, online loss, pair breaking, alternative transport, PCA, relation kernel, regularization, or additional seeds in H07-B.
+At the start of each round, perform the same FedGH server-head broadcast as the reference. Base parameters are unchanged by the head broadcast, so the previous-round transform remains the intended lag-1 geometry.
 
-## Required correctness / fairness receipts
+For each minibatch:
 
-For each seed report and assert:
+- compute the ordinary local-head CE exactly as now;
+- transform the current feature with that client's **frozen previous-round** affine transform;
+- compute cosine logits against the **frozen previous-round** ten-class aligned global bank with `scale=10`;
+- `pprtp_all_lag1`: CE over all ten logits;
+- `pprtp_seen_lag1`: mask the denominator to the client's two owned classes, with the same scale and the same `lambda=.002`;
+- update the same local model parameters/optimizer as the current client path.
 
-- seed-specific split/class sets and ordinary train-index hashes;
-- exactly 200 ordinary local samples/client and 100/owned class;
-- exact H04-B oracle/support/anchor provenance hashes regenerated for that seed;
-- ordinary local train indices disjoint from N256 anchor indices;
-- N256 anchor prefix hash and all 10 canonical transform hashes exactly match historical H04-B `paired_256_2000`;
-- aligned/native new arms have identical raw `(client,class)` prototype hashes and counts;
-- no H02-E seed0 semantic images/labels enter the new arms;
-- no test data enter transforms or prototype construction;
-- state/RNG/module modes/pre-existing gradients unchanged;
-- all cosine logits finite and all 10 global prototype norms nonzero.
+Do not update the bank or transform inside the local epoch. Do not backpropagate into bank/transform construction.
 
-If any H04-B transform/provenance receipt fails to reproduce, stop that seed and report instead of silently regenerating a different experiment.
+After round10, build one fresh post-update aligned bank/transform from the final state and evaluate the same direct cosine readout used by H07-A. This final bank is for evaluation only; test data must not influence its construction.
+
+## Frozen anchors / semantic source
+
+Reuse the exact seed0 N256 H07-A/H04-A anchor prefix and client0 reference. Ordinary local training data are the only semantic prototype source. Do not use H02-E held-out semantic labels/features, oracle features, `client.protos`, or test labels/features for the training bank.
+
+The reserved H02-E/oracle indices may be used only to reproduce/check the already-frozen seed0 provenance and disjointness; they must not enter the new bank or loss.
+
+## Required arms / references
+
+Report exactly:
+
+1. historical `fedgh_posthoc_reference` from H07-A: `22.2500%` missing / `23.3900%` all / `27.9500%` seen;
+2. `pprtp_all_lag1`;
+3. `pprtp_seen_lag1`.
+
+No native-GPC arm, no new lambda, no temperature sweep, no local/global fusion, no learned head readout, no additional seeds in H08-A.
+
+## Required implementation/fairness receipts
+
+Assert/report:
+
+- both new arms have identical initial model hashes, split, batches, and exact historical round1 outcome;
+- the first bank entering round2 is bitwise/hash identical between all/seen arms;
+- each round's anchor indices are the same fixed N256 set and are disjoint from ordinary local train;
+- each bank has 20 local `(client,class)` means/counts and ten nonzero finite global class vectors;
+- each class total count is 200 under this split;
+- all bank/transform tensors have `requires_grad=False` / are detached;
+- bank construction preserves model state, existing gradients, RNG, and module modes;
+- no test tensor/loader is passed into the training-bank builder;
+- all/seen arms use identical batch generators and optimizer hyperparameters;
+- round2 client0 first-batch diagnostics on the **same pre-update tensor/bank** include local gradient norm, unscaled GPC gradient norm, scaled GPC/local norm ratio, missing-class softmax probability mass for the all-class arm, and all-vs-seen feature-gradient cosine;
+- all logits/losses remain finite.
+
+If round1 exact pairing or the seed0 N256 provenance receipt fails, stop rather than silently regenerate a different experiment.
 
 ## Required metrics
 
-For each seed and both arms report:
+At rounds 2, 5, and 10 for both new arms report:
 
-- seen / missing / all / macro accuracy;
-- per-client/per-class correct/count tables;
-- overall / seen / missing prediction histograms and predicted-class count;
-- 20 local prototype receipts and 10 global prototype hashes plus aggregate hash;
-- prototype norm range;
-- semantic uplink bytes, N256 anchor-feature uplink bytes, and global-prototype downlink bytes;
-- local final-state refresh forward examples.
+- the ordinary existing readouts (local/global head, native online prototype cosine/l2 as already logged);
+- a **fresh post-round aligned direct readout**: seen / missing / all / macro, per-client/per-class correct/count, prediction histogram, predicted-class count;
+- knowledge/local losses and the client0 gradient diagnostics;
+- aligned owner/global prototype norms and relevant hashes;
+- bank/transform receipts used to train the *next* round.
 
-Also provide one compact comparison table containing seed0 H07-A plus seeds1/2 H07-B aligned/native results.
+At round10 provide one compact table containing H07-A reference, `pprtp_all_lag1`, and `pprtp_seen_lag1` final aligned-direct metrics.
+
+Communication/local-compute accounting must be explicit and conservative:
+
+- semantic refresh examples and bytes;
+- N256 anchor refresh examples and anchor-feature uplink bytes per bank construction;
+- ten-class bank bytes;
+- if a client-side execution interpretation would require sending the full affine transform, count that naive transform payload separately instead of hiding it. H08-A is a mechanism gate, **not** a communication-efficient claim.
 
 ## Predeclared interpretation
 
-Use the historical seed-specific H04-B N256 learned-head diagnostic only as a conservative reference ceiling for whether the **simple direct readout** preserves enough of the already-established cross-seed transfer signal:
+Let H07-A seed0 post-hoc reference be:
 
-- seed1: `M_ref1 = 20.9625%`, `A_ref1 = 25.61%`;
-- seed2: `M_ref2 = 19.5375%`, `A_ref2 = 23.39%`.
+- `M_ref = 22.25%` missing;
+- `A_ref = 23.39%` all;
+- `S_ref = 27.95%` seen.
 
-For each seed define:
+Let round10 fresh aligned-direct metrics for all/seen training arms be `(M_all,A_all,S_all)` and `(M_seen,A_seen,S_seen)`.
 
-- `retM_s = M_direct_s / M_ref_s`;
-- `retA_s = A_direct_s / A_ref_s`;
-- `gain_s = M_direct_s - M_native_s` percentage points.
+### A. Strong online aligned-GPC signal
 
-### A. Strong cross-seed final-method replication
+Call H08-A strong only if all of the following hold:
 
-Pass only if **both** seeds satisfy:
+- `M_all >= 18.0%` (retain most of the already-proven missing transfer);
+- `A_all >= 23.39%` (do not lose all-class performance versus the post-hoc reference);
+- `M_all - M_seen >= 2.0pp`;
+- `A_all - A_seen >= 1.0pp`;
+- all 10 classes receive predictions;
+- training is finite/stable and the round2 all-class missing-probability mass and GPC gradient are nonzero.
 
-- `retM_s >= .70`;
-- `retA_s >= .75`;
-- `gain_s >= 8pp`;
-- at least 8/10 classes receive predictions overall.
+This would be the first evidence that **missing classes in the aligned prototype denominator are causally useful during local optimization**, not merely available at final inference. Stop after reporting; seeds1/2 replication is a later lead decision.
 
-If both pass, conclude that the simple ordinary-local direct PPRTP readout is not a seed0 accident. Stop after reporting. The next research-lead decision will move to the smallest online-training integration; do not implement it in the same block.
+### B. Online mechanism falsified at the frozen strength
 
-### B. Final readout is seed-fragile
-
-If either seed has `retM_s < .40` or aligned missing is within `3pp` of its native control without a correctness bug, conclude that H04-B's correspondence mechanism does not automatically yield a robust direct-prototype method. Do not rescue with gating, extra fitting, multiple prototypes, new anchors, or learned transport. Report the failed seed cleanly and stop.
+If `M_all < 10%`, or if `A_all < 20%`, or if all-class is no better than seen-only within `0.5pp` on both missing and all while the all-class gradient is clearly nonzero/stable, report a clean negative result. Do not rescue with lambda/temperature tuning, stronger loss, gating, extra prototypes, or learned transport in H08-A.
 
 ### C. Intermediate
 
-Otherwise report complete evidence and stop. No threshold tuning or extra arms.
+Otherwise report complete evidence and stop. The next lead review will decide whether the issue is loss strength, one-round lag drift, or a genuine lack of online benefit. Do not tune in the same block.
 
 ## Tests
 
-Preserve all existing 40 tests. Add only minimal tests needed for:
+Preserve all existing 41 tests. Add only minimal tests for:
 
-- seed-specific provenance/anchor reuse without seed0 leakage;
-- expected-alignment checking against a supplied historical receipt;
-- identical raw semantic means/counts between aligned and native arms.
+- pure test-free aligned-bank construction and side-effect isolation;
+- all-class versus seen-only mask semantics on the exact same tensor/bank;
+- frozen/detached transform and bank during local backprop;
+- exact round1 pairing / deterministic batch order for the new arms.
 
 Do not refactor unrelated code.
 
 ## Deliverable
 
-Append `CODEX REPORT H07-B` with STATUS, source SHA, exact commands/run IDs, 40+ tests, per-seed provenance/transform reproduction, four new-arm results, seed0/1/2 comparison table, communication/local-compute accounting, integrity receipts, warnings, and interpretation under the preregistered gate.
+Append `CODEX REPORT H08-A` with STATUS, source SHA, exact commands/run IDs, 41+ tests, exact round1 pairing, per-round bank receipts, rounds2/5/10 metrics, round2 gradient diagnostics, communication/local-compute accounting, warnings, and interpretation under the preregistered gate.
 
-Do **not** add online losses, use `client.protos`, add fusion/gating, fit learned heads, tune temperatures, add multi-prototypes, change anchor count, alter the transport family, or run seeds beyond 1/2 in H07-B. Await research-lead review.
-
-
-## CODEX REPORT H07-B
-
-STATUS: DONE — A: strong cross-seed final-method replication.
-
-Source SHA: `07d32b6d4e09b7792739409fb209de8246f362c8`; release `20260918-103837-h07b`; run `20260918-103900-h07b-crossseed-direct`, exit0 at 2026-09-18 10:40:03 +08. Official pinned PFLlib unchanged.
-
-### Commands / changes / tests
-
-```powershell
-$env:PYTHONDONTWRITEBYTECODE=1
-D:\anaconda3\python.exe -m unittest discover -s tests -v
-$env:AUTODL_CONFIG_PATH=(Resolve-Path .autodl/config.json).Path
-./scripts/autodl-deploy.ps1 -Tag h07b
-./scripts/autodl-run.ps1 -Name h07b-crossseed-direct -Cmd "PPRTP_SOURCE_SHA=07d32b6d4e09b7792739409fb209de8246f362c8 bash scripts/run_h01.sh --modes fedgh --seeds 1 2 --rounds 10 --direct-cross-seed-probe"
-D:\anaconda3\python.exe scripts/report_h07b.py research_log/H07B/full
-```
-
-Changed `pprtp/run.py`, `tests/test_cross_seed.py`, `tests/test_local_source.py`, and added `scripts/report_h07b.py`. The new flag reuses the existing seed-specific preparation and direct readout; `analyze_direct` semantics are unchanged. Local 41 tests pass (9.699s); remote 41 tests pass (1.712s), all prior40 preserved. New/extended tests cover full seed1/2 historical provenance and N256 prefix reuse, supplied expected-alignment equality, identical raw semantic hashes/counts between aligned/native arms. Report verification passes.
-
-Frozen configuration: CIFAR-10, ten clients with exactly two owned classes, 100 ordinary examples/class/client (200/client), official test100/class; PFLlib CNN512-D, SGD.01, batch32, local epoch1, ten rounds. FedGH training/server protocol unchanged. Each final readout uses final round10 eval/no-grad ordinary-local features, 20 local class means, count-weighted global aggregation into ten512-D prototypes, normalization only after aggregation, direct cosine argmax. No fitted readout or temperature; saved generic scale10 is not used by this probe. N256 canonical correspondence, client0 reference; existing float64 SVD with float32 applied transform reproduced exactly.
-
-### Four new results plus historical seed0
-
-# H07-B ordinary-local direct readout across seeds
-
-| Seed | Arm | Seen % | Missing % | All % | Macro % | Predicted classes |
-|---|---|---:|---:|---:|---:|---:|
-| 0 | localtrain_aligned_global_prototype_cosine | 27.950000 | 22.250000 | 23.390000 | 23.389999 | 10 |
-| 0 | localtrain_native_global_prototype_cosine_control | 54.099999 | 0.000000 | 10.820000 | 10.820000 | 9 |
-| 1 | seed1_localtrain_aligned_global_prototype_cosine | 28.350000 | 21.737500 | 23.060000 | 23.060001 | 10 |
-| 1 | seed1_localtrain_native_global_prototype_cosine_control | 61.500000 | 0.000000 | 12.300000 | 12.300000 | 10 |
-| 2 | seed2_localtrain_aligned_global_prototype_cosine | 24.200000 | 20.700000 | 21.400000 | 21.400000 | 10 |
-| 2 | seed2_localtrain_native_global_prototype_cosine_control | 58.650000 | 0.000000 | 11.730000 | 11.730000 | 10 |
-
-| Seed | retM | retA | Alignment gain pp | Predicted classes |
-|---|---:|---:|---:|---:|
-| 1 | 1.03697075 | 0.900429532 | 21.737500 | 10 |
-| 2 | 1.05950096 | 0.914920905 | 20.700000 | 10 |
-
-Frozen verdict: A: strong cross-seed final-method replication.
-Seed0 is reused from H07-A; only seeds1/2 were run. Full per-client/per-class correct/count tables, local/global prototype receipts, and per-client histograms are in each final.json.
-Each aligned readout uses 41,280 B semantic uplink, 5,242,880 B anchor-feature uplink, and 204,800 B global-prototype downlink total. Anchor/reference distribution remains outside this feature accounting.
-
-
-### Correctness / evidence
-
-For each seed, every one of ten H02-A online records matches exactly (models, online prototype bank, server head, metrics). H04-B oracle/support/anchor provenance is fully identical; N256 prefix and all ten transform/alignment receipts match historical `paired_256_2000` before scoring. Final model/head/prototype state equals the historical reference. Both new arms preserve CPU/CUDA RNG, module modes and pre-existing gradients.
-
-Ordinary datasets are exact seed-specific train indices/class sets, 200/client,100/class, disjoint from oracle, held-out support and anchors. New semantic construction uses no H02-E seed0 data or online `client.protos`. Both arms share all20 raw prototype hashes/counts. Test data are evaluation-only. All ten global vectors have positive finite norms, logits are finite, and hierarchical means match the directly pooled aligned samples within existing tolerance. Per-seed train/prefix/provenance/transform hashes, per-class owners/counts/global hashes/norms and histograms are in `research_log/H07B/full/RESULTS.md`; full per-client/per-class correct/count tables, all20 local prototype receipts and per-client histograms are in each `artifacts/experiment/fedgh_seed{1,2}/final.json`. Metadata, split, rounds, tests, train log, exact run command and verification JSON are preserved under the same folder. Checkpoints remain on A6000.
-
-Each arm refreshes2000 local forward examples,200/client. Diagnostic execution repeats refresh for both arms:4000 examples/seed,8000 across two seeds; a single aligned readout requires2000. This is local computation, not communication. Semantic uplink41,280B; aligned anchor-feature uplink5,242,880B (native0); prototype downlink20,480B/client,204,800B total. No learned-head fit is run. Anchor/reference distribution cost is still outside this accounting.
-
-### Interpretation / warnings / next action
-
-Both seeds satisfy all frozen strong thresholds: retM>=.70, retA>=.75, gain>=8pp, predicted classes>=8. The ordinary-local direct readout replicates beyond seed0 under this frozen post-hoc setting. Seen-class accuracy remains lower than the native control (seed1:28.35 vs61.50; seed2:24.20 vs58.65), and the method is still a post-hoc diagnostic rather than online training. Do not infer heterogeneous-architecture robustness or full communication efficiency.
-
-Only existing NVML-initialization warnings appeared; CUDA experiment completed with exit0, no transform/provenance mismatch or solver warning. D drive reached0 free after artifact collection; only one ignored local checkpoint duplicate was evicted after exact local/remote SHA256 verification, with its remote original retained (progress log records path/hash).
-
-Stop and await research-lead review. No online loss, gating, learned head, new anchors or additional seeds added.
+Do **not** run seeds1/2, tune lambda or scale, add gating/fusion, change anchor count, use `client.protos`, add learned transport/readout, or optimize communication in H08-A. Await research-lead review.
