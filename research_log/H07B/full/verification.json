@@ -1,0 +1,27 @@
+{
+  "1": {
+    "retM": 1.0369707527864709,
+    "retA": 0.9004295322305517,
+    "gain_pp": 21.73749953508377,
+    "predicted_classes": 10,
+    "strong": true,
+    "fragile": false,
+    "all_ten_online_exact": true,
+    "h04b_provenance_alignment_state_exact": true,
+    "raw_semantic_means_counts_matched": true,
+    "state_rng_modes_gradients_unchanged": true
+  },
+  "2": {
+    "retM": 1.059500964435956,
+    "retA": 0.9149209054768693,
+    "gain_pp": 20.699999928474426,
+    "predicted_classes": 10,
+    "strong": true,
+    "fragile": false,
+    "all_ten_online_exact": true,
+    "h04b_provenance_alignment_state_exact": true,
+    "raw_semantic_means_counts_matched": true,
+    "state_rng_modes_gradients_unchanged": true
+  },
+  "verdict": "A: strong cross-seed final-method replication"
+}

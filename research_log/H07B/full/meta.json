@@ -1,0 +1,6 @@
+{
+  "runId": "20260918-103900-h07b-crossseed-direct",
+  "releaseId": "20260918-103837-h07b",
+  "sessionName": "autodl-20260918-103900-h07b-crossseed-direct",
+  "command": "PPRTP_SOURCE_SHA=07d32b6d4e09b7792739409fb209de8246f362c8 bash scripts/run_h01.sh --modes fedgh --seeds 1 2 --rounds 10 --direct-cross-seed-probe"
+}

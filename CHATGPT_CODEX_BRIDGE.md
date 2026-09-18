@@ -187,3 +187,64 @@ Do not refactor unrelated code.
 Append `CODEX REPORT H07-B` with STATUS, source SHA, exact commands/run IDs, 40+ tests, per-seed provenance/transform reproduction, four new-arm results, seed0/1/2 comparison table, communication/local-compute accounting, integrity receipts, warnings, and interpretation under the preregistered gate.
 
 Do **not** add online losses, use `client.protos`, add fusion/gating, fit learned heads, tune temperatures, add multi-prototypes, change anchor count, alter the transport family, or run seeds beyond 1/2 in H07-B. Await research-lead review.
+
+
+## CODEX REPORT H07-B
+
+STATUS: DONE — A: strong cross-seed final-method replication.
+
+Source SHA: `07d32b6d4e09b7792739409fb209de8246f362c8`; release `20260918-103837-h07b`; run `20260918-103900-h07b-crossseed-direct`, exit0 at 2026-09-18 10:40:03 +08. Official pinned PFLlib unchanged.
+
+### Commands / changes / tests
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE=1
+D:\anaconda3\python.exe -m unittest discover -s tests -v
+$env:AUTODL_CONFIG_PATH=(Resolve-Path .autodl/config.json).Path
+./scripts/autodl-deploy.ps1 -Tag h07b
+./scripts/autodl-run.ps1 -Name h07b-crossseed-direct -Cmd "PPRTP_SOURCE_SHA=07d32b6d4e09b7792739409fb209de8246f362c8 bash scripts/run_h01.sh --modes fedgh --seeds 1 2 --rounds 10 --direct-cross-seed-probe"
+D:\anaconda3\python.exe scripts/report_h07b.py research_log/H07B/full
+```
+
+Changed `pprtp/run.py`, `tests/test_cross_seed.py`, `tests/test_local_source.py`, and added `scripts/report_h07b.py`. The new flag reuses the existing seed-specific preparation and direct readout; `analyze_direct` semantics are unchanged. Local 41 tests pass (9.699s); remote 41 tests pass (1.712s), all prior40 preserved. New/extended tests cover full seed1/2 historical provenance and N256 prefix reuse, supplied expected-alignment equality, identical raw semantic hashes/counts between aligned/native arms. Report verification passes.
+
+Frozen configuration: CIFAR-10, ten clients with exactly two owned classes, 100 ordinary examples/class/client (200/client), official test100/class; PFLlib CNN512-D, SGD.01, batch32, local epoch1, ten rounds. FedGH training/server protocol unchanged. Each final readout uses final round10 eval/no-grad ordinary-local features, 20 local class means, count-weighted global aggregation into ten512-D prototypes, normalization only after aggregation, direct cosine argmax. No fitted readout or temperature; saved generic scale10 is not used by this probe. N256 canonical correspondence, client0 reference; existing float64 SVD with float32 applied transform reproduced exactly.
+
+### Four new results plus historical seed0
+
+# H07-B ordinary-local direct readout across seeds
+
+| Seed | Arm | Seen % | Missing % | All % | Macro % | Predicted classes |
+|---|---|---:|---:|---:|---:|---:|
+| 0 | localtrain_aligned_global_prototype_cosine | 27.950000 | 22.250000 | 23.390000 | 23.389999 | 10 |
+| 0 | localtrain_native_global_prototype_cosine_control | 54.099999 | 0.000000 | 10.820000 | 10.820000 | 9 |
+| 1 | seed1_localtrain_aligned_global_prototype_cosine | 28.350000 | 21.737500 | 23.060000 | 23.060001 | 10 |
+| 1 | seed1_localtrain_native_global_prototype_cosine_control | 61.500000 | 0.000000 | 12.300000 | 12.300000 | 10 |
+| 2 | seed2_localtrain_aligned_global_prototype_cosine | 24.200000 | 20.700000 | 21.400000 | 21.400000 | 10 |
+| 2 | seed2_localtrain_native_global_prototype_cosine_control | 58.650000 | 0.000000 | 11.730000 | 11.730000 | 10 |
+
+| Seed | retM | retA | Alignment gain pp | Predicted classes |
+|---|---:|---:|---:|---:|
+| 1 | 1.03697075 | 0.900429532 | 21.737500 | 10 |
+| 2 | 1.05950096 | 0.914920905 | 20.700000 | 10 |
+
+Frozen verdict: A: strong cross-seed final-method replication.
+Seed0 is reused from H07-A; only seeds1/2 were run. Full per-client/per-class correct/count tables, local/global prototype receipts, and per-client histograms are in each final.json.
+Each aligned readout uses 41,280 B semantic uplink, 5,242,880 B anchor-feature uplink, and 204,800 B global-prototype downlink total. Anchor/reference distribution remains outside this feature accounting.
+
+
+### Correctness / evidence
+
+For each seed, every one of ten H02-A online records matches exactly (models, online prototype bank, server head, metrics). H04-B oracle/support/anchor provenance is fully identical; N256 prefix and all ten transform/alignment receipts match historical `paired_256_2000` before scoring. Final model/head/prototype state equals the historical reference. Both new arms preserve CPU/CUDA RNG, module modes and pre-existing gradients.
+
+Ordinary datasets are exact seed-specific train indices/class sets, 200/client,100/class, disjoint from oracle, held-out support and anchors. New semantic construction uses no H02-E seed0 data or online `client.protos`. Both arms share all20 raw prototype hashes/counts. Test data are evaluation-only. All ten global vectors have positive finite norms, logits are finite, and hierarchical means match the directly pooled aligned samples within existing tolerance. Per-seed train/prefix/provenance/transform hashes, per-class owners/counts/global hashes/norms and histograms are in `research_log/H07B/full/RESULTS.md`; full per-client/per-class correct/count tables, all20 local prototype receipts and per-client histograms are in each `artifacts/experiment/fedgh_seed{1,2}/final.json`. Metadata, split, rounds, tests, train log, exact run command and verification JSON are preserved under the same folder. Checkpoints remain on A6000.
+
+Each arm refreshes2000 local forward examples,200/client. Diagnostic execution repeats refresh for both arms:4000 examples/seed,8000 across two seeds; a single aligned readout requires2000. This is local computation, not communication. Semantic uplink41,280B; aligned anchor-feature uplink5,242,880B (native0); prototype downlink20,480B/client,204,800B total. No learned-head fit is run. Anchor/reference distribution cost is still outside this accounting.
+
+### Interpretation / warnings / next action
+
+Both seeds satisfy all frozen strong thresholds: retM>=.70, retA>=.75, gain>=8pp, predicted classes>=8. The ordinary-local direct readout replicates beyond seed0 under this frozen post-hoc setting. Seen-class accuracy remains lower than the native control (seed1:28.35 vs61.50; seed2:24.20 vs58.65), and the method is still a post-hoc diagnostic rather than online training. Do not infer heterogeneous-architecture robustness or full communication efficiency.
+
+Only existing NVML-initialization warnings appeared; CUDA experiment completed with exit0, no transform/provenance mismatch or solver warning. D drive reached0 free after artifact collection; only one ignored local checkpoint duplicate was evicted after exact local/remote SHA256 verification, with its remote original retained (progress log records path/hash).
+
+Stop and await research-lead review. No online loss, gating, learned head, new anchors or additional seeds added.
