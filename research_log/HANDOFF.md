@@ -1,3 +1,9 @@
+# Latest state — 2026-09-19T00:45:48.510785+08:00
+H11-B DONE: source9e6b25b6a36352457dadc4d7787381d022c7b77e run20260919-002740-h11b-full-seeds12 exit0.57tests local17.448s remote8.577s;prior56preserved;H11Aseed0split/report byte-identical. Seeds1/2full49744train+256fixedanchors/10000test exacthistoricalownership;allarmsinitial/split/round1/156steps perclient-round paired,states/rawmeans/counts/RNG/modes/grad unchanged. PPRTPseed1 S40.09 M19.27375 A23.437;seed2 S38.62 M18.205 A22.288. Withseed0:3/3STRONG,mean+sampleSD S40.19+/-1.622313 M18.881667+/-0.588470 A23.143333+/-0.752763. Native missing0allseeds;no tuning. Caveatperclientclasscount seed1min7 seed2min6 thoughaggregate10. STOPsame-dataset replication;awaitlead nextdataset/architecture task. RootC:/work/PPRTP.
+
+# Current running task
+[2026-09-19T00:27:46.1541797+08:00] H11-B RUNNING source9e6b25b6a36352457dadc4d7787381d022c7b77e release20260919-002627-h11b run20260919-002740-h11b-full-seeds12;seeds1/2,3arms10rounds. Continue same run,do not duplicate. Workroot C:/work/PPRTP; collectcompact artifacts without checkpoints to research_log/H11B/full, run report_h11a.py root 1 and root 2 then report_h11b.py root. Seed0 H11A preserved.
+
 # Latest state — 2026-09-18T23:19:32.257123+08:00
 H11-A DONE: source329a6e3754db495245902ed05d28d923eec35cbf run20260918-230745-h11a-full-data exit0. Full49744train+256labelblindanchors=50000,10000test,seed0historicalownership exact;56tests local15.313s remote8.220s.3arms10rounds156steps/client/round (15600/arm),first-round hashes paired. PPRTPseen41.86/missing19.16625/all23.705 vs FedProtoL2 seen82.595/missing.00375/all16.522 and FedGHdeployed77.42/0/15.484; native80.69/0/16.138. All6frozengates pass STRONG. Samefinalstate/rawmeans/counts/state/RNG/modes/grad exact. No tuning. H11A/full evidence;awaitlead second-dataset/heterogeneity decision,do not startH11B. Workroot C:/work/PPRTP.
 
@@ -98,6 +104,7 @@ Extracted under remote shared/cifar10. Partial official/UCSD downloads preserved
 Failed run 20260916-221759-h01-smoke stopped before training at Python SSL CA failure;
 system curl retained TLS verification. No server driver/environment change performed.
 No automation created in this task; user's research-side hourly loop is external.
+
 
 
 

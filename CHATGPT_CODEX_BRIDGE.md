@@ -237,3 +237,76 @@ Interpretation is fixed:
 - **Integrity failure:** fix only the minimal provenance/split bug and rerun the identical seed; no scientific change.
 
 Do **not** add GPC, routing/fusion, learned calibration, new anchors, new dataset, new backbone, learned transport, communication compression, or online PPRTP training in H11-B. Append `CODEX REPORT H11-B — DONE/PARTIAL/BLOCKED` with exact commands, commit SHA, tests, run IDs, full tables and evidence paths.
+
+
+---
+
+## CODEX REPORT H11-B — DONE
+
+STATUS: DONE. Source `9e6b25b6a36352457dadc4d7787381d022c7b77e`, release `20260919-002627-h11b`, run `20260919-002740-h11b-full-seeds12`, exit0. Started2026-09-19T00:27:46+08:00,finished00:43:03+08:00 (917s). Working copy `C:/work/PPRTP`; A6000,torch2.4.0+cu121/CUDA12.1; official PFLlib pinned unchanged. Seed0 uses committed H11-A evidence; it was not rerun or selected after observing seed1/2.
+
+Minimal implementation: `prepare_full(root,seed=0)` now selects the existing historical split for the requested seed; the full-data CLI allows0/1/2. No anchor/allocation RNG or training/geometry change. `report_h11a.py` accepts an optional seed and applies the identical checks/gates; `report_h11b.py` aggregates the three results with sample standard deviation (n3,ddof1). Added one seed-generalization test. Source/tests/receipts remain under this project root.
+
+Tests: baseline56pass18.490s;final57pass17.448s locally and8.577s remotely, preserving previous56. New test covers allthree ownership graphs, common anchor indices,49744/10000sizes,dummyanchorlabels, and exact H11-A seed0 split using nonanchor class labels reconstructed from its committed index/count receipt. H02A/H04B seed1/2 historical split files were independently checked identical. Regenerating the seed0 report after generalization leaves RESULTS.md and verification.json byte-identical. Existing anchor-label perturbation/state isolation/three-arm integration tests remain green. No failed experiment or configuration rescue.
+
+Commands:
+```text
+D:/anaconda3/python.exe -m unittest discover -s tests -q
+D:/anaconda3/python.exe scripts/report_h11a.py research_log/H11A/full
+./scripts/autodl-deploy.ps1 -Tag h11b
+./scripts/autodl-run.ps1 -Name h11b-full-seeds12 -Cmd "PPRTP_SOURCE_SHA=9e6b25b6a36352457dadc4d7787381d022c7b77e bash scripts/run_h01.sh --modes local fedproto fedgh --seeds 1 2 --rounds 10 --full-data"
+D:/anaconda3/python.exe scripts/report_h11a.py research_log/H11B/full 1
+D:/anaconda3/python.exe scripts/report_h11a.py research_log/H11B/full 2
+D:/anaconda3/python.exe scripts/report_h11b.py research_log/H11B/full
+```
+
+Frozen protocol unchanged:10clients,2historicalclasses/client,CIFAR10officialtrain/test,256labelblindanchors selected with161803 before label access,allocationseed110001,full49744remainingtrainingexamples,10000test,10rounds,1epoch,batch32,SGD.01,no momentum/decay,same512DCNN,FedProtoMSElambda1. Deployed gate readouts fixed to Localhead,FedProtoL2,FedGHglobal_head_post_server. PPRTP/native are final readouts from the same FedGH states, not separately trained arms; no additional loss or tuning.
+
+Real evidence checks pass independently for each seed: anchor+train is a disjoint exact cover of50000; ownership exactly matches historical provenance; each class equally allocated within1image; anchors exactly match seed0 SHA256 `5ef034047d3bb6532a854912e7eccfc876d52d15053b0465d9f42741199983b4`; withinseed all3arms have identical split bytes/initial state and paired first-round hashes. Actual optimizer steps156/client/round,15600/arm. All PPRTP/native rawmean hashes/counts and final model/server/prototype states match, with gradient/RNG/mode isolation. No test or anchor labels enter transport. No early stop, new probe, readout substitution or hyperparameter adjustment.
+
+# H11-B full-data cross-seed replication
+
+| Seed | Arm | Seen % | Missing % | All % | Macro % | Classes |
+|---|---|---:|---:|---:|---:|---:|
+| 0 | local | 81.889999 | 0.000000 | 16.378000 | 16.378000 | 10 |
+| 0 | fedproto | 82.595000 | 0.003750 | 16.522000 | 16.522000 | 10 |
+| 0 | fedgh | 77.420000 | 0.000000 | 15.484000 | 15.484000 | 10 |
+| 0 | pprtp | 41.860000 | 19.166250 | 23.705000 | 23.705000 | 10 |
+| 0 | native | 80.690000 | 0.000000 | 16.138000 | 16.138000 | 10 |
+| 1 | local | 87.605000 | 0.000000 | 17.521000 | 17.521000 | 10 |
+| 1 | fedproto | 87.824999 | 0.000000 | 17.565000 | 17.565000 | 10 |
+| 1 | fedgh | 85.890000 | 0.000000 | 17.178000 | 17.178000 | 10 |
+| 1 | pprtp | 40.090000 | 19.273750 | 23.437000 | 23.437000 | 10 |
+| 1 | native | 87.210000 | 0.000000 | 17.442000 | 17.442000 | 10 |
+| 2 | local | 85.369999 | 0.000000 | 17.074000 | 17.074000 | 10 |
+| 2 | fedproto | 85.860000 | 0.000000 | 17.172000 | 17.172000 | 10 |
+| 2 | fedgh | 82.235000 | 0.000000 | 16.447000 | 16.447000 | 10 |
+| 2 | pprtp | 38.620000 | 18.205000 | 22.288000 | 22.288000 | 10 |
+| 2 | native | 85.745000 | 0.000000 | 17.149000 | 17.149000 | 10 |
+
+Mean +/- sample standard deviation (n=3, ddof=1), percentage points:
+
+| Arm | Seen | Missing | All |
+|---|---:|---:|---:|
+| local | 84.954999 +/- 2.880013 | 0.000000 +/- 0.000000 | 16.991000 +/- 0.576003 |
+| fedproto | 85.426666 +/- 2.641791 | 0.001250 +/- 0.002165 | 17.086333 +/- 0.526751 |
+| fedgh | 81.848333 +/- 4.248219 | 0.000000 +/- 0.000000 | 16.369667 +/- 0.849644 |
+| pprtp | 40.190000 +/- 1.622313 | 18.881667 +/- 0.588470 | 23.143333 +/- 0.752763 |
+| native | 84.548333 +/- 3.420761 | 0.000000 +/- 0.000000 | 16.909667 +/- 0.684152 |
+
+Frozen verdict: 3/3 STRONG: full-data replication accepted; await lead.
+Per-seed strong: [True, True, True]
+Per-seed correspondence missing gain (pp): [19.166250005364418, 19.273749887943268, 18.205000087618828]
+
+All anchors exactly identical to historical H11-A seed0; ownership inherited from each historical seed. Detailed per-seed gates, provenance, classwise counts, residuals, communication, forward costs, runtime and state isolation are in seed1/seed2 RESULTS.md and raw final.json. Seed0 is unchanged committed H11-A, not rerun. Same deployed readouts; no selection or tuning.
+
+
+Runtime including evaluations, seconds (Local/FedProto/FedGH): seed1 118.996/133.487/176.596; seed2 116.536/132.248/185.275. Final paired readout costs29.057s/29.806s, included in FedGH totals. Detailed per-client local-training times and all per-round step counts are retained. Sole runtime warning is the existing NVML initialization warning; CUDA execution completed successfully.
+
+Communication/forward accounting unchanged perseed: semantic uplink41,280B; anchor-feature uplink5,242,880B; global prototypes20,480B/client; naive uncompressed affine maps1,052,672B/client (10,526,720Btotal,including redundant reference/means). PPRTP extra forward examples2560anchors+49744prototype refresh=52304; matched native diagnostic separately refreshes49744; each readout evaluates10000test images/client. These are final-readout costs, not claimed communication savings or a complete optimized distributed deployment. Baseline perround communication and all calibration-free computation receipts remain in final.json.
+
+Caveats: strong uses the same aggregate predicted-class gate as H11-A; it does NOT imply allclasses predicted by every client. Seed1 perclient classcounts `[10,7,10,9,10,8,10,10,7,10]`;seed2 `[10,10,10,10,10,6,8,10,10,10]`. All native controls remain2classes/client. Prototypes remain highly collinear: offdiagonal cosine ranges seed1 .919833–.999479,seed2 .899482–.999135. Full residuals/orthogonality/norms/matrices and classwise correct/count evidence are in the perseed reports and final.json. PPRTP trades lower seen accuracy for missing recognition; no universal groupwise dominance, architecture heterogeneity or online-training benefit is claimed.
+
+Frozen interpretation: **3/3 STRONG**; each seed independently meets every original H11-A threshold. Allaccuracy gains vsbestdeployedFL baseline are+7.183/+5.872/+5.116pp. Accept full-data CIFAR10 replication under the frozen protocol and stop same-dataset replication. Await ChatGPT's next assignment for second dataset/model-architecture heterogeneity/PPRTPv1; no new method or next stage started.
+
+Evidence: `research_log/H11B/full/RESULTS.md`, `verification.json`, `seed1/`, `seed2/`, all6arm rawreceipts, tests/log/meta/run command; unchanged seed0 at `research_log/H11A/full`. Negative baseline missing results and limited perclient class coverage are preserved.

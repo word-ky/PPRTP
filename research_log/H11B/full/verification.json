@@ -1,0 +1,844 @@
+{
+  "strong_seed_count": 3,
+  "verdict": "3/3 STRONG: full-data replication accepted; await lead",
+  "anchor_indices_equal": true,
+  "summary": {
+    "local": {
+      "seen": {
+        "mean": 84.95499928792317,
+        "std": 2.880013346111334
+      },
+      "missing": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "all": {
+        "mean": 16.990999976793926,
+        "std": 0.576002694988783
+      }
+    },
+    "fedproto": {
+      "seen": {
+        "mean": 85.4266663392385,
+        "std": 2.6417905294795996
+      },
+      "missing": {
+        "mean": 0.0012500000593718141,
+        "std": 0.002165063612296095
+      },
+      "all": {
+        "mean": 17.086333433787026,
+        "std": 0.5267508423936211
+      }
+    },
+    "fedgh": {
+      "seen": {
+        "mean": 81.84833347797394,
+        "std": 4.24821856456342
+      },
+      "missing": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "all": {
+        "mean": 16.369666655858357,
+        "std": 0.8496438044471163
+      }
+    },
+    "pprtp": {
+      "seen": {
+        "mean": 40.18999998768171,
+        "std": 1.6223131053837043
+      },
+      "missing": {
+        "mean": 18.881666660308838,
+        "std": 0.5884703001304739
+      },
+      "all": {
+        "mean": 23.1433334449927,
+        "std": 0.7527632306460401
+      }
+    },
+    "native": {
+      "seen": {
+        "mean": 84.54833348592122,
+        "std": 3.4207614389783716
+      },
+      "missing": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "all": {
+        "mean": 16.909666806459427,
+        "std": 0.6841522832145601
+      }
+    }
+  },
+  "per_seed": {
+    "0": {
+      "per_client_predicted_classes": {
+        "local": {
+          "head": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "cosine": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "l2": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            3,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        "fedproto": {
+          "head": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "cosine": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "l2": [
+            2,
+            2,
+            2,
+            3,
+            2,
+            3,
+            2,
+            2,
+            2,
+            3
+          ]
+        },
+        "fedgh": {
+          "cosine": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "l2": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "local_head_pre_server": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "global_head_post_server": [
+            2,
+            2,
+            2,
+            2,
+            1,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        "pprtp_h07": [
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "native_control": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ]
+      },
+      "gates": {
+        "missing_at_least15": true,
+        "missing_beats_baselines5pp": true,
+        "all_beats_baselines2pp": true,
+        "correspondence_missing_gain10pp": true,
+        "predicted_classes9": true,
+        "integrity": true
+      },
+      "verdict": "STRONG",
+      "correspondence_missing_gain_pp": 19.166250005364418,
+      "runtime": {
+        "local": {
+          "total_seconds": 124.80434703826904,
+          "optimizer_steps_total": 15600,
+          "optimizer_steps_per_client_round": [
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156
+          ],
+          "local_training_seconds_per_client": [
+            8.693451881408691,
+            8.465128660202026,
+            8.150163650512695,
+            8.119387865066528,
+            8.164402961730957,
+            8.141871690750122,
+            8.09127140045166,
+            8.504015922546387,
+            8.095658779144287,
+            8.117757797241211
+          ]
+        },
+        "fedproto": {
+          "total_seconds": 135.537127494812,
+          "optimizer_steps_total": 15600,
+          "optimizer_steps_per_client_round": [
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156
+          ],
+          "local_training_seconds_per_client": [
+            9.926508903503418,
+            9.492887258529663,
+            9.500600814819336,
+            9.523094654083252,
+            9.536399602890015,
+            9.49373984336853,
+            9.687488794326782,
+            9.47763705253601,
+            9.503539562225342,
+            9.47804045677185
+          ]
+        },
+        "fedgh": {
+          "total_seconds": 188.5446901321411,
+          "optimizer_steps_total": 15600,
+          "optimizer_steps_per_client_round": [
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156
+          ],
+          "local_training_seconds_per_client": [
+            8.048678636550903,
+            8.01197600364685,
+            7.81899356842041,
+            7.801682949066162,
+            7.792631149291992,
+            7.819865465164185,
+            7.844475746154785,
+            8.026917457580566,
+            7.808336973190308,
+            7.812728404998779
+          ]
+        }
+      },
+      "split_identical": true,
+      "round1_identical": true,
+      "coverage_exact": true,
+      "final_state_and_means_exact": true,
+      "source_sha": "329a6e3754db495245902ed05d28d923eec35cbf"
+    },
+    "1": {
+      "per_client_predicted_classes": {
+        "local": {
+          "head": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "cosine": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "l2": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        "fedproto": {
+          "head": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "cosine": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "l2": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            3,
+            2,
+            2,
+            2
+          ]
+        },
+        "fedgh": {
+          "cosine": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "l2": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "local_head_pre_server": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "global_head_post_server": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        "pprtp_h07": [
+          10,
+          7,
+          10,
+          9,
+          10,
+          8,
+          10,
+          10,
+          7,
+          10
+        ],
+        "native_control": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ]
+      },
+      "gates": {
+        "missing_at_least15": true,
+        "missing_beats_baselines5pp": true,
+        "all_beats_baselines2pp": true,
+        "correspondence_missing_gain10pp": true,
+        "predicted_classes9": true,
+        "integrity": true
+      },
+      "verdict": "STRONG",
+      "correspondence_missing_gain_pp": 19.273749887943268,
+      "runtime": {
+        "local": {
+          "total_seconds": 118.99645495414734,
+          "optimizer_steps_total": 15600,
+          "optimizer_steps_per_client_round": [
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156
+          ],
+          "local_training_seconds_per_client": [
+            8.311908960342407,
+            7.957391977310181,
+            7.758213996887207,
+            7.692003965377808,
+            7.739355087280273,
+            7.745657444000244,
+            7.752207517623901,
+            7.952639579772949,
+            7.76220965385437,
+            7.746530771255493
+          ]
+        },
+        "fedproto": {
+          "total_seconds": 133.48668718338013,
+          "optimizer_steps_total": 15600,
+          "optimizer_steps_per_client_round": [
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156
+          ],
+          "local_training_seconds_per_client": [
+            9.782589673995972,
+            9.361170530319214,
+            9.344805717468262,
+            9.353127002716064,
+            9.372712135314941,
+            9.374368667602539,
+            9.564478874206543,
+            9.366342306137085,
+            9.342248916625977,
+            9.337048053741455
+          ]
+        },
+        "fedgh": {
+          "total_seconds": 176.59582233428955,
+          "optimizer_steps_total": 15600,
+          "optimizer_steps_per_client_round": [
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156
+          ],
+          "local_training_seconds_per_client": [
+            7.360342979431152,
+            7.567118406295776,
+            7.527682781219482,
+            7.507028341293335,
+            7.45216178894043,
+            7.262784004211426,
+            7.343095302581787,
+            7.531546592712402,
+            7.383461952209473,
+            7.358362674713135
+          ]
+        }
+      },
+      "split_identical": true,
+      "round1_identical": true,
+      "coverage_exact": true,
+      "final_state_and_means_exact": true,
+      "source_sha": "9e6b25b6a36352457dadc4d7787381d022c7b77e"
+    },
+    "2": {
+      "per_client_predicted_classes": {
+        "local": {
+          "head": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "cosine": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "l2": [
+            2,
+            3,
+            2,
+            2,
+            3,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        "fedproto": {
+          "head": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "cosine": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "l2": [
+            2,
+            2,
+            2,
+            2,
+            3,
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        "fedgh": {
+          "cosine": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "l2": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "local_head_pre_server": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "global_head_post_server": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            1,
+            2,
+            2,
+            2,
+            2
+          ]
+        },
+        "pprtp_h07": [
+          10,
+          10,
+          10,
+          10,
+          10,
+          6,
+          8,
+          10,
+          10,
+          10
+        ],
+        "native_control": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ]
+      },
+      "gates": {
+        "missing_at_least15": true,
+        "missing_beats_baselines5pp": true,
+        "all_beats_baselines2pp": true,
+        "correspondence_missing_gain10pp": true,
+        "predicted_classes9": true,
+        "integrity": true
+      },
+      "verdict": "STRONG",
+      "correspondence_missing_gain_pp": 18.205000087618828,
+      "runtime": {
+        "local": {
+          "total_seconds": 116.53614401817322,
+          "optimizer_steps_total": 15600,
+          "optimizer_steps_per_client_round": [
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156
+          ],
+          "local_training_seconds_per_client": [
+            7.853458642959595,
+            7.819279909133911,
+            7.973334312438965,
+            7.703414440155029,
+            7.706285715103149,
+            7.690881729125977,
+            7.724703550338745,
+            7.914760589599609,
+            7.728145599365234,
+            7.721966028213501
+          ]
+        },
+        "fedproto": {
+          "total_seconds": 132.24752283096313,
+          "optimizer_steps_total": 15600,
+          "optimizer_steps_per_client_round": [
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156
+          ],
+          "local_training_seconds_per_client": [
+            9.595308780670166,
+            9.314578533172607,
+            9.292593240737915,
+            9.294235229492188,
+            9.482418537139893,
+            9.308380126953125,
+            9.300551652908325,
+            9.304265975952148,
+            9.480383157730103,
+            9.288865327835083
+          ]
+        },
+        "fedgh": {
+          "total_seconds": 185.2749946117401,
+          "optimizer_steps_total": 15600,
+          "optimizer_steps_per_client_round": [
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156,
+            156
+          ],
+          "local_training_seconds_per_client": [
+            7.623194456100464,
+            7.602599143981934,
+            7.601580619812012,
+            7.792963266372681,
+            7.774876356124878,
+            7.593345880508423,
+            7.585049390792847,
+            7.584076166152954,
+            7.579333782196045,
+            7.77324914932251
+          ]
+        }
+      },
+      "split_identical": true,
+      "round1_identical": true,
+      "coverage_exact": true,
+      "final_state_and_means_exact": true,
+      "source_sha": "9e6b25b6a36352457dadc4d7787381d022c7b77e"
+    }
+  }
+}

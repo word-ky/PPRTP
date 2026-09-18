@@ -1,0 +1,6 @@
+{
+  "runId": "20260919-002740-h11b-full-seeds12",
+  "releaseId": "20260919-002627-h11b",
+  "sessionName": "autodl-20260919-002740-h11b-full-seeds12",
+  "command": "PPRTP_SOURCE_SHA=9e6b25b6a36352457dadc4d7787381d022c7b77e bash scripts/run_h01.sh --modes local fedproto fedgh --seeds 1 2 --rounds 10 --full-data"
+}
