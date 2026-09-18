@@ -77,11 +77,12 @@ class H01Client(clientProto):
         self.diagnostic = None
         self.optimizer_steps = 0
         online=self.mode in ("pprtp_all_lag1","pprtp_seen_lag1")
-        if online: self.batch_hashes=[]
+        audit_batches=online or getattr(self,'audit_batch_order',False)
+        if audit_batches: self.batch_hashes=[]
         for _ in range(self.local_epochs):
             for x, y in self.load_train_data():
                 x, y = x.to(self.device), y.to(self.device)
-                if online: self.batch_hashes.append(hashlib.sha256(x.detach().cpu().contiguous().numpy().tobytes()+y.detach().cpu().contiguous().numpy().tobytes()).hexdigest())
+                if audit_batches: self.batch_hashes.append(hashlib.sha256(x.detach().cpu().contiguous().numpy().tobytes()+y.detach().cpu().contiguous().numpy().tobytes()).hexdigest())
                 z = self.model.base(x)
                 local = self.loss(self.model.head(z), y)
                 bank, valid = prototype_bank(self.global_protos, self.num_classes, z)

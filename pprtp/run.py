@@ -46,6 +46,7 @@ def check_round_one(records):
     for record in records[1:]:
         assert record['client_model_hashes'] == reference['client_model_hashes'], 'Round-1 client mismatch'
         assert record['prototype_bank_hash'] == reference['prototype_bank_hash'], 'Round-1 prototype mismatch'
+        if 'batch_hashes' in reference:assert record['batch_hashes']==reference['batch_hashes'], 'Round-1 data order mismatch'
 
 
 def metrics(predictions, labels, seen,num_classes=10):
@@ -108,10 +109,20 @@ def run(cfg, mode, seed):
     out = Path(cfg.output) / f"{mode}_seed{seed}"
     out.mkdir(parents=True, exist_ok=True)
     (out/'split.json').write_text(json.dumps(split))
-    cnn = FedAvgCNN(in_features=3, num_classes=num_classes, dim=1600)
-    head = copy.deepcopy(cnn.fc)
-    cnn.fc = torch.nn.Identity()
-    args = SimpleNamespace(model=BaseHeadSplit(cnn,head).to(cfg.device),
+    if cfg.mixed_backbone:
+        assert cfg.full_data and cfg.dataset=='CIFAR100' and seed==0
+        assert json.loads(json.dumps(split))==json.loads(Path('research_log/H12A/full/artifacts/experiment/local_seed0/split.json').read_text())
+        from pprtp.mixed_backbone import build_mixed
+        initial_models,architecture_receipts=build_mixed(seed,num_classes,tensor_hash)
+        for owners in split['owners'].values():
+            assert len(owners)==2 and {architecture_receipts[i]['architecture'] for i in owners}=={'FedAvgCNN','ResNet18'}
+        initial_model=initial_models[0]
+    else:
+        cnn = FedAvgCNN(in_features=3, num_classes=num_classes, dim=1600)
+        head = copy.deepcopy(cnn.fc)
+        cnn.fc = torch.nn.Identity()
+        initial_model=BaseHeadSplit(cnn,head)
+    args = SimpleNamespace(model=initial_model.to(cfg.device),
         algorithm=mode, mode=mode, scale=cfg.scale, dataset='Cifar100' if num_classes==100 else 'Cifar10',device=cfg.device,
         save_folder_name='items',num_classes=num_classes,batch_size=cfg.batch_size,
         local_learning_rate=cfg.lr,local_epochs=cfg.local_epochs,few_shot=0,
@@ -120,9 +131,13 @@ def run(cfg, mode, seed):
                .002 if mode=='gpc_all_match' or online else cfg.lamda))
     clients=[]
     for i, ds in enumerate(datasets):
+        if cfg.mixed_backbone:args.model=initial_models[i].to(cfg.device)
         client=H01Client(args,i,len(ds),len(test),train_slow=False,send_slow=False)
         client.class_set=split['class_sets'][i]
         clients.append(client)
+    if cfg.mixed_backbone:
+        args.model=initial_models[0]
+        assert [tensor_hash(c.model.state_dict().values()) for c in clients]==[a['initial_model_hash'] for a in architecture_receipts]
     # Upstream constructor resets global seed to 0; all batch shuffles below use
     # explicit client/round generators, independent of constructor/evaluation RNG.
     initial_hash=tensor_hash(args.model.state_dict().values())
@@ -133,6 +148,10 @@ def run(cfg, mode, seed):
         model='PFLlib FedAvgCNN 512D', optimizer='SGD, no momentum/decay',
         prototype_rule='sample-count-weighted online raw feature means; no EMA',
         initial_state_sha256=initial_hash,split_sha256=hashlib.sha256((out/'split.json').read_bytes()).hexdigest())
+    if cfg.mixed_backbone:
+        metadata.update(model='PFLlib mixed FedAvgCNN/ResNet18 512D',client_initial_states=architecture_receipts,
+            architecture_assignment=[a['architecture'] for a in architecture_receipts],server_head_initial_client=0,
+            every_class_one_owner_per_architecture=True)
     (out/'metadata.json').write_text(json.dumps(metadata,indent=2))
     testloader=DataLoader(test,batch_size=128,shuffle=False)
     if cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe or cfg.local_source_probe:
@@ -188,6 +207,9 @@ def run(cfg, mode, seed):
         previous_bank=None
     if fedgh:
         server_head=copy.deepcopy(args.model.head)
+        if cfg.mixed_backbone:
+            shapes={k:list(v.shape) for k,v in server_head.state_dict().items()}
+            assert all(a['head_shapes']==shapes for a in architecture_receipts)
         server_optimizer=torch.optim.SGD(server_head.parameters(),lr=.01)
     started=time.time()
     with (out/'rounds.jsonl').open('w') as stream:
@@ -208,6 +230,7 @@ def run(cfg, mode, seed):
                 gen=torch.Generator().manual_seed(seed*100000+r*100+i)
                 loader=DataLoader(datasets[i],batch_size=cfg.batch_size,shuffle=True,drop_last=False,generator=gen)
                 client.load_train_data=lambda loader=loader: loader
+                if cfg.mixed_backbone:client.audit_batch_order=(r==0)
                 local_start=time.time()
                 client.train()
                 local_seconds.append(time.time()-local_start);local_steps.append(client.optimizer_steps)
@@ -234,6 +257,7 @@ def run(cfg, mode, seed):
                 prototype_payload_bytes=dict(upload_vectors=sum(len(c.protos)*512*4 for c in clients),
                     upload_counts=sum(len(c.protos)*8 for c in clients),download_vectors=cfg.clients*num_classes*512*4),
                 elapsed_seconds=time.time()-started)
+            if cfg.mixed_backbone and r==0:record['batch_hashes']=[c.batch_hashes for c in clients]
             if fedgh:
                 if r == 0 and not cfg.full_data:
                     historical=Path('research_log/H01B/receipts')/f'fedproto_seed{seed}'/'rounds.jsonl'
@@ -622,6 +646,7 @@ def main():
     parser.add_argument('--conditioning-probe',action='store_true')
     parser.add_argument('--dataset',choices=['CIFAR10','CIFAR100'],default='CIFAR10')
     parser.add_argument('--num-classes',type=int,default=10)
+    parser.add_argument('--mixed-backbone',action='store_true')
     parser.add_argument('--full-data',action='store_true')
     parser.add_argument('--full-pair-probe',action='store_true')
     parser.add_argument('--group-refine-probe',action='store_true')
