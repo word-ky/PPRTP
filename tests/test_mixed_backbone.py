@@ -44,3 +44,25 @@ class MixedBackboneTest(unittest.TestCase):
                 for k in ('rng_cpu_unchanged','rng_cuda_unchanged','module_modes_unchanged','existing_gradients_unchanged'):self.assertTrue(r[k])
             self.assertTrue(rr[2]['full_pair_probe']['same_raw_means_counts_exact']);self.assertTrue(rr[2]['full_pair_probe']['anchor_feature_hashes_exact'])
             self.assertTrue(json.loads((Path(output)/'round_one_pairing_seed0.json').read_text())['passed'])
+
+    def test_seed_replication_initialization_and_actual_batch_orders(self):
+        torch.set_num_threads(1);torch.manual_seed(130)
+        split=json.loads(Path('research_log/H12A/full/artifacts/experiment/local_seed0/split.json').read_text())
+        local=[TensorDataset(torch.randn(40,3,32,32),torch.tensor(cs*2)) for cs in split['class_sets']]
+        evaluation=TensorDataset(torch.randn(100,3,32,32),torch.arange(100))
+        anchors=TensorDataset(torch.randn(256,3,32,32),torch.zeros(256,dtype=torch.long))
+        with tempfile.TemporaryDirectory() as output:
+            argv=['pprtp','--data','unused','--output',output,'--device','cpu','--modes','local','--seeds','0','1','2','--rounds','1','--full-data','--dataset','CIFAR100','--num-classes','100','--k','20','--mixed-backbone']
+            with patch('sys.argv',argv),patch('pprtp.full_data.prepare_cifar100',return_value=(local,evaluation,split,anchors)),contextlib.redirect_stdout(io.StringIO()):main()
+            roots=[Path(output)/f'local_seed{seed}' for seed in (0,1,2)]
+            initial=[json.loads((r/'metadata.json').read_text())['client_initial_states'] for r in roots]
+            batches=[json.loads((r/'final.json').read_text())['batch_hashes'] for r in roots]
+            for r in roots:self.assertEqual(json.loads((r/'split.json').read_text()),split)
+            for i in range(10):
+                self.assertEqual(len({rr[i]['initial_model_hash'] for rr in initial}),3)
+                self.assertEqual(len({tuple(bb[i]) for bb in batches}),3)
+                for rr in initial:
+                    self.assertEqual(rr[i]['architecture'],'FedAvgCNN' if i%2==0 else 'ResNet18')
+                    self.assertEqual(rr[i]['head_shapes'],{'weight':[100,512],'bias':[100]})
+            models,repeated=build_mixed(1,100,tensor_hash)
+            self.assertEqual(initial[1],repeated)

@@ -110,7 +110,7 @@ def run(cfg, mode, seed):
     out.mkdir(parents=True, exist_ok=True)
     (out/'split.json').write_text(json.dumps(split))
     if cfg.mixed_backbone:
-        assert cfg.full_data and cfg.dataset=='CIFAR100' and seed==0
+        assert cfg.full_data and cfg.dataset=='CIFAR100' and seed in (0,1,2)
         assert json.loads(json.dumps(split))==json.loads(Path('research_log/H12A/full/artifacts/experiment/local_seed0/split.json').read_text())
         from pprtp.mixed_backbone import build_mixed
         initial_models,architecture_receipts=build_mixed(seed,num_classes,tensor_hash)

@@ -1,11 +1,12 @@
 """Reuse H12 frozen metrics/gates; add H13 mixed-backbone receipts and grouping."""
 import contextlib,io,json,runpy,sys
 from pathlib import Path
-root=Path(sys.argv[1]);base=root/'artifacts/experiment'
+root=Path(sys.argv[1]);base=root/'artifacts/experiment';seed=int(sys.argv[2]) if len(sys.argv)>2 else 0
+destination=root if seed==0 else root/f'seed{seed}'
 with contextlib.redirect_stdout(io.StringIO()):runpy.run_path('scripts/report_h12a.py',run_name='__main__')
 def read(p):return json.loads(Path(p).read_text(encoding='utf-8'))
-modes=('local','fedproto','fedgh');meta={m:read(base/f'{m}_seed0/metadata.json') for m in modes};runs={m:read(base/f'{m}_seed0/final.json') for m in modes}
-split=read(base/'local_seed0/split.json');assert split==read('research_log/H12A/full/artifacts/experiment/local_seed0/split.json')
+modes=('local','fedproto','fedgh');meta={m:read(base/f'{m}_seed{seed}/metadata.json') for m in modes};runs={m:read(base/f'{m}_seed{seed}/final.json') for m in modes}
+split=read(base/f'local_seed{seed}/split.json');assert split==read('research_log/H12A/full/artifacts/experiment/local_seed0/split.json')
 assignment=['FedAvgCNN','ResNet18']*5;receipts=meta['local']['client_initial_states']
 for m in modes:
  assert meta[m]['architecture_assignment']==assignment and meta[m]['client_initial_states']==receipts
@@ -15,9 +16,16 @@ for i,r in enumerate(receipts):
  assert r['head_shapes']=={'weight':[100,512],'bias':[100]}
  assert any('running_mean' in k for k in r['buffer_names'])==(i%2==1)
 for owners in split['owners'].values():assert len(owners)==2 and {assignment[i] for i in owners}=={'FedAvgCNN','ResNet18'}
-first=[json.loads((base/f'{m}_seed0/rounds.jsonl').read_text().splitlines()[0]) for m in modes]
+first=[json.loads((base/f'{m}_seed{seed}/rounds.jsonl').read_text().splitlines()[0]) for m in modes]
 assert first[0]['batch_hashes']==first[1]['batch_hashes']==first[2]['batch_hashes']
 assert [len(h) for h in first[0]['batch_hashes']]==[156]*10
+if seed:
+ for previous in range(seed):
+  old=Path('research_log/H13A/full/artifacts/experiment/local_seed0') if previous==0 else base/f'local_seed{previous}'
+  old_receipts=read(old/'metadata.json')['client_initial_states']
+  old_first=json.loads((old/'rounds.jsonl').read_text().splitlines()[0])
+  assert all(a['initial_model_hash']!=b['initial_model_hash'] for a,b in zip(receipts,old_receipts))
+  assert all(a!=b for a,b in zip(first[0]['batch_hashes'],old_first['batch_hashes']))
 f=runs['fedgh']['full_data_readout'];p=f['pprtp_h07'];b=runs['fedgh']['full_pair_probe']['pair_broken_h07'];n=f['native_global_prototype_cosine_control']
 perclient={m:[r[key] for r in runs[m]['per_client']] for m,key in [('local','head'),('fedproto','l2'),('fedgh','global_head_post_server')]}
 perclient.update(paired_h07=p['per_client'],pair_broken_h07=b['per_client'],native_control=n['per_client'])
@@ -38,8 +46,8 @@ for arch in ('FedAvgCNN','ResNet18'):
  residuals[arch]={name:sum(r['alignment'][i]['centered_residual_after'] for i in ii)/len(ii) for name,r in [('paired',p),('broken',b)]}
  extra.append(arch+': '+json.dumps(residuals[arch]))
 extra+=['','Residual magnitudes depend on feature scale; this grouping is descriptive, not proof of a failure mechanism. Full per-client residuals/orthogonality, classwise counts and histograms remain in final.json. The frozen overallgate is unchanged; groupedmetrics are not selected as alternativegates. Same512Dpayloads asH12; modelparametercounts differ, with no modelweight exchange in these prototype/head baselines. One mixedseed only; do not claim multi-seed architectureheterogeneity yet.']
-text=(root/'RESULTS.md').read_text().replace('# H12-A CIFAR100 seed0 portability stress test','# H13-A CIFAR100 seed0 mixed-backbone falsifier',1)
-text+='\n'.join(extra)+'\n';(root/'RESULTS.md').write_text(text,encoding='utf-8')
-v=read(root/'verification.json');v.update(architecture_assignment=assignment,client_initial_states=receipts,initial_states_paired_by_client=True,round1_actual_batches_exact=True,split_exact_h12a=True,every_class_cross_architecture=True,per_backbone_metrics=grouped,nonreference_alignment_residuals=residuals)
-(root/'verification.json').write_text(json.dumps(v,indent=2),encoding='utf-8')
+text=(destination/'RESULTS.md').read_text().replace(f'# H12-A CIFAR100 seed{seed} portability stress test',f'# H13-A CIFAR100 seed{seed} mixed-backbone falsifier',1)
+text+='\n'.join(extra)+'\n';(destination/'RESULTS.md').write_text(text,encoding='utf-8')
+v=read(destination/'verification.json');v.update(architecture_assignment=assignment,client_initial_states=receipts,initial_states_paired_by_client=True,round1_actual_batches_exact=True,split_exact_h12a=True,every_class_cross_architecture=True,per_backbone_metrics=grouped,nonreference_alignment_residuals=residuals)
+(destination/'verification.json').write_text(json.dumps(v,indent=2),encoding='utf-8')
 print('\n'.join(text.splitlines()[:16]));print(json.dumps(grouped,indent=2))
