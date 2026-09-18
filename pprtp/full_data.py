@@ -54,7 +54,7 @@ def prepare_full(root,seed=0):
     return local,evaluation,split,public
 
 
-def full_readouts(clients,head,anchors,datasets,test,tensor_hash,metrics):
+def full_readouts(clients,head,anchors,datasets,test,tensor_hash,metrics,construction_output=None):
     capture={}
     aligned=analyze_direct(clients,head,anchors,datasets,test,tensor_hash,metrics,None,construction_output=capture)
     native=analyze_direct(clients,head,anchors,datasets,test,tensor_hash,metrics,None,aligned=False)
@@ -63,6 +63,7 @@ def full_readouts(clients,head,anchors,datasets,test,tensor_hash,metrics):
     assert signature(aligned)==signature(native)
     for p in aligned['local_prototypes']:
         assert p['count']==int((datasets[p['client']].tensors[1]==p['label']).sum())
+    if construction_output is not None: construction_output.update(capture)
     bank=capture['bank'];nb=torch.nn.functional.normalize(bank,dim=1)
     transforms=capture['transforms'];payload=[sum(t.numel()*t.element_size() for t in tt) for tt in transforms]
     return dict(pprtp_h07=aligned,native_global_prototype_cosine_control=native,

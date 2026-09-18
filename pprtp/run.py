@@ -94,6 +94,11 @@ def run(cfg, mode, seed):
         datasets,test,split,full_anchors=prepare_full(cfg.data,seed)
     else:
         datasets, test, split = prepare(cfg.data, seed, cfg.clients, cfg.k, cfg.train_per_class, cfg.test_per_class)
+    if cfg.full_pair_probe:
+        assert cfg.full_data and mode=='fedgh' and cfg.rounds==10
+        h11=Path('research_log/H11A/full' if seed==0 else 'research_log/H11B/full')/'artifacts/experiment'/f'fedgh_seed{seed}'
+        assert json.loads(json.dumps(split))==json.loads((h11/'split.json').read_text())
+        h11_rounds=[json.loads(line) for line in (h11/'rounds.jsonl').read_text().splitlines()]
     out = Path(cfg.output) / f"{mode}_seed{seed}"
     out.mkdir(parents=True, exist_ok=True)
     (out/'split.json').write_text(json.dumps(split))
@@ -532,10 +537,29 @@ def run(cfg, mode, seed):
                 record['local_optimizer_steps']=local_steps;record['local_training_seconds']=local_seconds
                 record['prediction_histograms']={key:[sum(v[key]['prediction_histogram'][c] for v in per_client) for c in range(10)] for key in per_client[0]}
                 record['predicted_class_counts']={key:sum(n>0 for n in hh) for key,hh in record['prediction_histograms'].items()}
+                if cfg.full_pair_probe:
+                    for key in ('metrics','per_client','client_model_hashes','prototype_bank_hash','server_head','uploaded_class_counts','local_optimizer_steps'):
+                        assert json.loads(json.dumps(record[key]))==h11_rounds[r][key], f'H11 reproduction: round{r+1} {key}'
                 if mode=='fedgh' and r+1==cfg.rounds:
                     from pprtp.full_data import full_readouts
                     diagnostic_start=time.time()
-                    record['full_data_readout']=full_readouts(clients,server_head,full_anchors,datasets,test,tensor_hash,metrics)
+                    capture={} if cfg.full_pair_probe else None
+                    record['full_data_readout']=full_readouts(clients,server_head,full_anchors,datasets,test,tensor_hash,metrics,construction_output=capture)
+                    if cfg.full_pair_probe:
+                        historical=dict(h11_rounds[-1]['full_data_readout']);historical.pop('diagnostic_seconds')
+                        assert record['full_data_readout']==historical, 'Entire H11 readout must reproduce before pair breaking'
+                        from pprtp.direct_prototypes import analyze_direct
+                        broken=analyze_direct(clients,server_head,full_anchors,datasets,test,tensor_hash,metrics,None,broken=True)
+                        paired=record['full_data_readout']['pprtp_h07']
+                        assert broken['anchor_feature_hashes']==capture['anchor_feature_hashes']
+                        assert broken['state_before']==broken['state_after']==paired['state_before']
+                        signature=lambda a:[(p['client'],p['label'],p['count'],p['raw_hash']) for p in a['local_prototypes']]
+                        assert signature(broken)==signature(paired)
+                        assert broken['alignment'][0]==paired['alignment'][0]
+                        assert [p['fixed_points'] for p in broken['permutation_receipts']]==[1,0,1,2,1,0,2,3,1]
+                        record['full_pair_probe']=dict(pair_broken_h07=broken,h11_entire_reference_exact=True,
+                            all_online_rounds_exact=True,split_exact=True,anchor_feature_hashes_exact=True,
+                            same_raw_means_counts_exact=True,paired_anchor_feature_hashes=capture['anchor_feature_hashes'])
                     record['full_data_readout']['diagnostic_seconds']=time.time()-diagnostic_start
                 record['elapsed_seconds']=time.time()-started
             stream.write(json.dumps(record)+'\n'); stream.flush()
@@ -590,6 +614,7 @@ def main():
     parser.add_argument('--relation-probe',action='store_true')
     parser.add_argument('--conditioning-probe',action='store_true')
     parser.add_argument('--full-data',action='store_true')
+    parser.add_argument('--full-pair-probe',action='store_true')
     parser.add_argument('--group-refine-probe',action='store_true')
     parser.add_argument('--radius-router-probe',action='store_true')
     parser.add_argument('--centered-dual-probe',action='store_true')

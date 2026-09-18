@@ -19,7 +19,7 @@ def cosine_scores(z,bank):
     return scores
 
 
-def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,historical,aligned=True,expected_alignment=None,bank_output=None,construction_output=None):
+def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,historical,aligned=True,expected_alignment=None,bank_output=None,construction_output=None,broken=False):
     def state():
         return dict(clients=[tensor_hash(c.model.state_dict().values()) for c in clients],
             server=tensor_hash(head.state_dict().values()),
@@ -32,6 +32,16 @@ def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,histori
     cuda=torch.cuda.get_rng_state_all() if devices else []
     with torch.random.fork_rng(devices=devices):
         aa=[features(c,anchors)[0] for c in clients] if aligned else []
+        anchor_hashes=[tensor_hash([a]) for a in aa]
+        if construction_output is not None: construction_output['anchor_feature_hashes']=anchor_hashes
+        permutations=[]
+        if broken:
+            from pprtp.paired import break_pairs
+            assert aligned
+            for i in range(1,len(aa)):
+                aa[i],receipt=break_pairs(aa[i],i)
+                permutations.append(dict(client=i,**receipt,original_feature_hash=anchor_hashes[i],permuted_feature_hash=tensor_hash([aa[i]])))
+
         pp=[];ll=[];nn=[];zz=[];yy=[];owners=[];transforms=[];alignment=[];local=[]
         raw_owners=[]
         for i,(c,ds) in enumerate(zip(clients,support)):
@@ -85,7 +95,7 @@ def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,histori
         construction_output.update(bank=bank.detach().clone(),transforms=transforms,raw_owners=raw_owners)
     if bank_output is not None: bank_output['bank']=bank.detach().clone()
     vector_bytes=bank.numel()*bank.element_size()
-    return dict(metrics={k:sum(v[k] for v in values)/len(values) for k in ('seen','missing','all','macro')},
+    result=dict(metrics={k:sum(v[k] for v in values)/len(values) for k in ('seen','missing','all','macro')},
         per_client=values,global_prototypes=receipts,global_hash=tensor_hash([bank]),global_labels=classes.tolist(),
         local_prototypes=local,alignment=alignment,prototype_norm_min=norms.min().item(),prototype_norm_max=norms.max().item(),
         prediction_histograms=dict(per_client=histograms,total=totals),predicted_class_count=sum(v>0 for v in totals['overall']),
@@ -98,3 +108,6 @@ def analyze_direct(clients,head,anchors,support,test,tensor_hash,metrics,histori
         state_before=before,state_after=state(),rng_cpu_unchanged=True,rng_cuda_unchanged=True,
         module_modes_unchanged=True,existing_gradients_unchanged=True,anchor_labels_used=False,
         fitting=False,test_used_for_transform=False,cosine_logits_finite=True)
+
+    if broken: result.update(permutation_receipts=permutations,anchor_feature_hashes=anchor_hashes,reference_client_unchanged=True)
+    return result
