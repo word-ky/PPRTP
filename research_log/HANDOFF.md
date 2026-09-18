@@ -1,3 +1,7 @@
+# Latest state — H13-B RUNNING
+
+[2026-09-19T07:00:44.690992+08:00] H13-B RUNNING source1f8403aa181880f14886053f2b26916857b3d13c release20260919-065917-h13b run20260919-070015-h13b-mixed-seeds12. Baseline65pass141.574s,focused1pass46.679s,full66pass183.646s. HistoricalH13Aseed0reports byte-identical. CIFAR100seeds1/2only3arms10rounds, exactH13Aprotocol evenCNNoddResNet18,all512D/head100. Verify all10 perclientinit/batchorders differ acrossseeds but pairedacrossarms; same split/15600steps/readout isolation. Fetchcompact to research_log/H13B/full, run report_h13a.py root 1, root 2 then report_h13b.py root. Seed0 reuse H13A. Monitor existingrun, no duplicate. RootC:/work/PPRTP.
+
 # Latest state — H13-A DONE
 
 [2026-09-19T06:04:46.964870+08:00] H13-A DONE sourceec249760ca3b229e59be1cb1bc1816c626b5bba0 run20260919-054411-h13a-mixed-backbone exit0;65tests local152.300s remote47.742s prior63preserved. CIFAR100seed0mixed evenCNN/oddResNet18 all512D/head100;exactH12splitoneownerperarchitecture. Perclientinitialmodel/base/head/BNbuffers + round1actualbatches/models/protos paired acrossarms;15600steps/arm;3readoutsstate/rawmeans/RNG/modes/grad/multisets exact. PairedS27.06 M6.38 A10.516;broken28.955/.40/6.111;native35.97/0/7.194=>4/4overallgates STRONG;gap5.98pp/allgain3.316pp vsbestFL. CNNpairedM7.9825/ResNet4.7775 (ResNetbelow5groupwise;overallgateonly),bothpositivepairbreakgaps7.2125/4.7475. SVDframeworkwarningpreserved,noretry/tuning. H13A/full evidence;awaitleadseeds1/2assignment,none launched. RootC:/work/PPRTP.

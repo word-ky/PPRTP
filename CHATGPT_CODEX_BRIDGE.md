@@ -114,3 +114,21 @@ Also report, for each seed and backbone group, paired/broken/native seen/missing
 Do **not** start a new dataset, ownership graph, reference-client sweep, communication compression, online training, routing/fusion, or PPRTP-v2 complexity inside this block.
 
 Append `CODEX REPORT H13-B — DONE/PARTIAL/BLOCKED` with exact source SHA, files changed, tests, commands/run IDs, per-seed architecture/init hashes, split and batch-order integrity receipts, compact overall and per-backbone tables, all frozen gate values, 3-seed summary if complete, warnings, and evidence paths.
+
+
+# CODEX REPORT H13-B — PARTIAL (running)
+
+STATUS: PARTIAL — experiments running, no final scientific verdict yet. Updated 2026-09-19T07:02:49.311159+08:00.
+
+Source: `1f8403aa181880f14886053f2b26916857b3d13c`; release `20260919-065917-h13b`; run `20260919-070015-h13b-mixed-seeds12`.
+
+The only training-code change permits mixed-backbone seeds0/1/2 in the existing guard. `build_mixed`, frozen split, architecture assignment, optimization and readouts are unchanged. `tests/test_mixed_backbone.py` adds an actual miniature three-seed Local entrypoint test for per-client distinct initial hashes and actual batch order, unchanged split/architecture/head shapes, and exact repeated seed1 construction. `scripts/report_h13a.py` accepts a seed and checks per-client cross-seed receipts; `scripts/report_h13b.py` aggregates the original gates and backbone-group qualifications. Historical H13-A seed0 RESULTS/verification regenerate byte-identically.
+
+Validation commands: `D:/anaconda3/python.exe -m unittest discover -s tests -q` (baseline65 passed141.574s; final66 passed183.646s); focused `-m unittest discover -s tests -p test_mixed_backbone.py -k seed_replication -v` (1 passed46.679s). Remote complete66 passed62.158s. Real seed1 metadata confirms all10 modelinitialhashes differ from H13-A seed0, with identical architecture/head shapes and exact split JSON. Static receipts: `research_log/H13B/full/artifacts/experiment/local_seed1/metadata.json` and `split.json`.
+
+Launch command:
+```sh
+PPRTP_SOURCE_SHA=1f8403aa181880f14886053f2b26916857b3d13c bash scripts/run_h01.sh --data /home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar100 --modes local fedproto fedgh --seeds 1 2 --rounds 10 --full-data --dataset CIFAR100 --num-classes 100 --k 20 --mixed-backbone
+```
+
+The existing NVML initialization warning persists, but actual `cuda:0` training has completed seed1 Local round1 successfully (27.44s). No training or integrity failure so far. Do not infer final performance from early-round metrics. No rerun, solver change or tuning. Next action: monitor this same run, fetch compact artifacts (checkpoints remain remote), run `scripts/report_h13a.py research_log/H13B/full 1` and `2`, then `scripts/report_h13b.py research_log/H13B/full`; append DONE with all per-seed gates and grouped results. Do not duplicate this run or rerun H13-A seed0.
