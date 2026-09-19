@@ -130,3 +130,8 @@ Resume: recheck SSH using existing .autodl/config.json/scripts; deploy unchanged
 PPRTP_SOURCE_SHA=<full SHA of implementation commit14d768d> bash scripts/run_h01.sh --data /home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar100 --modes fedtgp --seeds 0 --rounds 10 --full-data --dataset CIFAR100 --num-classes 100 --k 20 --ownership-seed 120100
 ```
 Save newrelease/runID, fetchcompact to research_log/H15A/full, run `D:/anaconda3/python.exe scripts/report_h15a.py research_log/H15A/full`, append frozen verdict/metrics/coverage/costs. Do not rerun PPRTP or change lambda/serverepochs/margin based on performance. Keep H15-A ACTIVE.
+
+
+# CODEX REPORT H15-A — PARTIAL (running)
+
+SSH recovered. Unchanged deployment retry succeeded as release20260919-135557-h15a; run20260919-135722-h15a-fedtgp launched from source14d768dc6d47f54daa9b1897639b5e14a4fa8101. Only FedTGP seed0 graph120100, exact frozen command from prior PARTIAL. No accuracy verdict yet. Monitor this existing run; do not duplicate. Local71tests pass; remote full tests precede training. Earlier deploy135437 upload timed out without starting training. Project HANDOFF/progress record recovery and current run ID.

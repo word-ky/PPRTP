@@ -1,3 +1,7 @@
+# Latest state — H15-A RUNNING
+
+[2026-09-19T13:57:49.453563+08:00] H15-A RUNNING source14d768dc6d47f54daa9b1897639b5e14a4fa8101 release20260919-135557-h15a run20260919-135722-h15a-fedtgp. SSH recovered and unchangeddeployment retry succeeded. Only fedtgp seed0 ownership120100 homogeneousCNN/fullCIFAR100/10cycles. Lambda10,serverepochs100,margin100,serverlr.01,batch32; pinned round-start checkpoint prototype timing. Local71tests pass246.188s. Monitor samejob,no duplicate. FetchcompactH15A/full then report_h15a.py; verifyhistoricalsplit/init/round1model and H13Aexactinputbatchreceipts. Keep 15600clientsteps/7000serversteps, allclass finite. NoPPRTP rerun. RootC:/work/PPRTP.
+
 # Latest state — H15-A PARTIAL: implementation ready, SSH blocked
 
 [2026-09-19T13:33:50.928879+08:00] H15-A PARTIAL READY, SSH BLOCKED. Implementation14d768d, pinnedFedTGPc77cbbb31eb30d13066cd11f7f4a2e732aeaae24, baseline68pass220.813s focused3pass10.062s full71pass246.188s. No realrun launched. Deploy133128/133157 failed initialSSHclosed exit255, thirdread-onlySSHsame;TCP8220reachable. No remoteconfigchange. Need reconnect/deploy unchangedcode and launch ONLY fedtgp seed0/graph120100/10rounds/fullCIFAR100/k20. SourcefullSHA gitrev-parse14d768d. Lambda10/serverepochs100/margin100/serverlr.01/batch32; roundstartprototype timing literalpinnedcode documented/tested. FetchH15A/full then report_h15a.py; noPPRTP rerun. Local/GitHub durablestate authoritative; remote mirrorpending dueconnection. RootC:/work/PPRTP.
