@@ -2,14 +2,15 @@ import hashlib,json,math,sys
 from pathlib import Path
 import numpy as np
 root=Path(sys.argv[1]);base=root/'artifacts/experiment';seed=int(sys.argv[2]) if len(sys.argv)>2 else 0
+ownership_seed=int(sys.argv[3]) if len(sys.argv)>3 else 120100
 destination=root if seed==0 else root/f'seed{seed}';destination.mkdir(parents=True,exist_ok=True)
 def read(p):return json.loads(Path(p).read_text(encoding='utf-8-sig'))
 def sha(v):return hashlib.sha256(json.dumps(v,separators=(',',':')).encode()).hexdigest()
 modes=('local','fedproto','fedgh');runs={m:read(base/f'{m}_seed{seed}/final.json') for m in modes};splits={m:read(base/f'{m}_seed{seed}/split.json') for m in modes};s=splits['local'];assert all(v==s for v in splits.values())
-order=np.random.default_rng(120100).permutation(100).tolist();sets=[[] for _ in range(10)]
+order=np.random.default_rng(ownership_seed).permutation(100).tolist();sets=[[] for _ in range(10)]
 for j,c in enumerate(order):sets[j%10].append(c);sets[(j+1)%10].append(c)
 sets=[sorted(cs) for cs in sets];assert s['class_sets']==sets and s['class_sets_sha256']==sha(sets) and s['ownership_order']==order and s['ownership_order_sha256']==sha(order)
-assert s['ownership_seed']==120100 and s['allocation_rng_seed']==110001
+assert s['ownership_seed']==ownership_seed and s['allocation_rng_seed']==110001
 anchors=np.random.default_rng(161803).permutation(50000)[:256].tolist();assert s['anchor_indices']==anchors and s['anchor_indices_sha256']==sha(anchors)
 assert s['anchor_selection_label_blind'] and not s['anchor_labels_used']
 flat=anchors+sum(s['train_indices'],[]);assert sorted(flat)==list(range(50000)) and len(flat)==len(set(flat))==50000

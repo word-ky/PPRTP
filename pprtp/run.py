@@ -95,7 +95,7 @@ def run(cfg, mode, seed):
         assert cfg.clients==10 and mode in ('local','fedproto','fedgh')
         if cfg.dataset=='CIFAR100':
             assert seed in (0,1,2) and num_classes==100 and cfg.k==20
-            datasets,test,split,full_anchors=prepare_cifar100(cfg.data)
+            datasets,test,split,full_anchors=prepare_cifar100(cfg.data,cfg.ownership_seed)
         else:
             assert seed in (0,1,2) and num_classes==10 and cfg.k==2
             datasets,test,split,full_anchors=prepare_full(cfg.data,seed)
@@ -230,7 +230,7 @@ def run(cfg, mode, seed):
                 gen=torch.Generator().manual_seed(seed*100000+r*100+i)
                 loader=DataLoader(datasets[i],batch_size=cfg.batch_size,shuffle=True,drop_last=False,generator=gen)
                 client.load_train_data=lambda loader=loader: loader
-                if cfg.mixed_backbone:client.audit_batch_order=(r==0)
+                if cfg.mixed_backbone or (cfg.full_data and cfg.dataset=='CIFAR100'):client.audit_batch_order=(r==0)
                 local_start=time.time()
                 client.train()
                 local_seconds.append(time.time()-local_start);local_steps.append(client.optimizer_steps)
@@ -257,7 +257,7 @@ def run(cfg, mode, seed):
                 prototype_payload_bytes=dict(upload_vectors=sum(len(c.protos)*512*4 for c in clients),
                     upload_counts=sum(len(c.protos)*8 for c in clients),download_vectors=cfg.clients*num_classes*512*4),
                 elapsed_seconds=time.time()-started)
-            if cfg.mixed_backbone and r==0:record['batch_hashes']=[c.batch_hashes for c in clients]
+            if (cfg.mixed_backbone or (cfg.full_data and cfg.dataset=='CIFAR100')) and r==0:record['batch_hashes']=[c.batch_hashes for c in clients]
             if fedgh:
                 if r == 0 and not cfg.full_data:
                     historical=Path('research_log/H01B/receipts')/f'fedproto_seed{seed}'/'rounds.jsonl'
@@ -646,6 +646,7 @@ def main():
     parser.add_argument('--conditioning-probe',action='store_true')
     parser.add_argument('--dataset',choices=['CIFAR10','CIFAR100'],default='CIFAR10')
     parser.add_argument('--num-classes',type=int,default=10)
+    parser.add_argument('--ownership-seed',type=int,default=120100)
     parser.add_argument('--mixed-backbone',action='store_true')
     parser.add_argument('--full-data',action='store_true')
     parser.add_argument('--full-pair-probe',action='store_true')

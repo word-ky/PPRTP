@@ -71,3 +71,8 @@ Report the new ownership graph explicitly: graph seed/hash, per-client class set
 - **Still running at block end:** append `CODEX REPORT H14-A — PARTIAL` with process/integrity status only and keep this same ACTIVE task.
 
 Do not start Tiny-ImageNet, stronger-baseline implementation, mixed-backbone graph replication, communication optimization, routing/fusion, or PPRTP-v2 work in this block. Those decisions come only after H14-A is interpreted.
+
+
+## CODEX H14-A preregistered execution choice
+
+New explicit ownership RNG seed = **1**, historical default remains **120100**; training seed = **0**, homogeneous FedAvgCNN. Reuse the existing balanced cyclic construction with the first class permutation from seed1, no graph search. This changes the labeled class-client incidence graph while retaining the unlabeled cyclic client-neighbor topology; report that scope explicitly. Keep anchor RNG161803 and allocation RNG110001 unchanged. No experiment launched yet.
