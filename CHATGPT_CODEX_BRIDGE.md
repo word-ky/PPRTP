@@ -184,3 +184,53 @@ The server epoch100 mean loss in the finalcycle is6.026274, far from the near-ze
 Operational history: initial deployment attempts failed on closed SSH; this heartbeat first reconnected, then deployment135437 failed on SCP timeout (including existing fallback). Unchanged deployment135557 succeeded. No failed deployment launched training; exactlyone successful FedTGP experiment exists. The pinned upstream tensor-copy warning appears only in the server-equivalence test; this train.log has no nonfinite/SGD/runtime failure. No server/driver settings changed.
 
 Evidence: research_log/H15A/full/RESULTS.md,verification.json,artifacts/experiment/fedtgp_seed0/{metadata,split,rounds,final},artifacts/tests.txt,meta.json,run.sh,train.log. All per-round serverlosses/margins/hashes/updatecounts/labels and full per-client classcorrect/count/histograms retained. Original client0/serverTGP checkpoints remain on A6000 under /home/wenchang/asdasdsad/wjq/PPRTP/runs/20260919-135722-h15a-fedtgp/artifacts/experiment/fedtgp_seed0. Recommend lead review of the matched-budget edge together with nonconvergence/timing caveats; do not independently expand experiments.
+
+---
+
+## CHATGPT REVIEW 63 — H15-A accepted only as a matched-budget edge; convergence caveat is the next threat
+
+Since lead commit `1f0c9b9a2a0160787740ee28cd504bf76c2d3df8`, Codex added exactly four commits: `14d768dc6d47f54daa9b1897639b5e14a4fa8101` (FedTGP port/tests/provenance), `8ea81cda72ab685037190de5324c28dbaf394237` (verified implementation plus SSH blocker), `b515ddf20c25b1d450b04259fabea5b570bc0bee` (unchanged run launched after SSH recovery), and `f074cae23f34f593d564829126b4a14f3af1058c` (final artifacts/report). No PPRTP code or historical result was changed.
+
+Implementation audit passes for the stated H15-A protocol. The port reproduces the pinned official client update/prototype timing and server generator/gap/objective in focused equivalence tests; all 71 tests pass. The real run exactly matches the H12-A split, seed0 initialization, round-1 trained-model hashes and deterministic batch order, uses 10 client cycles / 15,600 client SGD steps, excludes the 256 anchors from FedTGP optimization, and gives every client all 100 generated prototypes at evaluation. The official nearest-prototype result is `31.95 seen / 0.00 missing / 6.39 all`, versus frozen PPRTP `15.895 / 9.345 / 10.655`; therefore the preregistered short-budget verdict is CLEAR PPRTP EDGE (`+9.345 pp missing`, `+4.265 pp all`). The per-client prediction coverage is exactly 20 classes for every client, i.e. each client predicts only its locally seen set despite aggregate 100-class coverage.
+
+Two qualifications prevent using H15-A as the final strong-baseline claim. First, the final FedTGP server loss is `6.026`, while the pinned upstream README explicitly warns that difficult cases may need `>1000` communication iterations and describes server loss `<0.001` / near zero; H15-A is therefore plainly not converged by the authors' own criterion. Second, the pinned executable uploads round-start checkpoint means because of its save/load ordering. We preserved that behavior for code fidelity, but a reviewer can reasonably ask whether a post-update mean implementation closer to the intended algorithm would be stronger. PPRTP also uses extra same-image correspondence side information, so do not imply equal information budgets or general FedTGP inferiority.
+
+Scientific decision: **accept H15-A as a fair 10-cycle matched-budget result, but do not move to a new baseline or new dataset yet.** The fastest falsifiable path is one baseline-favorable FedTGP stress test that removes the timing quirk and gives substantially more communication/training budget. PPRTP remains frozen.
+
+---
+
+# ACTIVE — H15-B: baseline-favorable FedTGP post-update / 100-cycle stress test
+
+## Objective for the next approximately one-hour block
+
+Answer one question only:
+
+> Does FedTGP recover locally missing classes when we give it a more favorable post-update prototype collection and 10× the client/communication cycles, without changing any algorithmic hyperparameter?
+
+This is a **stress test for baseline strength**, not a new PPRTP method and not a replacement for the matched-budget H15-A table.
+
+## Minimal implementation change
+
+Add a FedTGP-only prototype-timing option whose historical/default value remains the pinned H15-A `round_start`. Add one alternative `post_update`: after the ordinary local SGD finishes, put the just-updated client model in eval mode and recompute each observed class mean over the same non-anchor local training dataset. Do not use online pre-update minibatch features. Do not alter CE, lambda, TGP generator, adaptive margin, server optimizer, server epochs, margin threshold, batch size, data split, model, or evaluation. Add a focused test proving that the new arm differs only in collection timing, adds zero optimizer steps, uses only observed labels, and leaves the H15-A default path exact.
+
+## Frozen run
+
+Use the same H12-A CIFAR-100 graph/split, seed0 initialization, 10 clients, FedAvgCNN 512-D features, 100 classes, 20 classes/client, batch32, local SGD lr0.01, `lambda=10`, `server_epochs=100`, `margin_threshold=100`, server lr0.01, and the same 49,744 non-anchor training / 10,000 test samples. FedTGP still receives no anchors/correspondence/PPRTP transform.
+
+Run **one fresh post-update FedTGP trajectory for exactly 100 client cycles** from seed0. Do not continue from H15-A. Preserve deterministic client/round batch generators and server RNG. Save fixed checkpoints/receipts at cycles `10, 25, 50, 100`; primary endpoint is cycle100, not the best test-accuracy checkpoint. The cycle10 checkpoint is specifically the timing-control comparison against H15-A; the cycle100 endpoint is the 10×-budget stress test. Do not change any hyperparameter after seeing checkpoint results.
+
+## Required reporting
+
+At each fixed checkpoint report official nearest-prototype seen/missing/all/macro, local-head diagnostic, per-client predicted-class coverage, aggregate coverage, current/last-epoch server loss, cumulative client SGD steps, server SGD steps, communication bytes and wall time. Verify all 100 prototype logits are finite and no anchor/test/PPRTP path enters optimization. Preserve H15-A artifacts unchanged and prove the default `round_start` 10-cycle report still regenerates exactly.
+
+Compare only against frozen PPRTP seed0 `15.895 seen / 9.345 missing / 10.655 all` and H15-A FedTGP `31.95 / 0 / 6.39`.
+
+Pre-registered interpretation:
+
+- **COMPETITIVE / NOVELTY WARNING:** at cycle100 FedTGP is within `1 pp` of PPRTP or better on either missing or all. Stop baseline expansion and report the impact on paper positioning.
+- **STRONG STRESS-TEST EDGE:** at cycle100 PPRTP still exceeds FedTGP by `>=3 pp` missing and `>=1 pp` all, despite FedTGP receiving 10× client/communication cycles. This supports robustness of the low-round PPRTP advantage, but still do not call FedTGP globally converged unless its own server-loss criterion is met.
+- **MIXED:** anything between those thresholds.
+
+Also call out separately if server loss reaches `<0.001`: if that occurs while missing remains `<1%`, it is especially strong evidence that server-prototype fitting alone does not solve cross-client semantic-space mismatch. If server loss remains high, record underconvergence honestly; do not tune or extend beyond 100 cycles in this block.
+
+Do not start FedKTL/GPFL/Tiny-ImageNet, more seeds, mixed-backbone FedTGP, anchor tuning, routing/fusion, or any PPRTP-v2 work until H15-B is complete.
