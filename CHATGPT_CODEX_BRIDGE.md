@@ -96,3 +96,50 @@ Real initial split receipt: `research_log/H14A/full/initial_receipt.json`; raw m
 New graph removes165/200 old incidences and adds165 new incidences;330/1000 binary incidence entries differ; meanclientclasssetJaccard=.09723095. First graph produced by seed1 used, no graph search. This changes labeled class-client incidences while retaining the balanced cyclic client-neighbor topology. No claim of arbitrary topology robustness.
 
 Continue this same run; do not duplicate. After completion, fetchcompact artifacts excluding checkpoints and run `D:/anaconda3/python.exe scripts/report_h14a.py research_log/H14A/full`. Report all6arms, frozen4gates, Local-all gap, fullclasssets/ownerpairs, pairing/state/RNG/gradient/mode receipts and warnings. Stop after this onegraph/seed; await lead.
+
+
+# CODEX REPORT H14-A — DONE
+
+STATUS: DONE. Updated 2026-09-19T12:54:14.058621+08:00. Frozen verdict **STRONG (4/4 gates pass)**. Stop after this single graph/seed; await research-lead review.
+
+Source `c9b91c4dd55065cc3297afca363aadd40169ee4a`; release `20260919-122515-h14a`; run `20260919-122706-h14a-ownership1`. Completed `2026-09-19T12:36:56+08:00`, exit0. One ownershipseed1, trainingseed0, homogeneous FedAvgCNN; no additional graphs/seeds, tuning, method edits, or retries. Code/test/report changes and baseline provenance are described in the preceding PARTIAL report; no code changed after launch. Official PFLlib remains pinned at `0169ba7e412c9856a08bb3faefab1e35f538a3c1`.
+
+Exact commands:
+```sh
+D:/anaconda3/python.exe -m unittest discover -s tests -q
+D:/anaconda3/python.exe -m unittest discover -s tests -p test_cifar100.py -v
+PPRTP_SOURCE_SHA=c9b91c4dd55065cc3297afca363aadd40169ee4a bash scripts/run_h01.sh --data /home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar100 --modes local fedproto fedgh --seeds 0 --rounds 10 --full-data --dataset CIFAR100 --num-classes 100 --k 20 --ownership-seed 1
+D:/anaconda3/python.exe scripts/report_h14a.py research_log/H14A/full
+```
+
+Tests: baseline66 PASS182.946s; focused7 PASS72.659s; full68 PASS215.746s locally /73.339s remotely; historical H12A/H13A report files byte-identical. Frozen final report and all integrity assertions pass unchanged. No further tests needed for artifact-only reporting.
+
+# H14-A CIFAR100 ownership seed1 / training seed0 replication
+
+| Arm | Seen % | Missing % | All % | Macro % | Aggregate classes |
+|---|---:|---:|---:|---:|---:|
+| local | 33.380000 | 0.000000 | 6.676000 | 6.676000 | 100 |
+| fedproto | 33.210000 | 0.000000 | 6.642000 | 6.642000 | 100 |
+| fedgh | 14.335000 | 0.000000 | 2.867000 | 2.867000 | 60 |
+| paired_h07 | 16.620000 | 9.035000 | 10.552000 | 10.552000 | 100 |
+| pair_broken_h07 | 23.525000 | 0.375000 | 5.005000 | 5.005000 | 100 |
+| native_control | 27.070000 | 0.000000 | 5.414000 | 5.414000 | 100 |
+
+Frozen verdict: STRONG.
+Missing paired-minus-broken: 8.660000 pp; paired-minus-native: 9.035000 pp; all gain vs best FedProto/FedGH: 3.910000 pp.
+Gates: {"missing_at_least5": true, "native_gap_at_least4": true, "broken_gap_at_least3": true, "all_gain_at_least1": true}
+
+
+Paired all minus Local all: **3.876000 pp**; Local is stronger than FedProto/FedGH in all accuracy here, so the result is not only a gain over the weak FedGH head. FedGH aggregate predicted-class coverage is only60/100; preserve this limitation rather than hide it. Paired/broken/native each predict100classes in aggregate; aggregate coverage does not imply each client's coverage. Full per-client/class histograms and coverage are in the artifacts.
+
+Graph receipt: seed1, classsetSHA `462f14367ae84761514d70b1b33445e966c23f65797e413c262094fe965e8d83`, ownershiporderSHA `6860bb34e44af88356db6107db927bcc7759137dd7d415b49d1135b02f1510cb`; splitSHA `df7f7f5a2228489bd62d2415be8cf3229437e01729639751f4484daea1bdd7f2`. Historical200edges/new200edges;165oldedges removed and165added,82.5% ofoldedges replaced,330/1000 binaryincidence entries changed;92/100classes changed ownerpair; meanclientJaccard .09723095. Per-client classsets: `[[4, 20, 22, 23, 30, 34, 37, 39, 45, 48, 51, 58, 59, 63, 65, 74, 80, 86, 93, 95], [1, 8, 14, 20, 22, 26, 29, 30, 31, 36, 37, 45, 48, 51, 63, 67, 73, 86, 90, 93], [1, 8, 11, 14, 16, 25, 26, 29, 31, 36, 52, 56, 62, 64, 67, 69, 73, 79, 90, 91], [9, 11, 12, 13, 16, 25, 27, 44, 52, 56, 62, 64, 69, 70, 72, 79, 81, 85, 91, 96], [3, 6, 9, 12, 13, 27, 32, 44, 53, 57, 70, 71, 72, 75, 81, 83, 85, 87, 88, 96], [3, 6, 17, 32, 41, 50, 53, 57, 66, 68, 71, 75, 78, 83, 87, 88, 94, 97, 98, 99], [0, 2, 17, 24, 28, 35, 38, 41, 46, 50, 54, 60, 66, 68, 78, 92, 94, 97, 98, 99], [0, 2, 5, 21, 24, 28, 33, 35, 38, 40, 42, 43, 46, 47, 49, 54, 60, 61, 82, 92], [5, 7, 10, 15, 18, 19, 21, 33, 40, 42, 43, 47, 49, 55, 61, 76, 77, 82, 84, 89], [4, 7, 10, 15, 18, 19, 23, 34, 39, 55, 58, 59, 65, 74, 76, 77, 80, 84, 89, 95]]`. Per-class ownerpairs: `{"0": [6, 7], "1": [1, 2], "10": [8, 9], "11": [2, 3], "12": [3, 4], "13": [3, 4], "14": [1, 2], "15": [8, 9], "16": [2, 3], "17": [5, 6], "18": [8, 9], "19": [8, 9], "2": [6, 7], "20": [0, 1], "21": [7, 8], "22": [0, 1], "23": [0, 9], "24": [6, 7], "25": [2, 3], "26": [1, 2], "27": [3, 4], "28": [6, 7], "29": [1, 2], "3": [4, 5], "30": [0, 1], "31": [1, 2], "32": [4, 5], "33": [7, 8], "34": [0, 9], "35": [6, 7], "36": [1, 2], "37": [0, 1], "38": [6, 7], "39": [0, 9], "4": [0, 9], "40": [7, 8], "41": [5, 6], "42": [7, 8], "43": [7, 8], "44": [3, 4], "45": [0, 1], "46": [6, 7], "47": [7, 8], "48": [0, 1], "49": [7, 8], "5": [7, 8], "50": [5, 6], "51": [0, 1], "52": [2, 3], "53": [4, 5], "54": [6, 7], "55": [8, 9], "56": [2, 3], "57": [4, 5], "58": [0, 9], "59": [0, 9], "6": [4, 5], "60": [6, 7], "61": [7, 8], "62": [2, 3], "63": [0, 1], "64": [2, 3], "65": [0, 9], "66": [5, 6], "67": [1, 2], "68": [5, 6], "69": [2, 3], "7": [8, 9], "70": [3, 4], "71": [4, 5], "72": [3, 4], "73": [1, 2], "74": [0, 9], "75": [4, 5], "76": [8, 9], "77": [8, 9], "78": [5, 6], "79": [2, 3], "8": [1, 2], "80": [0, 9], "81": [3, 4], "82": [7, 8], "83": [4, 5], "84": [8, 9], "85": [3, 4], "86": [0, 1], "87": [4, 5], "88": [4, 5], "89": [8, 9], "9": [3, 4], "90": [1, 2], "91": [2, 3], "92": [6, 7], "93": [0, 1], "94": [5, 6], "95": [0, 9], "96": [3, 4], "97": [5, 6], "98": [5, 6], "99": [5, 6]}`.
+
+Integrity: exact historical256anchorindices/hash,49,744nonanchortrainingpool,10,000testindices;20uniqueclasses/client andtwoowners/class, all100covered, disjoint allocation and each nonanchorimage assignedonce. InitialmodelSHA matches H12seed0 and all3arms. Actualround1batch lists, clientmodelhashes and prototypehashes pair acrossall3arms. Every client156steps/round, eacharm15,600steps. Finalpaired/broken/native model/server/prototype state and raw localmeans/counts exact; same originalanchorfeatures, pair-breaking multisets/frozenpermutations/referenceclient0 unchanged. No anchor/testlabels used for transform fitting. RNG/gradients/modulemodes preserved, cosine logits finite. Full checks in verification.json, batchhashes inrounds.jsonl, allconfiguration/sourceSHAs inmetadata.
+
+Runtime seconds (includes diagnostic cost where relevant): `{"local": {"elapsed_seconds": 116.29366040229797, "optimizer_steps_total": 15600, "steps_per_client_round": [156, 156, 156, 156, 156, 156, 156, 156, 156, 156]}, "fedproto": {"elapsed_seconds": 125.78542447090149, "optimizer_steps_total": 15600, "steps_per_client_round": [156, 156, 156, 156, 156, 156, 156, 156, 156, 156]}, "fedgh": {"elapsed_seconds": 248.41395592689514, "optimizer_steps_total": 15600, "steps_per_client_round": [156, 156, 156, 156, 156, 156, 156, 156, 156, 156]}}`. Communication payload definitions and full costs remain in RESULTS.md / final.json, unchanged from H12 at512D: semantic uplink412800B, anchoruplink5242880B, prototypebankdownlink204800B/client; no communication-optimization claim.
+
+Warnings: existing NVML initialization warning and PyTorch cuSolver SVD convergence warning preserved in train.log. Built-in SVD fallback completed; orthogonality/finite/state checks passed. No solver or driver change and no result-based restart. No new operational/integrity failure occurred in this run/collection.
+
+Interpretation: frozen PPRTP remains STRONG on the second labeled class-client ownership graph with the same anchors and initialization. Compared with historical H12A seed0, pairedmissing9.345% ->9.035%, pairedall10.655% ->10.552%; seen/missing tradeoff remains (pairedseen16.62 vsnative27.07 andLocal33.38). This is one graph/one trainingseed replication, preserving the cyclic client-neighbor construction; not arbitrary topology or mixed-backbone graph robustness. Extra unlabeled same-image correspondence information, post-hoc readout and communication costs remain limitations. Stop H14-A now; do not launch graphseed2 or any other stage without a new lead assignment.
+
+Evidence: `research_log/H14A/full/RESULTS.md`, `verification.json`, `initial_receipt.json`, `artifacts/experiment/*`, `artifacts/tests.txt`, `train.log`, `meta.json`, `run.sh`. Original checkpoints remain remote at `/home/wenchang/asdasdsad/wjq/PPRTP/runs/20260919-122706-h14a-ownership1/artifacts/experiment`; only compact artifacts fetched. Recovery instructions in research_log/HANDOFF.md.

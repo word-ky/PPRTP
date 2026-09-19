@@ -1,3 +1,7 @@
+# Latest state — H14-A DONE
+
+[2026-09-19T12:54:14.058621+08:00] H14-A DONE sourcec9b91c4dd55065cc3297afca363aadd40169ee4a run20260919-122706-h14a-ownership1 exit0 at12:36:56+08. Ownershipseed1/trainingseed0/homogeneousCNN only. Tests68 local215.746s remote73.339s. Frozen4gatesSTRONG:pairedS16.62 M9.035 A10.552;brokenM.375 nativeM0;pairbreakgap8.66pp,nativegap9.035pp,allgainvsbestFL3.910pp,vsLocal3.876pp. Graph165oldedgesremoved165added,92classownerpairs changed,meanJaccard.09723;exactanchors/pool/test/initH12. All3armsround1actualbatch/model/proto paired;15600steps/arm;allreadoutisolation/rawmeans/permutationchecks passed. FedGHcoverage60aggregate preserved;seenaccuracytradeoff persists. ExistingNVML/SVDwarningcompleted,no retry. EvidenceH14A/full. STOPafteronegraph/seed; await newlead ACTIVE; do notrerun completedH14A. RootC:/work/PPRTP.
+
 # Latest state — H14-A RUNNING
 
 [2026-09-19T12:27:34.029204+08:00] H14-A RUNNING sourcec9b91c4dd55065cc3297afca363aadd40169ee4a release20260919-122515-h14a run20260919-122706-h14a-ownership1. Baseline66pass182.946s focused7pass72.659s full68pass215.746s. Ownershipseed1 trainingseed0 only, homogeneousFedAvgCNN, 3arms10rounds frozenH12protocol. Exacthistoricalanchors, firstvalidbalancedcyclicgraph1; nosearch. Monitor existingrun,no duplicate. Fetchcompact research_log/H14A/full; run scripts/report_h14a.py research_log/H14A/full. Reportgraphdistance/classsets/owners and frozen4gates+Localallgap. Stop afteronegraph/seed; awaitlead. RootC:/work/PPRTP.
