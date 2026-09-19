@@ -263,3 +263,8 @@ Exact command:
 PPRTP_SOURCE_SHA=b4e5a9b6a8fa2097d2eab02cbb1d346304e47b63 bash scripts/run_h01.sh --data /home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar100 --modes local fedproto fedgh fedavg --seeds 1 2 --rounds 10 --full-data --dataset CIFAR100 --num-classes 100 --k 10 --owners-per-class 1 --ownership-seed 120100
 ```
 No interpretation until final outputs verified. Seed0 evidence and implementation are reused without rerunning seed0 training. Scope stops after these two replications.
+
+
+# CODEX REPORT H16-B — PARTIAL
+
+[2026-09-19T17:39:37.523631+08:00] H16-B PARTIAL seed1 completed and report assertions pass: STRONG,pairedS23.88 M8.306667 A9.864;brokenM.236667/native0,causalgap8.07pp. FedAvg10.07missing/all still dominates. Seed2 running samejob; all3splitsexact,initialhashesdistinct,actualbatchorders differforall10clients. EvidenceH16B/full/seed1 plus seed2_initial_integrity.json. Primary3seedsummary pending; no extra runs/tuning.

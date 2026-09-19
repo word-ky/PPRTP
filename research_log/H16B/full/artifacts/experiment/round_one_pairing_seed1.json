@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "modes": [
+    "local",
+    "fedproto",
+    "fedgh",
+    "fedavg"
+  ],
+  "seed": 1,
+  "client_model_hashes": [
+    "7e65f8693441e6ba35c5065f7cc91fd1d6138dca02b406caef18557abe7b83c0",
+    "2757e2b9b7325e82f30e740f1348ba7f39b37b1480aba763ca7ddca1c57f7a2f",
+    "0e179f2a279d99a84db65abb3f2f1cb6d624f3e605a23c488fc54a3934e9bce9",
+    "ddf07b9c340dfd1210c78552c8ee12bfdddb3eee29f24df36e583114b443508e",
+    "2a053f275ac21b2e7dafa04254fe7cb9db76a38a74ff807ffde914058f9df2ba",
+    "00c2ad65848ecb90c15b75e6fdcd048d6f10f8059bdf7ad54430075a5c3ad681",
+    "ecebd9dc8d77d1006bfd13e47e4e82b385c8042ff3f9dda07c4da26a091f209f",
+    "bf639d7e23d0ef83b38b87d79d7ff8cb48eb5bbda599d87efc606028aca814cf",
+    "4742c02bac4b4ec241d26bc0530c01643c31cd2ab669261e3309f5afff65e7ad",
+    "65e965cefca12aac378d6dd324c207a6c891033d55b26ec0dad8692258dcbfa5"
+  ],
+  "prototype_bank_hash": "58562d118363c8fe248257329057d799a866a562675257039bf51b186b3d48e8"
+}

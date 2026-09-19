@@ -1,0 +1,13 @@
+{
+  "split_exact_h16a_all3": true,
+  "initial_hashes": [
+    "45f199c1b832adf0f877a365c0d96fca9521efbd03ed5f13cc09ce49bfe321e0",
+    "953f01f3b69eb39d67d6c42d5fa50b4a30d4383541bb8e10f67f4fe92c623070",
+    "6e60ed1a1a7ceeb4ecbf0d9335264b394d66d1407f9475c151e1053995efbec1"
+  ],
+  "initial_distinct_all3": true,
+  "actual_batches_distinct_all3_for_all10clients": true,
+  "seed1_verdict": "STRONG",
+  "seed1_mean_coverage": 97.0,
+  "seed2_endpoint_pending": true
+}
