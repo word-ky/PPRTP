@@ -107,3 +107,17 @@ Otherwise call it **MIXED** and report without tuning.
 All performance comparisons to Local/FedProto/FedGH/FedAvg are descriptive, not part of the mechanism gate. If a global-model baseline dominates missing/all, flag a positioning warning rather than changing the gate.
 
 If H16-A is STRONG, stop after committing the seed0 report and artifacts; the next lead block will decide seeds1/2 replication. If no meaningful progress is made, leave this ACTIVE unchanged.
+
+# CODEX REPORT H16-A — RUNNING
+
+STATUS: PARTIAL (implementation green; real run started).
+
+[2026-09-19T16:38:56.847187+08:00] H16-A RUNNING source25973cf41aded74a4decb52630abe3f4d6e5c348 release20260919-163638-h16a run20260919-163816-h16a-one-owner. Owners1 historicalorder120100 trainingseed0/fullCIFAR100/homogeneousCNN/10cycles fourarms Local,FedProto,FedGH,FedAvg plus frozenpaired/broken/native. Baseline72PASS220.445s partition9PASS100.407s FedAvg2PASS56.243s full76PASS316.620s. H12reportbyteexact. Monitor samejob, no duplicate. FetchcompactH16A/full excludingpt then scripts/report_h16a.py. Verify nestedgraph/anchors/fullcoverage/initial+actualbatchpairing, frozenmissing+coveragegates; stopafterseed0. ExistingvLLMoccupies46GBGPU; untouched. No realfailure yet.
+
+Minimal owners_per_class default2 passes byte-identical historical split, new1 retains owner j%10 of same120100 order. Existing allocation/anchors and PPRTP math unchanged. Faithful FedAvg integration required no refactor: directly inherit pinned PFLlib aggregate_parameters/add_parameters, sample-count full-model averaging and upstream set_parameters; Local CE SGD exactly matches clientAVG before/after broadcast. Full-participation homogeneousCNN, matched shuffled/no-drop loader and exactly10cycles, post-aggregation evaluation. Prototype diagnostics never enter FedAvg training/communication. Provenance recorded.
+
+Training command:
+```sh
+PPRTP_SOURCE_SHA=25973cf41aded74a4decb52630abe3f4d6e5c348 bash scripts/run_h01.sh --data /home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar100 --modes local fedproto fedgh fedavg --seeds 0 --rounds 10 --full-data --dataset CIFAR100 --num-classes 100 --k 10 --owners-per-class 1 --ownership-seed 120100
+```
+Local validation: unittest discover -s tests -v; focused -p test_cifar100.py and -p test_fedavg.py. Logs/reuse map under research_log/H16A and research_log/h16_baseline_tests.log. Changed full_data/run; added minimal fedavg.py/report_h16a.py/test_fedavg.py, extended test_cifar100; PROVENANCE. No performance interpretation before final validation. Fixed gates copied unchanged; FedAvg comparisons descriptive only. One local handoff append failed due Windows default GBK decoding, repaired with explicit UTF8 without data loss; training unaffected. Prior72 tests preserved.

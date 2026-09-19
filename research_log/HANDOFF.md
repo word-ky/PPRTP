@@ -1,3 +1,7 @@
+# Latest state — H16-A RUNNING
+
+[2026-09-19T16:38:56.847187+08:00] H16-A RUNNING source25973cf41aded74a4decb52630abe3f4d6e5c348 release20260919-163638-h16a run20260919-163816-h16a-one-owner. Owners1 historicalorder120100 trainingseed0/fullCIFAR100/homogeneousCNN/10cycles fourarms Local,FedProto,FedGH,FedAvg plus frozenpaired/broken/native. Baseline72PASS220.445s partition9PASS100.407s FedAvg2PASS56.243s full76PASS316.620s. H12reportbyteexact. Monitor samejob, no duplicate. FetchcompactH16A/full excludingpt then scripts/report_h16a.py. Verify nestedgraph/anchors/fullcoverage/initial+actualbatchpairing, frozenmissing+coveragegates; stopafterseed0. ExistingvLLMoccupies46GBGPU; untouched. No realfailure yet.
+
 # Latest state — H16-A TESTING
 
 [2026-09-19T16:31:41.983740+08:00] H16-A increments green: baseline72PASS220.445s,partition9PASS100.407s,FedAvg2PASS56.243s. Defaultsplit byte-exact; nested1owner/anchors/coverage/tiny3arm passed. LocalSGD exact upstream, pinnedFedAvg aggregation/tiny4arm passed. Full76suite running, no experiment yet. GPUstatus bothA6000 46287/49140MiB used by existing vLLMservice; untouched. Observe originalrun resource use. Localhandoff append initially failed GBKdecode, corrected explicitUTF8, no artifactloss.
