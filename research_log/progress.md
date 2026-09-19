@@ -334,3 +334,23 @@ Run20260919-185409-h17a-tiny-one-owner started18:54:16+08 under tmux; frozen see
 
 GitHub push is blocked403 (email verification required); fetch still works. Local commits and remote mirror preserved. User notified; synchronization remains pending. A preflight relative path failed because current is a release symlink; absolute-path retry succeeded without code/data changes. No experiment retry.
 [2026-09-19T18:57+08:00] Remote mirror verified after eae6645. H17-A healthy: Local rounds1/2 completed (31.24s/59.58s cumulative); seen17.25%/22.95%,missing0. These are interim only, final readiness/result gate waits10cycles. split.json,metadata.json,rounds.jsonl present. No OOM/traceback observed. GitHub push remains pending emailverification.
+
+## CODEX REPORT — H17-A DONE; GitHub synchronization BLOCKED — 2026-09-19 19:27 +08
+
+Source c59015e7e8bc9fc457012c5ec141cda5cc3e4cba. Run20260919-185409-h17a-tiny-one-owner finished19:21:54+08 exit0. No experiment retry or tuning. Local79PASS516.365s; remote79PASS172.595s. Exact launch/verification commands and observed operational issues retained in research_log/H17A/launch.md. Changed implementation files: pprtp/tiny_data.py,pprtp/run.py,tests/test_tiny_data.py,tests/test_tiny_runner.py,scripts/report_h17a.py,PROVENANCE.md; this completion adds evidence/logs only.
+
+| Arm | Seen % | Missing % | All % |
+|---|---:|---:|---:|
+| Local |43.270000|0|4.327000|
+| FedProto |42.750000|0|4.275000|
+| FedGH |22.040000|0|2.204000|
+| FedAvg |8.550000|8.550000|8.550000|
+| PPRTP paired |21.430000|6.013333|7.555000|
+| Pair-broken |37.730000|0.034444|3.804000|
+| Native |39.150000|0|3.915000|
+
+Frozen verdict STRONG: LocalSeen43.27>=10; all5Tinygates pass. Paired-native+6.013333pp,paired-broken+5.978889pp,aggregatecoverage200,meanclientcoverage193.2 (range189–198). FedAvg exceeds paired by2.536667pp missing and.995pp all: preserve global-learner positioning warning. One seed only; no significance/replication or universal superiority claim. Seenaccuracy tradeoff, extra same-image anchor information, posthoc readout and nonoptimized communication remain.
+
+Server command `OMP_NUM_THREADS=1 /home/wenchang/asdasdsad/wjq/TTFL/.venv/bin/python scripts/report_h17a.py /home/wenchang/asdasdsad/wjq/PPRTP/runs/20260919-185409-h17a-tiny-one-owner` passed all assertions. Exact rawcounts/classmapping/manifests/splits,99744+256coverage,initialstate and actual first-round batches paired across4arms,31200optimizersteps/arm,finalstate/rawmeans/anchor multisets/readout RNG isolation verified. Full per-client/classwise metrics, runtime and communication are in remote run artifacts; summary RESULTS.md and verification.json are local under research_log/H17A/full. SVD accurate-method fallback warning preserved; no crash or change. Local full evidence transfer (35MB compressed, no pt) remains in progress, followed automatically by extraction and identical local reporter; remote complete evidence is authoritative until transfer finishes.
+
+GitHub fetch shows no new lead instruction; push retry19:17 still403 emailverification required. Local commits and remote project mirror preserved. Next action: finish local evidence sync, push after GitHub email verification, then await research-lead instruction. STOP seed0; do not start seeds1/2 or alter methods, even while this ACTIVE heading remains.
