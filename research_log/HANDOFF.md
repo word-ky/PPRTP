@@ -1,3 +1,7 @@
+# Latest state — H15-B DONE
+
+[2026-09-19T15:37:14.373628+08:00] H15-B DONE. Run20260919-144131-h15b-postupdate100 exit0 at15:13:56+08; sourcee0e171f6bfb0247eba599a263ca26241e248d9f7. Exactly100cycles/156000clientsteps/70000serversteps verified. Official S57.97 M0 A11.594; frozen PPRTP15.895/9.345/10.655 => PPRTP missing+9.345pp/all-0.939pp, COMPETITIVE / NOVELTY WARNING. No cycle server final-epoch loss<.001; endpoint4.892917 underconverged. No extension/tuning. Report script ran once successfully; checkpoints10/25/50/100 JSON/local and binary/remote with SHA256. Tests72 local223.596s remote74.965s. Runtime1854.571s server273.420s. Stop baseline expansion; await new lead ACTIVE, never rerun completed H15-B. RootC:/work/PPRTP.
+
 # Latest state — H15-B RUNNING
 
 [2026-09-19T14:41:54.456000+08:00] H15-B RUNNING sourcee0e171f6bfb0247eba599a263ca26241e248d9f7 release20260919-143906-h15b run20260919-144131-h15b-postupdate100. FreshFedTGPpost_update100cycles seed0 historicalgraph120100,allfrozenhyperparams/H12split;noH15Acontinuation. Baseline71pass216.425s focused4pass9.716s full72pass223.596s;H15Areportbyteexact. Fixedcheckpoints10/25/50/100(all10models+server+globalbank pt,JSONmetrics), primary100. Monitorexistingrun,no duplicate. FetchcompactH15B/full then report_h15b.py; verify156000client/70000serversteps; recordlosscriterion. Earlylocalindentationerrorfixedbeforetests/deploy;noexperimentretry. RootC:/work/PPRTP.
