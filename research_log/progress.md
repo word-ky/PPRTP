@@ -325,3 +325,11 @@ Source0cea063; run20260917-150905-h02b-probe2 exit0.13tests pass. All10round onl
 [2026-09-19T18:34:46.474260+08:00] H17-A IMPLEMENTING. Baseline76PASS314.211s; data2PASS.919s; actual64CNN fourarm integrationPASS205.492s (512base/200head,200slotfinite/readoutisolation). Full79suite running. Tinyraw officialHTTP35KB/s,HTTPS32KB/s; download now aria2 sameofficialHTTPS8connections,resumingprefix,~44/236MiB at18:33. Remote path shared/tiny-h17,aria2PID739161; do not duplicate. No realexperiment yet. After fullsuite deploy, waitofficialdownloadcomplete+zipCRC/SHA256/extract, then launch seed0 only frozenprotocol. Currentnewfiles tiny_data,test_tiny_data,test_tiny_runner,report_h17a; runner minimal200/64 changes. No math changes.
 
 [2026-09-19T18:43:25.001664+08:00] H17-A full79PASS516.365s (prior76preserved);baseline76PASS314.211s,data2PASS.919s,64CNN1PASS205.492s,H16reportbyteexact. Implementation ready to deploy; officialdataset stilldownloading viaaria2PID739161. No experiment launched. Datasetproof/model512D200head/4armactualbatchpairing/200slots/3readoutisolation green onfixtures. FrozenreportreadinessLocalSeen10%, gates2%/1.5pp/1pp/160aggregate/120meanclient. No tuning.
+
+## CODEX REPORT — H17-A PARTIAL / RUNNING — 2026-09-19 18:55 +08
+
+Implementation c59015e7e8bc9fc457012c5ec141cda5cc3e4cba; local79PASS516.365s and remote79PASS172.595s. Canonical Tiny archive fully CRC-verified and SHA256-matched after upload. Raw preflight passed train100000/val10000,500/50 per200classes,99744supervised+256label-blind anchors,oneowner20classes/client. Evidence and exact command: research_log/H17A/launch.md, archive_receipt.json, raw_verification.json, remote_tests.txt.
+
+Run20260919-185409-h17a-tiny-one-owner started18:54:16+08 under tmux; frozen seed0/10cycles/Local,FedProto,FedGH,FedAvg and paired/broken/native readouts. Dataset loading; no accuracy claim yet. No method changes or tuning. Monitor existing run, collect compact evidence and run report_h17a.py; stop after seed0. ACTIVE unchanged.
+
+GitHub push is blocked403 (email verification required); fetch still works. Local commits and remote mirror preserved. User notified; synchronization remains pending. A preflight relative path failed because current is a release symlink; absolute-path retry succeeded without code/data changes. No experiment retry.

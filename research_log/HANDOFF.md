@@ -1,3 +1,7 @@
+# Latest state — H17-A RUNNING / GITHUB PUSH BLOCKED
+
+Run20260919-185409-h17a-tiny-one-owner started18:54:16+08; sourcec59015e7e8bc9fc457012c5ec141cda5cc3e4cba,release20260919-184407-h17a. Local79PASS516.365s remote79PASS172.595s. Official archive CRC/SHA256 and raw100000/10000 checks passed; launch.md and raw_verification.json in research_log/H17A. Monitor same run, do not duplicate; collectcompactfullartifacts then scripts/report_h17a.py. Frozen seed0/10cycles/fourarms/200classes/64CNN/oneowner120200; no tuning,stopafterseed0. GitHub push403 emailverification;fetchworks,localcommitsandremotemirror retained,askuserverifyGitHubemail beforepushretry. Every20min heartbeatACTIVE. RootC:/work/PPRTP.
+
 # Latest state — H17-A IMPLEMENTING / DATA DOWNLOADING
 
 [2026-09-19T18:34:46.474260+08:00] H17-A IMPLEMENTING. Baseline76PASS314.211s; data2PASS.919s; actual64CNN fourarm integrationPASS205.492s (512base/200head,200slotfinite/readoutisolation). Full79suite running. Tinyraw officialHTTP35KB/s,HTTPS32KB/s; download now aria2 sameofficialHTTPS8connections,resumingprefix,~44/236MiB at18:33. Remote path shared/tiny-h17,aria2PID739161; do not duplicate. No realexperiment yet. After fullsuite deploy, waitofficialdownloadcomplete+zipCRC/SHA256/extract, then launch seed0 only frozenprotocol. Currentnewfiles tiny_data,test_tiny_data,test_tiny_runner,report_h17a; runner minimal200/64 changes. No math changes.
