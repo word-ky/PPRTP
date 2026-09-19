@@ -1,0 +1,102 @@
+# H13-A CIFAR100 seed2 mixed-backbone falsifier
+
+| Arm | Seen % | Missing % | All % | Macro % | Aggregate classes |
+|---|---:|---:|---:|---:|---:|
+| local | 39.645000 | 0.000000 | 7.929000 | 7.929000 | 100 |
+| fedproto | 38.185000 | 0.000000 | 7.637000 | 7.637000 | 100 |
+| fedgh | 30.305000 | 0.002500 | 6.063000 | 6.063000 | 100 |
+| paired_h07 | 27.555000 | 6.363750 | 10.602000 | 10.602000 | 100 |
+| pair_broken_h07 | 28.655000 | 0.406250 | 6.056000 | 6.056000 | 100 |
+| native_control | 34.615000 | 0.001250 | 6.924000 | 6.924000 | 100 |
+
+Frozen verdict: STRONG.
+Missing paired-minus-broken: 5.957500 pp; paired-minus-native: 6.362500 pp; all gain vs best FedProto/FedGH: 2.965000 pp.
+Gates: {"missing_at_least5": true, "native_gap_at_least4": true, "broken_gap_at_least3": true, "all_gain_at_least1": true}
+
+Split/initialization/all-arm round1 hashes identical. Exact50000-index coverage:49744 disjoint clienttrain+256 label-blind anchors;10000 evaluation-only test.20classes/client,exactly2owners/class.
+{
+  "local": {
+    "FedAvgCNN": {
+      "seen": 0.34489999413490297,
+      "missing": 0.0,
+      "all": 0.06898000091314316,
+      "macro": 0.0689799964427948
+    },
+    "ResNet18": {
+      "seen": 0.44799999594688417,
+      "missing": 0.0,
+      "all": 0.08959999978542328,
+      "macro": 0.08959999978542328
+    }
+  },
+  "fedproto": {
+    "FedAvgCNN": {
+      "seen": 0.31520000100135803,
+      "missing": 0.0,
+      "all": 0.0630400002002716,
+      "macro": 0.06303999945521355
+    },
+    "ResNet18": {
+      "seen": 0.448499995470047,
+      "missing": 0.0,
+      "all": 0.08969999998807907,
+      "macro": 0.08969999849796295
+    }
+  },
+  "fedgh": {
+    "FedAvgCNN": {
+      "seen": 0.15650000125169755,
+      "missing": 0.0,
+      "all": 0.0313000001013279,
+      "macro": 0.031300000846385956
+    },
+    "ResNet18": {
+      "seen": 0.4495999991893768,
+      "missing": 5.0000002374872565e-05,
+      "all": 0.08995999991893769,
+      "macro": 0.08995999842882156
+    }
+  },
+  "paired_h07": {
+    "FedAvgCNN": {
+      "seen": 0.14570000171661376,
+      "missing": 0.07754999995231629,
+      "all": 0.09118000119924545,
+      "macro": 0.09118000268936158
+    },
+    "ResNet18": {
+      "seen": 0.4053999960422516,
+      "missing": 0.0497249998152256,
+      "all": 0.1208600014448166,
+      "macro": 0.12085999846458435
+    }
+  },
+  "pair_broken_h07": {
+    "FedAvgCNN": {
+      "seen": 0.11430000066757202,
+      "missing": 0.007849999982863665,
+      "all": 0.02914000041782856,
+      "macro": 0.02914000041782856
+    },
+    "ResNet18": {
+      "seen": 0.4587999999523163,
+      "missing": 0.0002750000014202669,
+      "all": 0.09198000133037568,
+      "macro": 0.09198000282049179
+    }
+  },
+  "native_control": {
+    "FedAvgCNN": {
+      "seen": 0.23889999985694885,
+      "missing": 0.0,
+      "all": 0.047780000418424604,
+      "macro": 0.047779998183250426
+    },
+    "ResNet18": {
+      "seen": 0.45339999794960023,
+      "missing": 2.5000001187436283e-05,
+      "all": 0.09070000052452087,
+      "macro": 0.09069999754428863
+    }
+  }
+}
