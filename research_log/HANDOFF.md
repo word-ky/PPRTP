@@ -1,3 +1,7 @@
+# Latest state — H16-B RUNNING
+
+[2026-09-19T17:23:30.927377+08:00] H16-B RUNNING sourceb4e5a9b6a8fa2097d2eab02cbb1d346304e47b63 release20260919-172120-h16b run20260919-172251-h16b-one-owner-seeds12. Reporter-onlychange,seed0resultsbyteidentical;trainingunchanged25973cf,prior76green. Onlyseeds1/2,4arms10cycles,owners1/order120100,exactH16Asplit/anchors. Monitor existingrun,no duplicate. FetchcompactH16B/full excludingpt; report_h16a.py root 1 then2; report_h16b.py root. Verify everyclient actualbatchorders different0/1/2,initialhashesdistinct,withinseed4arms paired,15590steps/arm,frozen5gates andFedAvgcomparison. Stop after2seeds, noTinyImageNet.
+
 # Latest state — H16-B READY
 
 [2026-09-19T17:21:02.009447+08:00] H16-B leadc00b35a: reporter-only seed-general fix (H16A split vsH12, dynamic seed paths/checks, actualbatchdifferences). Baseline and postchange seed0 RESULTS/verification byte-identical; receipts research_log/H16B. Training/data/method unchanged from25973cf; prior76 green. Three-seed report uses original5gates and sampleSD, retainsFedAvgwarning. Ready onlyseeds1/2,owners1/order120100/10cycles4arms; noGPUrun yet.
