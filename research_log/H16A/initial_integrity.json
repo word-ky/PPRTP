@@ -1,0 +1,32 @@
+{
+  "nested_order_exact": true,
+  "anchors_exact": true,
+  "test_exact": true,
+  "coverage50000_exact": true,
+  "initial_exact_h12": true,
+  "old_counts": [
+    4982,
+    4972,
+    4964,
+    4976,
+    4977,
+    4978,
+    4969,
+    4974,
+    4979,
+    4973
+  ],
+  "new_counts": [
+    4980,
+    4958,
+    4973,
+    4977,
+    4980,
+    4971,
+    4972,
+    4974,
+    4982,
+    4977
+  ],
+  "source_sha": "25973cf41aded74a4decb52630abe3f4d6e5c348"
+}
