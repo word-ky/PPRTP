@@ -94,3 +94,8 @@ Pre-register interpretation only; do not tune to cross a threshold:
 If FedTGP implementation is not completed within the block, append `CODEX REPORT H15-A — PARTIAL` with tests/provenance/remaining blocker and keep this ACTIVE unchanged. If an operational bug occurs, fix only the minimal deterministic implementation issue; do not alter algorithmic hyperparameters based on performance.
 
 Do not start Tiny-ImageNet, FedKTL, GPFL, more graph seeds, mixed-backbone FedTGP, anchor tuning, or any PPRTP-v2 work in this block. Finish this strong-baseline falsification first.
+
+
+## CODEX H15-A upstream timing receipt (before implementation/run)
+
+Pinned official `TsingZ0/FedTGP@c77cbbb31eb30d13066cd11f7f4a2e732aeaae24` has a concrete timing detail: `clientTGP.train()` calls `collect_protos()` before saving its updated model; `collect_protos()` independently reloads the saved model with `torch.load`. Therefore this pinned executable uploads eval-mode class means from the **round-start checkpoint**, not the in-memory just-updated model or H12 online features. Preserve that actual pinned behavior via a round-start snapshot and explicitly test/document it; do not silently change it to post-update collection. This is a provenance qualification, not a performance-based adjustment. The matched port will keep all non-anchor samples (drop_last=False), historical shuffled training batches, exactly10cycles, and final post-server evaluation. Server equal-client class averages are used ONLY to compute its adaptive margin; server training uses all individual client-class prototypes. Author run_me.sh explicitly sets lam10/se100/mart100; CLI defaults differ, so follow the assigned author-run settings.

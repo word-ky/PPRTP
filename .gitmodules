@@ -1,3 +1,6 @@
 [submodule "vendor/PFLlib"]
 	path = vendor/PFLlib
 	url = https://github.com/TsingZ0/PFLlib.git
+[submodule "vendor/FedTGP"]
+	path = vendor/FedTGP
+	url = https://github.com/TsingZ0/FedTGP.git
