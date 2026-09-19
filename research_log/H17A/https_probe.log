@@ -1,0 +1,17 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0  236M    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/1.1 200 OK
+Date: Sat, 19 Sep 2026 10:27:50 GMT
+Server: Apache/2.4.6 (CentOS)
+Strict-Transport-Security: max-age=31536000;
+Last-Modified: Mon, 09 Feb 2015 04:52:33 GMT
+ETag: "ec9b4cb-50ea089cca640"
+Accept-Ranges: bytes
+Content-Length: 248100043
+Content-Type: application/zip
+
+ 737332       02:08 curl -fL http://cs231n.stanford.edu/tiny-imagenet-200.zip -o tiny-imagenet-200.zip

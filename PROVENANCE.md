@@ -86,3 +86,14 @@ against clientAVG before and after broadcast. No momentum/decay; homogeneous
 FedAvgCNN has no BN buffer issue. Matched private shuffled loaders/drop_lastFalse,
 exactly10updates and final post-aggregation evaluation replace upstream harness
 scheduling. Prototype statistics are diagnostic, never used by/sent in FedAvg.
+
+
+H17-A uses canonical raw tiny-imagenet-200 from pinned PFLlib generator URL
+http://cs231n.stanford.edu/tiny-imagenet-200.zip; ImageFolder lexical class
+mapping and RGB ToTensor/Normalize(.5) preprocessing retained. Official labeled
+validation replaces generated local heldout split; no official unlabeled test.
+Tenclients/oneowner/20classes (seed120200),256 uniform label-blind trainanchors,
+all99744 remaining trainimages; no resampling/augmentation. Pinned non-CIFAR
+FedAvgCNN dim10816 for64x64 produces512base/200head, asserted beforelaunch.
+Existing objectives/aggregation/Procrustes/pair-breaking/metrics unchanged.
+Per-file hashes and annotation/mapping/index manifests are logged in split.json.

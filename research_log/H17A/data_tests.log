@@ -1,0 +1,7 @@
+test_full_one_owner_coverage_without_image_memory (test_tiny_data.TinyDataTest.test_full_one_owner_coverage_without_image_memory) ... ok
+test_lexical_mapping_annotations_and_label_blind_anchor_order (test_tiny_data.TinyDataTest.test_lexical_mapping_annotations_and_label_blind_anchor_order) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.919s
+
+OK

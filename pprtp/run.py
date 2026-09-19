@@ -68,9 +68,11 @@ def evaluate(client, loader, protos, include_histograms=False,num_classes=10):
     for x,y in loader:
         z = client.model.base(x.to(client.device))
         bank, valid = prototype_bank(protos, num_classes, z)
-        predictions['head'].append(client.model.head(z).argmax(1).cpu())
+        head_logits=client.model.head(z)
+        predictions['head'].append(head_logits.argmax(1).cpu())
         cosine = F.normalize(z,dim=1) @ F.normalize(bank,dim=1).T
         l2 = (z[:,None,:]-bank[None,:,:]).square().mean(2)
+        if num_classes==200:assert valid.all() and all(torch.isfinite(t).all() for t in (head_logits,cosine,l2))
         if getattr(client,'fedtgp',False):assert valid.all() and torch.isfinite(l2).all()
         predictions['cosine'].append(cosine.masked_fill(~valid[None], -torch.inf).argmax(1).cpu())
         predictions['l2'].append(l2.masked_fill(~valid[None], torch.inf).argmin(1).cpu())
@@ -94,7 +96,11 @@ def run(cfg, mode, seed):
     if cfg.full_data:
         from pprtp.full_data import prepare_full,prepare_cifar100
         assert cfg.clients==10 and mode in ('local','fedproto','fedgh','fedtgp','fedavg')
-        if cfg.dataset=='CIFAR100':
+        if cfg.dataset=='TinyImageNet':
+            from pprtp.tiny_data import prepare_tiny
+            assert seed==0 and num_classes==200 and cfg.k==20 and cfg.owners_per_class==1 and cfg.ownership_seed==120200
+            datasets,test,split,full_anchors=prepare_tiny(cfg.data)
+        elif cfg.dataset=='CIFAR100':
             assert seed in (0,1,2) and num_classes==100 and cfg.k==10*cfg.owners_per_class
             datasets,test,split,full_anchors=prepare_cifar100(cfg.data,cfg.ownership_seed,cfg.owners_per_class)
         else:
@@ -119,12 +125,16 @@ def run(cfg, mode, seed):
             assert len(owners)==2 and {architecture_receipts[i]['architecture'] for i in owners}=={'FedAvgCNN','ResNet18'}
         initial_model=initial_models[0]
     else:
-        cnn = FedAvgCNN(in_features=3, num_classes=num_classes, dim=1600)
+        cnn = FedAvgCNN(in_features=3, num_classes=num_classes, dim=10816 if cfg.dataset=='TinyImageNet' else 1600)
         head = copy.deepcopy(cnn.fc)
         cnn.fc = torch.nn.Identity()
         initial_model=BaseHeadSplit(cnn,head)
+        if cfg.dataset=='TinyImageNet':
+            with torch.no_grad():
+                dummy=initial_model.base(torch.zeros(2,3,64,64))
+                assert dummy.shape==(2,512) and initial_model.head(dummy).shape==(2,200)
     args = SimpleNamespace(model=initial_model.to(cfg.device),
-        algorithm=mode, mode='local' if mode=='fedavg' else mode, scale=cfg.scale, dataset='Cifar100' if num_classes==100 else 'Cifar10',device=cfg.device,
+        algorithm=mode, mode='local' if mode=='fedavg' else mode, scale=cfg.scale, dataset='TinyImagenet' if cfg.dataset=='TinyImageNet' else 'Cifar100' if num_classes==100 else 'Cifar10',device=cfg.device,
         save_folder_name='items',num_classes=num_classes,batch_size=cfg.batch_size,
         local_learning_rate=cfg.lr,local_epochs=cfg.local_epochs,few_shot=0,
         learning_rate_decay_gamma=1.,learning_rate_decay=False,
@@ -153,6 +163,8 @@ def run(cfg, mode, seed):
         model='PFLlib FedAvgCNN 512D', optimizer='SGD, no momentum/decay',
         prototype_rule='sample-count-weighted online raw feature means; no EMA',
         initial_state_sha256=initial_hash,split_sha256=hashlib.sha256((out/'split.json').read_bytes()).hexdigest())
+    if cfg.dataset=='TinyImageNet':
+        metadata.update(input_size=64,cnn_dim=10816,feature_dim=512,head_classes=200,pretrained=False,augmentation=False,model_shape_checked=True)
     if cfg.mixed_backbone:
         metadata.update(model='PFLlib mixed FedAvgCNN/ResNet18 512D',client_initial_states=architecture_receipts,
             architecture_assignment=[a['architecture'] for a in architecture_receipts],server_head_initial_client=0,
@@ -241,7 +253,7 @@ def run(cfg, mode, seed):
                 gen=torch.Generator().manual_seed(seed*100000+r*100+i)
                 loader=DataLoader(datasets[i],batch_size=cfg.batch_size,shuffle=True,drop_last=False,generator=gen)
                 client.load_train_data=lambda loader=loader: loader
-                if cfg.mixed_backbone or (cfg.full_data and cfg.dataset=='CIFAR100'):client.audit_batch_order=(r==0)
+                if cfg.mixed_backbone or (cfg.full_data and num_classes>=100):client.audit_batch_order=(r==0)
                 local_start=time.time()
                 client.train()
                 local_seconds.append(time.time()-local_start);local_steps.append(client.optimizer_steps)
@@ -271,7 +283,7 @@ def run(cfg, mode, seed):
                 prototype_payload_bytes=dict(upload_vectors=sum(len(c.protos)*512*4 for c in clients),
                     upload_counts=sum(len(c.protos)*8 for c in clients),download_vectors=cfg.clients*num_classes*512*4),
                 elapsed_seconds=time.time()-started)
-            if (cfg.mixed_backbone or (cfg.full_data and cfg.dataset=='CIFAR100')) and r==0:record['batch_hashes']=[c.batch_hashes for c in clients]
+            if (cfg.mixed_backbone or (cfg.full_data and num_classes>=100)) and r==0:record['batch_hashes']=[c.batch_hashes for c in clients]
             if mode=='fedtgp':
                 record['fedtgp_server']=tgp_receipt
                 tgp_receipt['prototype_collection']=metadata['prototype_collection']
@@ -605,12 +617,12 @@ def run(cfg, mode, seed):
                 if mode=='fedgh' and r+1==cfg.rounds:
                     from pprtp.full_data import full_readouts
                     diagnostic_start=time.time()
-                    capture={} if cfg.full_pair_probe or num_classes==100 else None
+                    capture={} if cfg.full_pair_probe or num_classes>=100 else None
                     record['full_data_readout']=full_readouts(clients,server_head,full_anchors,datasets,test,tensor_hash,metrics,construction_output=capture,num_classes=num_classes)
                     if cfg.full_pair_probe:
                         historical=dict(h11_rounds[-1]['full_data_readout']);historical.pop('diagnostic_seconds')
                         assert record['full_data_readout']==historical, 'Entire H11 readout must reproduce before pair breaking'
-                    if cfg.full_pair_probe or num_classes==100:
+                    if cfg.full_pair_probe or num_classes>=100:
                         from pprtp.direct_prototypes import analyze_direct
                         broken=analyze_direct(clients,server_head,full_anchors,datasets,test,tensor_hash,metrics,None,broken=True,num_classes=num_classes)
                         paired=record['full_data_readout']['pprtp_h07']
@@ -686,7 +698,7 @@ def main():
     parser.add_argument('--cross-seed-probe',action='store_true')
     parser.add_argument('--relation-probe',action='store_true')
     parser.add_argument('--conditioning-probe',action='store_true')
-    parser.add_argument('--dataset',choices=['CIFAR10','CIFAR100'],default='CIFAR10')
+    parser.add_argument('--dataset',choices=['CIFAR10','CIFAR100','TinyImageNet'],default='CIFAR10')
     parser.add_argument('--num-classes',type=int,default=10)
     parser.add_argument('--fedtgp-prototype-timing',choices=['round_start','post_update'],default='round_start')
     parser.add_argument('--ownership-seed',type=int,default=120100)

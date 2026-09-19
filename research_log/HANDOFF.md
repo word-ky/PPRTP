@@ -1,3 +1,7 @@
+# Latest state — H17-A IMPLEMENTING / DATA DOWNLOADING
+
+[2026-09-19T18:34:46.474260+08:00] H17-A IMPLEMENTING. Baseline76PASS314.211s; data2PASS.919s; actual64CNN fourarm integrationPASS205.492s (512base/200head,200slotfinite/readoutisolation). Full79suite running. Tinyraw officialHTTP35KB/s,HTTPS32KB/s; download now aria2 sameofficialHTTPS8connections,resumingprefix,~44/236MiB at18:33. Remote path shared/tiny-h17,aria2PID739161; do not duplicate. No realexperiment yet. After fullsuite deploy, waitofficialdownloadcomplete+zipCRC/SHA256/extract, then launch seed0 only frozenprotocol. Currentnewfiles tiny_data,test_tiny_data,test_tiny_runner,report_h17a; runner minimal200/64 changes. No math changes.
+
 # Latest state — H16-B DONE
 
 [2026-09-19T17:53:06.703136+08:00] H16-B DONE sourceb4e5a9b6a8fa2097d2eab02cbb1d346304e47b63 run20260919-172251-h16b-one-owner-seeds12 exit0 at17:49:52+08. Reporter-only fix,seed0reportsbyteexact;remote76PASS100.525s,trainingunchanged25973cf. Seed1/2 STRONG =>3/3. Paired S23.593333±.280238 M8.022593±.270633 A9.579667±.271559; brokenM.247778±.010184,native0;causalgap7.774815±.280771pp. FedAvgM/A10.08±.275137;paired-FedAvg M-2.057407±.301953pp A-.500333±.301222pp,warningall3. Exactsplit/3distinctinits/all10actualbatchordersdifferent,withinseed4armspaired15590steps/arm/readoutstates+rawmeans exact. SVDframeworkwarning preserved,no retry/tuning. STOPafterreplication;awaitnewleadACTIVE,noTinyImageNet. EvidenceH16B/full,rootC:/work/PPRTP.
