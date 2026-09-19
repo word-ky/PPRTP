@@ -234,3 +234,20 @@ Pre-registered interpretation:
 Also call out separately if server loss reaches `<0.001`: if that occurs while missing remains `<1%`, it is especially strong evidence that server-prototype fitting alone does not solve cross-client semantic-space mismatch. If server loss remains high, record underconvergence honestly; do not tune or extend beyond 100 cycles in this block.
 
 Do not start FedKTL/GPFL/Tiny-ImageNet, more seeds, mixed-backbone FedTGP, anchor tuning, routing/fusion, or any PPRTP-v2 work until H15-B is complete.
+
+# CODEX REPORT H15-B — PARTIAL (running)
+
+STATUS: PARTIAL, 2026-09-19T14:44:36.295454+08:00; no endpoint verdict yet. Source `e0e171f6bfb0247eba599a263ca26241e248d9f7`; release `20260919-143906-h15b`; run `20260919-144131-h15b-postupdate100`.
+
+Minimal changes: FedTGP-only CLI `--fedtgp-prototype-timing` defaults `round_start`, alternative `post_update` collects fresh eval-mode means after ordinary local SGD. Same H01 CE/observedMSE, server generator/gap/objective/SGD/epochs/RNG. `pprtp/fedtgp.py`, `pprtp/run.py`, one additional `tests/test_fedtgp.py` test, `scripts/report_h15b.py`, provenance/logs. Four fixed binarycheckpoints preserve all10clientstates,serverstate,globalbank; accompanying JSONrecords at10/25/50/100. Primary100, no best-checkpoint selection. The default H15-A artifacts and report remain unchanged.
+
+Validation: baseline71PASS216.425s; focused4PASS9.716s; full72PASS223.596s locally and74.965s remotely. Commands `D:/anaconda3/python.exe -m unittest discover -s tests -q` and `-m unittest discover -s tests -p test_fedtgp.py -v`. Newtest proves old/postupdate same modelweights and SGDsteps, sameobservedlabels/counts, differentmeans, exactpostupdateevalmeans; existing pinneddefault equivalence tests pass. H15-A RESULTS/verification regenerate byte-identically. An initial indentation error in checkpoint insertion was caught by test import, fixed before successfultests/deployment; no realtraining rerun or scientificchange.
+
+Exact fresh launch:
+```sh
+PPRTP_SOURCE_SHA=e0e171f6bfb0247eba599a263ca26241e248d9f7 bash scripts/run_h01.sh --data /home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar100 --modes fedtgp --seeds 0 --rounds 100 --full-data --dataset CIFAR100 --num-classes 100 --k 20 --ownership-seed 120100 --fedtgp-prototype-timing post_update
+```
+
+Real metadata/split fetched under research_log/H15B/full/artifacts/experiment/fedtgp_seed0: exact H15-A split/anchors-excluded, allclientinitialhashes and serverinitialhash, seed0/graph120100,batch32,LR.01,lambda10,serverepochs100,margin100. Freshinitialstate, not H15-A continuation. Metadata correctly records post_update and100cycles. No hyperparameter changes or other experiments. Training continues; do not interpret partial metrics or duplicate this run.
+
+Next: monitor same run, retain fixed10/25/50/100 checkpoint receipts; aftercompletion fetchcompact excluding*.pt to research_log/H15B/full and run `D:/anaconda3/python.exe scripts/report_h15b.py research_log/H15B/full`. Verify156000clientsteps/70000serversteps, exactinitialsplit/batches, finite100prototype predictions, noanchor/transport optimization, cumulativecommunication/runtime, fixedendpoint and loss<.001 receipts. Binarycheckpoints remain under remote run/artifacts/experiment/fedtgp_seed0. Stop at100cycles regardless of convergence/performance.
