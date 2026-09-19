@@ -1,3 +1,7 @@
+# Latest state — H16-A DONE
+
+[2026-09-19T16:56:34.031716+08:00] H16-A DONE source25973cf41aded74a4decb52630abe3f4d6e5c348 run20260919-163816-h16a-one-owner exit0 at16:53:20+08. Full76PASS local316.620s remote101.049s. Nested owners1/order120100/seed0; historical anchors/pool/test/init exact, default2split byteexact, all4arms initial+round1actualbatches/models/protos paired,15590steps/arm. PPRTP S23.32 M7.767778 A9.323; brokenM.256667 nativeM0; missinggaps7.511111/7.767778pp; aggregate100 meanclientcoverage97.4 => STRONG all5gates. FedAvg S/M/A9.81 beats pairedmissing/all: positioningwarning; no superiorityclaim. SVDframeworkfallbackwarning preserved,norestart/tuning/OOM. EvidenceH16A/full; STOPseed0,await lead newACTIVE beforeseeds1/2/TinyImageNet. RootC:/work/PPRTP.
+
 # Latest state — H16-A RUNNING
 
 [2026-09-19T16:38:56.847187+08:00] H16-A RUNNING source25973cf41aded74a4decb52630abe3f4d6e5c348 release20260919-163638-h16a run20260919-163816-h16a-one-owner. Owners1 historicalorder120100 trainingseed0/fullCIFAR100/homogeneousCNN/10cycles fourarms Local,FedProto,FedGH,FedAvg plus frozenpaired/broken/native. Baseline72PASS220.445s partition9PASS100.407s FedAvg2PASS56.243s full76PASS316.620s. H12reportbyteexact. Monitor samejob, no duplicate. FetchcompactH16A/full excludingpt then scripts/report_h16a.py. Verify nestedgraph/anchors/fullcoverage/initial+actualbatchpairing, frozenmissing+coveragegates; stopafterseed0. ExistingvLLMoccupies46GBGPU; untouched. No realfailure yet.
