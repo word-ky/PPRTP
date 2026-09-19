@@ -1,0 +1,2 @@
+H12-A RESULTS.md and verification.json byte-identical after unchanged historical reporting.
+['d9d9c4e90ac6d34de9e34d941fd2c3f2b6195ce5322e9eb36385b1bf7a6cd3af', 'ead185ee67a45d69947129026e9f59da437601bf0f585391fc93642feb0094b1']

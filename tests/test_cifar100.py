@@ -138,7 +138,7 @@ class Cifar100Test(unittest.TestCase):
         with tempfile.TemporaryDirectory() as output:
             argv=['pprtp','--data','unused','--output',output,'--device','cpu','--modes','local','fedproto','fedgh','--seeds','0','--rounds','1','--full-data','--dataset','CIFAR100','--num-classes','100','--k','20','--ownership-seed','1']
             with patch('sys.argv',argv),patch('pprtp.full_data.prepare_cifar100',return_value=(local,test,dict(class_sets=sets),anchors)) as prepare,contextlib.redirect_stdout(io.StringIO()):main()
-            self.assertEqual(prepare.call_count,3);prepare.assert_called_with('unused',1)
+            self.assertEqual(prepare.call_count,3);prepare.assert_called_with('unused',1,2)
             folders=[Path(output)/f'{m}_seed0' for m in ('local','fedproto','fedgh')]
             meta=[json.loads((r/'metadata.json').read_text()) for r in folders]
             self.assertEqual(len({m['initial_state_sha256'] for m in meta}),1)
@@ -147,4 +147,53 @@ class Cifar100Test(unittest.TestCase):
             self.assertEqual(rr[0]['batch_hashes'],rr[1]['batch_hashes']);self.assertEqual(rr[0]['batch_hashes'],rr[2]['batch_hashes'])
             self.assertEqual(rr[0]['client_model_hashes'],rr[2]['client_model_hashes'])
             self.assertTrue(rr[2]['full_pair_probe']['same_raw_means_counts_exact'])
+            self.assertTrue(json.loads((Path(output)/'round_one_pairing_seed0.json').read_text())['passed'])
+
+    def test_nested_one_owner_historical_order_and_coverage(self):
+        old=json.loads(Path('research_log/H12A/full/artifacts/experiment/local_seed0/split.json').read_text())
+        labels=np.zeros(50000,dtype=np.int64)
+        for ii,counts,cs in zip(old['train_indices'],old['class_counts'],old['class_sets']):
+            offset=0
+            for c in cs:
+                n=counts[str(c)];labels[ii[offset:offset+n]]=c;offset+=n
+        reserved=[]
+        class Train:
+            data=np.zeros((50000,1,1,3),dtype=np.uint8)
+            @property
+            def targets(self):
+                assert reserved
+                return labels
+        test=SimpleNamespace(data=np.zeros((10000,1,1,3),dtype=np.uint8),targets=np.arange(10000)%100)
+        def reserve(n):
+            a=reserve_anchors(n);reserved.extend(a);return a
+        with patch('pprtp.full_data.CIFAR100',side_effect=lambda root,train=True,download=True:Train() if train else test),patch('pprtp.full_data.reserve_anchors',side_effect=reserve):
+            default=prepare_cifar100('unused',120100,2)[2]
+            local,evaluation,new,anchors=prepare_cifar100('unused',120100,1)
+        self.assertEqual(json.dumps(default),json.dumps(old))
+        self.assertEqual(new['ownership_order'],old['ownership_order'])
+        self.assertEqual(new['anchor_indices'],old['anchor_indices'])
+        self.assertEqual(new['test_indices'],old['test_indices'])
+        self.assertEqual(sorted(new['anchor_indices']+sum(new['train_indices'],[])),list(range(50000)))
+        self.assertEqual([len(cs) for cs in new['class_sets']],[10]*10)
+        for j,c in enumerate(old['ownership_order']):
+            self.assertEqual(new['owners'][c],[j%10]);self.assertIn(c,old['class_sets'][j%10])
+        for i,cs in enumerate(new['class_sets']):
+            self.assertEqual(sorted(local[i].tensors[1].unique().tolist()),cs)
+            for cs2 in new['class_sets'][i+1:]:self.assertFalse(set(cs)&set(cs2))
+        self.assertEqual(len(evaluation),10000);self.assertEqual(new['train_count'],49744)
+        self.assertTrue(torch.equal(anchors.tensors[1],torch.zeros(256,dtype=torch.long)))
+
+    def test_one_owner_three_arm_entrypoint(self):
+        torch.set_num_threads(1);torch.manual_seed(160);sets,_=cifar100_ownership(120100,1)
+        local=[TensorDataset(torch.randn(20,3,32,32),torch.tensor(cs*2)) for cs in sets]
+        test=TensorDataset(torch.randn(100,3,32,32),torch.arange(100));anchors=TensorDataset(torch.randn(256,3,32,32),torch.zeros(256,dtype=torch.long))
+        with tempfile.TemporaryDirectory() as output:
+            argv=['pprtp','--data','unused','--output',output,'--device','cpu','--modes','local','fedproto','fedgh','--seeds','0','--rounds','1','--full-data','--dataset','CIFAR100','--num-classes','100','--k','10','--owners-per-class','1']
+            with patch('sys.argv',argv),patch('pprtp.full_data.prepare_cifar100',return_value=(local,test,dict(class_sets=sets),anchors)) as prepare,contextlib.redirect_stdout(io.StringIO()):main()
+            prepare.assert_called_with('unused',120100,1)
+            f=json.loads((Path(output)/'fedgh_seed0/final.json').read_text())
+            self.assertEqual(f['local_optimizer_steps'],[1]*10)
+            self.assertIsNone(f['owner_prototype_compatibility'])
+            self.assertEqual(f['communication_bytes']['upload_vectors'],100*512*4)
+            self.assertTrue(f['full_pair_probe']['same_raw_means_counts_exact'])
             self.assertTrue(json.loads((Path(output)/'round_one_pairing_seed0.json').read_text())['passed'])

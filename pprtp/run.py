@@ -93,10 +93,10 @@ def run(cfg, mode, seed):
     random.seed(seed)
     if cfg.full_data:
         from pprtp.full_data import prepare_full,prepare_cifar100
-        assert cfg.clients==10 and mode in ('local','fedproto','fedgh','fedtgp')
+        assert cfg.clients==10 and mode in ('local','fedproto','fedgh','fedtgp','fedavg')
         if cfg.dataset=='CIFAR100':
-            assert seed in (0,1,2) and num_classes==100 and cfg.k==20
-            datasets,test,split,full_anchors=prepare_cifar100(cfg.data,cfg.ownership_seed)
+            assert seed in (0,1,2) and num_classes==100 and cfg.k==10*cfg.owners_per_class
+            datasets,test,split,full_anchors=prepare_cifar100(cfg.data,cfg.ownership_seed,cfg.owners_per_class)
         else:
             assert seed in (0,1,2) and num_classes==10 and cfg.k==2
             datasets,test,split,full_anchors=prepare_full(cfg.data,seed)
@@ -124,7 +124,7 @@ def run(cfg, mode, seed):
         cnn.fc = torch.nn.Identity()
         initial_model=BaseHeadSplit(cnn,head)
     args = SimpleNamespace(model=initial_model.to(cfg.device),
-        algorithm=mode, mode=mode, scale=cfg.scale, dataset='Cifar100' if num_classes==100 else 'Cifar10',device=cfg.device,
+        algorithm=mode, mode='local' if mode=='fedavg' else mode, scale=cfg.scale, dataset='Cifar100' if num_classes==100 else 'Cifar10',device=cfg.device,
         save_folder_name='items',num_classes=num_classes,batch_size=cfg.batch_size,
         local_learning_rate=cfg.lr,local_epochs=cfg.local_epochs,few_shot=0,
         learning_rate_decay_gamma=1.,learning_rate_decay=False,
@@ -157,6 +157,9 @@ def run(cfg, mode, seed):
         metadata.update(model='PFLlib mixed FedAvgCNN/ResNet18 512D',client_initial_states=architecture_receipts,
             architecture_assignment=[a['architecture'] for a in architecture_receipts],server_head_initial_client=0,
             every_class_one_owner_per_architecture=True)
+    if mode=='fedavg':
+        assert cfg.full_data and not cfg.mixed_backbone
+        metadata.update(fedavg_rule='PFLlib sample-count-weighted full-model parameters, all clients',anchors_used=False,prototype_payload_diagnostic_only=True)
     if mode=='fedtgp':
         tgp=FedTGPServer(num_classes,512,cfg.device,seed,cfg.lr,cfg.batch_size)
         metadata.update(fedtgp_upstream_sha=UPSTREAM_SHA,server_epochs=100,margin_threshold=100,server_lr=cfg.lr,server_seed=seed,server_initial_hash=tensor_hash(tgp.model.state_dict().values()),client_initial_hashes=[tensor_hash(c.model.state_dict().values()) for c in clients],prototype_collection=('round-start checkpoint eval means' if cfg.fedtgp_prototype_timing=='round_start' else 'post-update eval means'),anchors_used=False,server_parameter_count=sum(p.numel() for p in tgp.model.parameters()))
@@ -274,6 +277,19 @@ def run(cfg, mode, seed):
                 tgp_receipt['prototype_collection']=metadata['prototype_collection']
                 record['prototype_payload_bytes'].update(upload_counts=0,upload_labels=sum(len(c.protos) for c in clients)*8)
                 record['fedtgp_server'].update(distance_logits_finite=True,global_labels=list(range(num_classes)),pprtp_transport_called=False)
+            if mode=='fedavg':
+                from pprtp.fedavg import MatchedFedAvg
+                global_server=MatchedFedAvg(clients)
+                global_model=global_server.global_model
+                for c,values in zip(clients,per_client):
+                    local_model=c.model
+                    c.model=global_model
+                    values['global_model_post_server']=evaluate(c,testloader,protos,include_histograms=True,num_classes=num_classes)['head']
+                    c.model=local_model
+                summary['global_model_post_server']={k:float(np.mean([v['global_model_post_server'][k] for v in per_client])) for k in ('seen','missing','all','macro')}
+                model_bytes=sum(p.numel()*p.element_size() for p in global_model.parameters())
+                record['fedavg_server']=dict(global_model_hash=tensor_hash(global_model.state_dict().values()),weights=global_server.uploaded_weights,all_clients=True,anchors_used=False,prototype_payload_diagnostic_only=True)
+                record['communication_bytes']=dict(upload_model_all_clients=model_bytes*len(clients),download_model_all_clients=model_bytes*len(clients))
             if fedgh:
                 if r == 0 and not cfg.full_data:
                     historical=Path('research_log/H01B/receipts')/f'fedproto_seed{seed}'/'rounds.jsonl'
@@ -626,7 +642,10 @@ def run(cfg, mode, seed):
                 check_round_one(prior)
             print(json.dumps(dict(mode=mode,seed=seed,round=r+1,metrics=summary,elapsed=record['elapsed_seconds'])),flush=True)
             for client in clients:
-                client.set_protos(protos if mode not in ('local','fedgh') and not online else None)
+                client.set_protos(protos if mode not in ('local','fedgh','fedavg') and not online else None)
+                if mode=='fedavg':client.set_parameters(global_model)
+    if mode=='fedavg':
+        torch.save(global_model.state_dict(),out/'global_model.pt')
     if mode=='fedtgp':
         torch.save(tgp.model.state_dict(),out/'server_tgp.pt')
     if fedgh:
@@ -671,6 +690,7 @@ def main():
     parser.add_argument('--num-classes',type=int,default=10)
     parser.add_argument('--fedtgp-prototype-timing',choices=['round_start','post_update'],default='round_start')
     parser.add_argument('--ownership-seed',type=int,default=120100)
+    parser.add_argument('--owners-per-class',type=int,choices=[1,2],default=2)
     parser.add_argument('--mixed-backbone',action='store_true')
     parser.add_argument('--full-data',action='store_true')
     parser.add_argument('--full-pair-probe',action='store_true')

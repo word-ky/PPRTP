@@ -74,3 +74,15 @@ upstream equivalence tests. post_update recomputes eval-mode local means after
 SGD with zero extra optimizer steps; all generator/loss/SGD settings unchanged.
 The assigned fresh100cycle run is a baseline-favorable stress test; fixed
 checkpoints10/25/50/100, primaryendpoint100, no accuracy-based selection.
+
+
+H16-A keeps historical CIFAR100 ownership order120100 and adds owners_per_class
+(default2, exact historical split); value1 retains order[j]'s owner j%10 only.
+Allocation, public anchors, methods and readouts unchanged.
+FedAvg uses pinned PFLlib Server.aggregate_parameters/add_parameters unchanged
+through MatchedFedAvg; full-participation sample-count weighting, whole-model
+broadcast with upstream Client.set_parameters. H01 Local CE SGD is tested exactly
+against clientAVG before and after broadcast. No momentum/decay; homogeneous
+FedAvgCNN has no BN buffer issue. Matched private shuffled loaders/drop_lastFalse,
+exactly10updates and final post-aggregation evaluation replace upstream harness
+scheduling. Prototype statistics are diagnostic, never used by/sent in FedAvg.

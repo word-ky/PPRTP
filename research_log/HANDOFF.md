@@ -1,3 +1,7 @@
+# Latest state — H16-A TESTING
+
+[2026-09-19T16:31:41.983740+08:00] H16-A increments green: baseline72PASS220.445s,partition9PASS100.407s,FedAvg2PASS56.243s. Defaultsplit byte-exact; nested1owner/anchors/coverage/tiny3arm passed. LocalSGD exact upstream, pinnedFedAvg aggregation/tiny4arm passed. Full76suite running, no experiment yet. GPUstatus bothA6000 46287/49140MiB used by existing vLLMservice; untouched. Observe originalrun resource use. Localhandoff append initially failed GBKdecode, corrected explicitUTF8, no artifactloss.
+
 # Latest state — H15-B DONE
 
 [2026-09-19T15:37:14.373628+08:00] H15-B DONE. Run20260919-144131-h15b-postupdate100 exit0 at15:13:56+08; sourcee0e171f6bfb0247eba599a263ca26241e248d9f7. Exactly100cycles/156000clientsteps/70000serversteps verified. Official S57.97 M0 A11.594; frozen PPRTP15.895/9.345/10.655 => PPRTP missing+9.345pp/all-0.939pp, COMPETITIVE / NOVELTY WARNING. No cycle server final-epoch loss<.001; endpoint4.892917 underconverged. No extension/tuning. Report script ran once successfully; checkpoints10/25/50/100 JSON/local and binary/remote with SHA256. Tests72 local223.596s remote74.965s. Runtime1854.571s server273.420s. Stop baseline expansion; await new lead ACTIVE, never rerun completed H15-B. RootC:/work/PPRTP.

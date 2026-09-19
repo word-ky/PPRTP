@@ -77,18 +77,19 @@ def full_readouts(clients,head,anchors,datasets,test,tensor_hash,metrics,constru
 
 OWNERSHIP_SEED=120100
 
-def cifar100_ownership(ownership_seed=OWNERSHIP_SEED):
+def cifar100_ownership(ownership_seed=OWNERSHIP_SEED,owners_per_class=2):
+    assert owners_per_class in (1,2)
     order=np.random.default_rng(ownership_seed).permutation(100).tolist()
     class_sets=[[] for _ in range(10)]
     for j,label in enumerate(order):
-        class_sets[j%10].append(label);class_sets[(j+1)%10].append(label)
+        for offset in range(owners_per_class):class_sets[(j+offset)%10].append(label)
     return [sorted(cs) for cs in class_sets],order
 
 
-def prepare_cifar100(root,ownership_seed=OWNERSHIP_SEED):
+def prepare_cifar100(root,ownership_seed=OWNERSHIP_SEED,owners_per_class=2):
     train=CIFAR100(root,train=True,download=True)
     anchors=reserve_anchors(len(train.data)) # Reserve before accessing labels.
-    class_sets,order=cifar100_ownership(ownership_seed)
+    class_sets,order=cifar100_ownership(ownership_seed,owners_per_class)
     split=allocate(np.asarray(train.targets),class_sets,anchors,num_classes=100)
     split.update(dataset='CIFAR100',num_classes=100,ownership_seed=ownership_seed,
         ownership_order=order,ownership_order_sha256=index_hash(order),class_sets_sha256=index_hash(class_sets))

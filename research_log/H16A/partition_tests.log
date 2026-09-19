@@ -1,0 +1,14 @@
+test_explicit_ownership_seed_reproduces_old_split_and_changes_graph (test_cifar100.Cifar100Test.test_explicit_ownership_seed_reproduces_old_split_and_changes_graph) ... ok
+test_metrics_histograms_and_all100_rows (test_cifar100.Cifar100Test.test_metrics_histograms_and_all100_rows) ... ok
+test_nested_one_owner_historical_order_and_coverage (test_cifar100.Cifar100Test.test_nested_one_owner_historical_order_and_coverage) ... ok
+test_new_graph_three_arm_initialization_and_actual_batch_pairing (test_cifar100.Cifar100Test.test_new_graph_three_arm_initialization_and_actual_batch_pairing) ... ok
+test_one_owner_three_arm_entrypoint (test_cifar100.Cifar100Test.test_one_owner_three_arm_entrypoint) ... ok
+test_ownership_label_blind_reservation_and_full_coverage (test_cifar100.Cifar100Test.test_ownership_label_blind_reservation_and_full_coverage) ... ok
+test_three_arm_100class_entrypoint (test_cifar100.Cifar100Test.test_three_arm_100class_entrypoint) ... ok
+test_three_readouts_100class_isolation_and_label_independence (test_cifar100.Cifar100Test.test_three_readouts_100class_isolation_and_label_independence) ... ok
+test_training_seeds_keep_h12a_split_and_change_initialization (test_cifar100.Cifar100Test.test_training_seeds_keep_h12a_split_and_change_initialization) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 100.407s
+
+OK
