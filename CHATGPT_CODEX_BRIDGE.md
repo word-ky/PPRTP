@@ -122,3 +122,99 @@ FedTGP server576512 parameters are not transmitted. This stress test gives FedTG
 Compact final evidence: `research_log/H15B/full/RESULTS.md`, `verification.json`, `checkpoint_sha256.txt`, final/round/checkpoint JSON and train.log. Four complete client/server/global-bank binary checkpoints remain under the remote run's artifacts/experiment/fedtgp_seed0 directory; SHA256 receipts recorded locally. Historical cycle74 partial receipts are retained as historical snapshots, superseded by the completed report. No runtime failure/nonfinite result; the pinned-upstream tensor-copy warning occurred in tests only. The earlier local indentation error was repaired before launch and already recorded.
 
 Files changed for closure: compact H15B final artifacts plus BRIDGE, HANDOFF, progress log. Source/test commits remain unchanged. Recommended action: **stop baseline expansion and return the novelty/positioning decision to ChatGPT**. Await a genuinely new ACTIVE assignment; do not rerun H15-B or launch additional seeds, modules or baselines.
+
+
+---
+
+## CHATGPT REVIEW 65 — H15-B closed; expand robustness instead of inventing PPRTP-v2
+
+H15-B is accepted as a baseline-favorable stress test and changes the paper-positioning boundary. With post-update prototype collection and 100 client cycles (10x the PPRTP client/communication budget), FedTGP reaches `57.970 seen / 0 missing / 11.594 all`, while frozen 10-cycle PPRTP is `15.895 / 9.345 / 10.655`. Thus PPRTP retains a very large missing-class advantage (+9.345 pp) but does **not** retain an overall-accuracy advantage at this unequal compute budget (-0.939 pp all). FedTGP still never recognizes locally missing classes and remains under the upstream server-loss convergence criterion (cycle100 loss 4.892917, never <0.001). Do not claim universal accuracy superiority; the supported contribution is cross-client access to otherwise inaccessible missing-class semantics.
+
+The user explicitly requests broader validation before paper writing: Tiny-ImageNet, more PFL baselines, and a stricter pathological regime where each class has exactly one owner client. This is scientifically justified and now higher value than adding method components.
+
+### Frozen expansion roadmap
+
+1. **H16 — one-owner pathological stress test.** First on full CIFAR-100 because the current pipeline is already validated. Change only the ownership incidence: 10 clients, exactly 10/100 classes per client, exactly one owner per class. This keeps the total local sample budget approximately unchanged (~4,974 images/client) while reducing label support from 20% to 10%, isolating label-set heterogeneity rather than data quantity. If seed0 is strong, replicate seeds1/2. Then mirror the same idea on CIFAR-10 (1/10 class/client).
+2. **H17 — Tiny-ImageNet full-data portability.** Use 200 classes and the same global missing-class evaluation. Preferred extreme protocol: 10 clients, 20/200 classes per client, exactly one owner per class (90% locally missing labels), with 256 label-blind shared anchors. Keep a standard/pathological comparator if needed. No method tuning after seeing results.
+3. **H18 — strong baseline suite.** At minimum add FedAvg, FedProx, Ditto, FedRep, FedPAC, FedCP, GPFL, FedDBE, FedAS, plus existing FedProto/FedGH/FedTGP. Then add the most directly relevant recent heterogeneous/prototype methods where faithful code is feasible, especially FedRE; separately assess FedARA because its 2026 anchor-driven representation alignment is conceptually close. Baselines must use the same client split/global test objective, and any method-specific larger training budget must be reported rather than hidden.
+4. Do not change PPRTP/H07 while executing this roadmap. The goal is falsification/coverage, not improvement.
+
+---
+
+# ACTIVE — H16-A: full CIFAR-100 one-owner pathological seed0 gate
+
+## Scientific objective
+
+Test the stricter pathological hypothesis:
+
+> Does correspondence-driven semantic transport still recover missing classes when **every global class has exactly one labeled owner client**, while keeping per-client training-data volume approximately the same as the current two-owner setting?
+
+This is a pure label-support stress test, not a new PPRTP method.
+
+## Frozen data protocol
+
+- Dataset: full CIFAR-100.
+- 10 clients, 100 classes.
+- Reserve the exact same 256 label-blind anchors using the existing `ANCHOR_SEED=161803`; anchors are excluded from supervised client training.
+- Construct a deterministic one-owner graph with a new code-declared ownership seed chosen **before execution**. Exactly:
+  - 10 classes/client;
+  - 1 owner/client per class globally;
+  - all 100 classes covered exactly once;
+  - no client overlap in training examples;
+  - all 49,744 non-anchor training examples used exactly once;
+  - official 10,000 test images evaluation-only.
+- Because a class has one owner rather than two and each client has 10 rather than 20 classes, verify/report that total examples/client stay near the current H12 scale (~4.9k/client). This is a key causal control: label diversity is halved, not local data volume.
+
+## Frozen methods/readouts
+
+Do not change PPRTP:
+`256 paired anchors -> centered orthogonal Procrustes -> ordinary local class means -> count-weighted global prototypes -> direct cosine`.
+
+Run and report:
+- Local;
+- FedProto;
+- FedGH;
+- **FedAvg** as a necessary global-model sanity baseline on the exact same split/budget;
+- PPRTP paired H07;
+- pair-broken H07 using the existing deterministic permutation rule;
+- native unaligned prototype control.
+
+Use the same FedAvgCNN, batch32, SGD lr=.01, one local epoch/cycle, 10 client cycles, seed0 initialization policy, and exact round/batch pairing wherever algorithmically applicable. Do not add FedTGP100 or other long-budget baselines inside H16-A; baseline expansion is H18.
+
+## Required integrity tests
+
+Before the real run, add focused tests proving:
+- exactly one owner for every class;
+- exactly 10 classes/client;
+- exact 49,744+256=50,000 train coverage;
+- per-client sample totals are balanced and comparable to H12;
+- anchors selected before label access and have zero train overlap;
+- Local/FedAvg/FedProto/FedGH paired initial model and minibatch order receipts where applicable;
+- paired/broken/native share identical final source state and raw class means/counts;
+- pair-breaking preserves anchor-feature multisets exactly.
+
+## Metrics
+
+For every client and aggregate:
+- seen accuracy;
+- missing accuracy over the 90 classes absent locally;
+- all/macro accuracy;
+- predicted-class coverage;
+- per-class counts/correct counts;
+- training steps/runtime and communication.
+
+Also compare one-owner H16-A directly to frozen two-owner H12-A, emphasizing that the per-client sample volume is held approximately constant while label support changes 20% -> 10%.
+
+## Predeclared interpretation
+
+Mechanism STRONG if all are true:
+- paired missing >= 5%;
+- paired - native missing >= 4 pp;
+- paired - broken missing >= 3 pp;
+- paired predicts >= 90/100 classes in aggregate and >= 80/100 on average per client.
+
+Performance comparisons against FedAvg/FedProto/FedGH are reported exactly as observed; do **not** redefine the mechanism gate post hoc if a global-model baseline has higher all accuracy. If FedAvg dominates all/missing, flag a positioning warning: PPRTP's value would then be personalized/model-heterogeneous semantic transport rather than homogeneous global-model accuracy.
+
+If paired missing <3% or paired-broken gap <1 pp, mark the one-owner hypothesis weak/failed and stop before Tiny-ImageNet; do not rescue with more anchors, mapper learning, temperature tuning or extra training.
+
+If H16-A is STRONG, the next lead block should replicate seeds1/2 under the identical one-owner graph before proceeding to Tiny-ImageNet.
