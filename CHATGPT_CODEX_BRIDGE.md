@@ -268,3 +268,51 @@ No interpretation until final outputs verified. Seed0 evidence and implementatio
 # CODEX REPORT H16-B — PARTIAL
 
 [2026-09-19T17:39:37.523631+08:00] H16-B PARTIAL seed1 completed and report assertions pass: STRONG,pairedS23.88 M8.306667 A9.864;brokenM.236667/native0,causalgap8.07pp. FedAvg10.07missing/all still dominates. Seed2 running samejob; all3splitsexact,initialhashesdistinct,actualbatchorders differforall10clients. EvidenceH16B/full/seed1 plus seed2_initial_integrity.json. Primary3seedsummary pending; no extra runs/tuning.
+
+
+# CODEX REPORT H16-B — DONE
+
+STATUS: DONE. **3/3 STRONG one-owner mechanism; FedAvg positioning warning in all3seeds.**
+
+[2026-09-19T17:53:06.703136+08:00] H16-B DONE sourceb4e5a9b6a8fa2097d2eab02cbb1d346304e47b63 run20260919-172251-h16b-one-owner-seeds12 exit0 at17:49:52+08. Reporter-only fix,seed0reportsbyteexact;remote76PASS100.525s,trainingunchanged25973cf. Seed1/2 STRONG =>3/3. Paired S23.593333±.280238 M8.022593±.270633 A9.579667±.271559; brokenM.247778±.010184,native0;causalgap7.774815±.280771pp. FedAvgM/A10.08±.275137;paired-FedAvg M-2.057407±.301953pp A-.500333±.301222pp,warningall3. Exactsplit/3distinctinits/all10actualbatchordersdifferent,withinseed4armspaired15590steps/arm/readoutstates+rawmeans exact. SVDframeworkwarning preserved,no retry/tuning. STOPafterreplication;awaitnewleadACTIVE,noTinyImageNet. EvidenceH16B/full,rootC:/work/PPRTP.
+
+## Execution and integrity
+
+Source `b4e5a9b6a8fa2097d2eab02cbb1d346304e47b63`; release `20260919-172120-h16b`; run `20260919-172251-h16b-one-owner-seeds12`, exit0 at2026-09-19T17:49:52+08:00. Only trainingseeds1/2 run; seed0 reused unchanged. Launch `07d5c37`, seed1 initialization receipt `bef8132`, completedseed1/seed2initial receipt `60acc6b`. Exact training command remains in RUNNING report and `research_log/H16B/full/run.sh`.
+
+Commands used after fetching compact artifacts without .pt:
+```powershell
+D:/anaconda3/python.exe scripts/report_h16a.py research_log/H16B/full 1
+D:/anaconda3/python.exe scripts/report_h16a.py research_log/H16B/full 2
+D:/anaconda3/python.exe scripts/report_h16b.py research_log/H16B/full
+```
+Each completed-seed and three-seed report assertion passed. Seed0 RESULTS.md/verification.json are byte-identical before/after reporter fix and still match saved hashes at closure. Only reporter paths/checks/summary changed; `git diff --exit-code 25973cf -- pprtp tests` clean. Remote existing76test suite passed100.525s. No method/data/training code changes, no retries, seed selection or tuning.
+
+All3seeds share exact H16-A split/classsets/owners/anchors/train/test coverage. Initial hashes0/1/2 distinct; all10clients' actual first-round batches differ across all3seeds, and match across the4arms within eachseed. Round1 trained-model/prototype hashes paired withinseed. All4arms perseed have10cycles/15590localsteps; raw uploaded counts match split. Paired/broken/native share finalmodel/server/prototype state, raw means/counts, CPU/CUDA RNG, modes and gradients exactly. Fixed pair-breaking permutations preserve anchorfeature multisets; no test/anchorlabels enter transport. FedAvg weights are exact train-sample fractions, knowledge loss0, no anchors/transport/prototype payload in training; common globalprediction histogram verified for allclients.
+
+## Frozen endpoints
+
+| Seed | Paired seen % | Paired missing % | Paired all % | Broken missing % | Native missing % | Paired aggregate / mean-client coverage | FedAvg missing / all % | Verdict |
+|---|---:|---:|---:|---:|---:|---|---|---|
+|0 (reused)|23.320|7.767778|9.323|0.256667|0|100 /97.4|9.810 /9.810|STRONG|
+|1|23.880|8.306667|9.864|0.236667|0|100 /97.0|10.070 /10.070|STRONG|
+|2|23.580|7.993333|9.552|0.250000|0|100 /97.3|10.360 /10.360|STRONG|
+
+All original5gates pass independently: missing>=5%, paired-native>=4pp, paired-broken>=3pp, aggregatecoverage>=90, meanclientcoverage>=80. No gate incorporates baseline superiority.
+
+Mean +/- sampleSD (n3,ddof1):
+- PPRTP seen23.593333 +/-0.280238%; missing8.022593 +/-0.270633%; all9.579667 +/-0.271559%.
+- Broken missing0.247778 +/-0.010184%; native missing0 +/-0%.
+- Paired-minus-broken missing7.774815 +/-0.280771pp; paired-minus-native8.022593 +/-0.270633pp.
+- FedAvg missing10.080000 +/-0.275136%; all10.080000 +/-0.275137%.
+- PPRTP-minus-FedAvg missing-2.057407 +/-0.301953pp; all-0.500333 +/-0.301222pp.
+
+The correspondence-dependent access to missing semantics survives3independent initializations/shuffles on this fixed one-owner graph. **FedAvg dominates missing/all in everyseed**; this is not best homogeneous global-learning evidence. Preserve PPRTP's personalized/model-heterogeneous motivation, current post-hoc status, seen/missing tradeoff and extra same-image side information. No universal accuracy, equal-information or communication-efficiency claim.
+
+## Costs, warnings, evidence and next action
+
+Seed1 runtime seconds Local138.127/FedProto127.465/FedGH302.029/FedAvg157.667; seed2 Local119.771/FedProto144.186/FedGH316.236/FedAvg173.576. FedGH runtime includes final three-readout diagnostics. Eacharm15590SGDsteps; no extra readout SGD. Communication matches H16-A: Local0trainingbytes; FedProto2048000vector+8000countuplink/20480000bankdownlink; FedGH2048000vector+8000labeluplink/20520000totalheaddownlink; FedAvg369883200bytes eachdirection, perseed. PPRTP final construction retains206400semantic +5242880anchoruplink,2048000globalbank +10526720naiveaffinedownlink bytes; actual naive accounting, not optimized deployment.
+
+The historical PyTorch SVD-driver fallback warning appeared during seed1 and is preserved in train.log; both seeds completed with all integrity/finite checks passing. No OOM or experiment restart. Per-seed reports, all7arms seen/missing/all/macro, perclient/classwise counts/correctcounts, prediction coverage/histograms, runtime/steps/communication, initial/batch/model/prototype hashes and permutation receipts remain under `research_log/H16B/full`; final three-seed RESULTS.md/verification.json summarize them. All binary models remain under the same remote run. `seed2_initial_integrity.json` retains its historical endpoint-pending snapshot; completed reports supersede that state.
+
+Files changed at closure: final compact evidence, BRIDGE, HANDOFF and progress; no further code change. **Stop H16 replication and await the lead's next ACTIVE task. Do not start Tiny-ImageNet or additional baselines/seeds in this block.**

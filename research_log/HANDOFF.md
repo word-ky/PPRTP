@@ -1,3 +1,7 @@
+# Latest state — H16-B DONE
+
+[2026-09-19T17:53:06.703136+08:00] H16-B DONE sourceb4e5a9b6a8fa2097d2eab02cbb1d346304e47b63 run20260919-172251-h16b-one-owner-seeds12 exit0 at17:49:52+08. Reporter-only fix,seed0reportsbyteexact;remote76PASS100.525s,trainingunchanged25973cf. Seed1/2 STRONG =>3/3. Paired S23.593333±.280238 M8.022593±.270633 A9.579667±.271559; brokenM.247778±.010184,native0;causalgap7.774815±.280771pp. FedAvgM/A10.08±.275137;paired-FedAvg M-2.057407±.301953pp A-.500333±.301222pp,warningall3. Exactsplit/3distinctinits/all10actualbatchordersdifferent,withinseed4armspaired15590steps/arm/readoutstates+rawmeans exact. SVDframeworkwarning preserved,no retry/tuning. STOPafterreplication;awaitnewleadACTIVE,noTinyImageNet. EvidenceH16B/full,rootC:/work/PPRTP.
+
 # Latest state — H16-B RUNNING
 
 [2026-09-19T17:23:30.927377+08:00] H16-B RUNNING sourceb4e5a9b6a8fa2097d2eab02cbb1d346304e47b63 release20260919-172120-h16b run20260919-172251-h16b-one-owner-seeds12. Reporter-onlychange,seed0resultsbyteidentical;trainingunchanged25973cf,prior76green. Onlyseeds1/2,4arms10cycles,owners1/order120100,exactH16Asplit/anchors. Monitor existingrun,no duplicate. FetchcompactH16B/full excludingpt; report_h16a.py root 1 then2; report_h16b.py root. Verify everyclient actualbatchorders different0/1/2,initialhashesdistinct,withinseed4arms paired,15590steps/arm,frozen5gates andFedAvgcomparison. Stop after2seeds, noTinyImageNet.
