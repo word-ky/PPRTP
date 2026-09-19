@@ -24,10 +24,13 @@ class TrainableGlobalPrototypes(nn.Module):
 class FedTGPClient(H01Client):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs);self.mode='fedproto';self.fedtgp=True
+        self.prototype_timing=getattr(args[0],'fedtgp_prototype_timing','round_start')
     def train(self):
         # Official collect_protos reloads disk BEFORE train saves the updated model.
-        snapshot=copy.deepcopy(self.model);snapshot.eval()
+        snapshot=copy.deepcopy(self.model) if self.prototype_timing=='round_start' else None
         super().train() # Existing CE + observed-class MSE and matched SGD/batches.
+        if snapshot is None:snapshot=self.model
+        snapshot.eval()
         protos=defaultdict(list)
         loader=DataLoader(self.load_train_data().dataset,batch_size=self.batch_size,shuffle=False,drop_last=False,generator=torch.Generator().manual_seed(0))
         with torch.no_grad():

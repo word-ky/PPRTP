@@ -66,3 +66,11 @@ or a claim of converged/best FedTGP performance. The official README discusses
 potentially much longer convergence (>1000 communication iterations); the frozen
 research assignment intentionally matches only10localcycles. Report that limit,
 round-start upload timing, all server costs, and PPRTP extraanchor sideinformation.
+
+
+H15-B adds an explicitly requested FedTGP-only post_update collection option.
+The historical/default round_start implementation remains covered by pinned
+upstream equivalence tests. post_update recomputes eval-mode local means after
+SGD with zero extra optimizer steps; all generator/loss/SGD settings unchanged.
+The assigned fresh100cycle run is a baseline-favorable stress test; fixed
+checkpoints10/25/50/100, primaryendpoint100, no accuracy-based selection.

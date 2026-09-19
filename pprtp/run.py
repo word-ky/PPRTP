@@ -133,6 +133,7 @@ def run(cfg, mode, seed):
     if mode=='fedtgp':
         from pprtp.fedtgp import FedTGPClient,FedTGPServer,UPSTREAM_SHA
         args.lamda=10.
+        args.fedtgp_prototype_timing=cfg.fedtgp_prototype_timing
     clients=[]
     for i, ds in enumerate(datasets):
         if cfg.mixed_backbone:args.model=initial_models[i].to(cfg.device)
@@ -158,7 +159,7 @@ def run(cfg, mode, seed):
             every_class_one_owner_per_architecture=True)
     if mode=='fedtgp':
         tgp=FedTGPServer(num_classes,512,cfg.device,seed,cfg.lr,cfg.batch_size)
-        metadata.update(fedtgp_upstream_sha=UPSTREAM_SHA,server_epochs=100,margin_threshold=100,server_lr=cfg.lr,server_seed=seed,server_initial_hash=tensor_hash(tgp.model.state_dict().values()),client_initial_hashes=[tensor_hash(c.model.state_dict().values()) for c in clients],prototype_collection='round-start checkpoint eval means',anchors_used=False,server_parameter_count=sum(p.numel() for p in tgp.model.parameters()))
+        metadata.update(fedtgp_upstream_sha=UPSTREAM_SHA,server_epochs=100,margin_threshold=100,server_lr=cfg.lr,server_seed=seed,server_initial_hash=tensor_hash(tgp.model.state_dict().values()),client_initial_hashes=[tensor_hash(c.model.state_dict().values()) for c in clients],prototype_collection=('round-start checkpoint eval means' if cfg.fedtgp_prototype_timing=='round_start' else 'post-update eval means'),anchors_used=False,server_parameter_count=sum(p.numel() for p in tgp.model.parameters()))
     (out/'metadata.json').write_text(json.dumps(metadata,indent=2))
     testloader=DataLoader(test,batch_size=128,shuffle=False)
     if cfg.paired_anchor_probe or cfg.pair_breaking_probe or cfg.persistence_probe or cfg.convexity_probe or cfg.anchor_count_probe or cfg.relation_probe or cfg.conditioning_probe or cfg.helmert_probe or cfg.precision_probe or cfg.precondition_probe or cfg.completion_probe or cfg.class_prototype_probe or cfg.direct_prototype_probe or cfg.local_source_probe:
@@ -270,6 +271,7 @@ def run(cfg, mode, seed):
             if (cfg.mixed_backbone or (cfg.full_data and cfg.dataset=='CIFAR100')) and r==0:record['batch_hashes']=[c.batch_hashes for c in clients]
             if mode=='fedtgp':
                 record['fedtgp_server']=tgp_receipt
+                tgp_receipt['prototype_collection']=metadata['prototype_collection']
                 record['prototype_payload_bytes'].update(upload_counts=0,upload_labels=sum(len(c.protos) for c in clients)*8)
                 record['fedtgp_server'].update(distance_logits_finite=True,global_labels=list(range(num_classes)),pprtp_transport_called=False)
             if fedgh:
@@ -607,6 +609,11 @@ def run(cfg, mode, seed):
                             same_raw_means_counts_exact=True,paired_anchor_feature_hashes=capture['anchor_feature_hashes'])
                     record['full_data_readout']['diagnostic_seconds']=time.time()-diagnostic_start
                 record['elapsed_seconds']=time.time()-started
+            if mode=='fedtgp' and cfg.fedtgp_prototype_timing=='post_update' and r+1 in (10,25,50,100):
+                checkpoint=out/f'checkpoint_cycle{r+1}.pt'
+                torch.save(dict(cycle=r+1,clients=[c.model.state_dict() for c in clients],server=tgp.model.state_dict(),global_protos=protos),checkpoint)
+                record['checkpoint_file']=checkpoint.name
+                (out/f'checkpoint_cycle{r+1}.json').write_text(json.dumps(record,indent=2))
             stream.write(json.dumps(record)+'\n'); stream.flush()
             if mode == 'fedgh' and cfg.probe_head and record['probe']['after']['accuracy'] < .95:
                 raise RuntimeError('H02-B stop: probe prototype accuracy below 95%; preserve negative result')
@@ -662,6 +669,7 @@ def main():
     parser.add_argument('--conditioning-probe',action='store_true')
     parser.add_argument('--dataset',choices=['CIFAR10','CIFAR100'],default='CIFAR10')
     parser.add_argument('--num-classes',type=int,default=10)
+    parser.add_argument('--fedtgp-prototype-timing',choices=['round_start','post_update'],default='round_start')
     parser.add_argument('--ownership-seed',type=int,default=120100)
     parser.add_argument('--mixed-backbone',action='store_true')
     parser.add_argument('--full-data',action='store_true')

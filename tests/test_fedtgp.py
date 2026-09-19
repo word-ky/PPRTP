@@ -68,3 +68,18 @@ class FedTGPTest(unittest.TestCase):
             self.assertEqual(len(rr[-1]['prediction_histograms']['l2']),100)
             self.assertFalse(rr[-1]['fedtgp_server']['anchors_used']);self.assertFalse(rr[-1]['fedtgp_server']['test_data_used'])
             for counts,cs in zip(rr[-1]['uploaded_class_counts'],split['class_sets']):self.assertEqual(set(map(int,counts)),set(cs))
+
+    def test_post_update_changes_only_collection_timing_without_extra_steps(self):
+        torch.set_num_threads(1)
+        old=fixture(FedTGPClient);new=fixture(FedTGPClient);new.prototype_timing='post_update'
+        old.train();new.train()
+        self.assertEqual(old.prototype_timing,'round_start')
+        self.assertEqual(old.optimizer_steps,new.optimizer_steps);self.assertEqual(new.optimizer_steps,2)
+        self.assertEqual(tensor_hash(old.model.state_dict().values()),tensor_hash(new.model.state_dict().values()))
+        self.assertEqual(old.proto_counts,new.proto_counts);self.assertEqual(set(new.protos),{0,1})
+        self.assertNotEqual(tensor_hash(old.protos.values()),tensor_hash(new.protos.values()))
+        x,y=new.load_train_data().dataset.tensors
+        before=tensor_hash(new.model.state_dict().values())
+        with torch.no_grad():z=new.model.base(x)
+        for label,p in new.protos.items():torch.testing.assert_close(p,z[y==label].mean(0),atol=1e-7,rtol=1e-6)
+        self.assertEqual(tensor_hash(new.model.state_dict().values()),before)
