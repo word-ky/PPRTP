@@ -1,0 +1,52 @@
+{
+  "verdict": "CLEAR PPRTP EDGE",
+  "gaps": {
+    "seen": -16.055000200867653,
+    "missing": 9.345000013709068,
+    "all": 4.265000149607659
+  },
+  "coverage": {
+    "l2": [
+      20,
+      20,
+      20,
+      20,
+      20,
+      20,
+      20,
+      20,
+      20,
+      20
+    ],
+    "head": [
+      20,
+      20,
+      20,
+      20,
+      20,
+      20,
+      20,
+      20,
+      20,
+      20
+    ]
+  },
+  "communication": {
+    "client_vectors_uplink_bytes_per_cycle": 409600,
+    "client_labels_uplink_bytes_per_cycle": 1600,
+    "global_prototype_downlink_bytes_per_client": 204800,
+    "global_prototype_downlink_bytes_all_clients_per_cycle": 2048000,
+    "server_model_parameters": 576512,
+    "server_model_transmitted": false,
+    "pprtp_anchor_uplink_bytes": 5242880
+  },
+  "split_exact": true,
+  "initial_exact": true,
+  "round1_model_exact": true,
+  "round1_batches_exact": true,
+  "client_steps": 15600,
+  "server_steps": 7000,
+  "server_initial_hash": "bb59b3677d36c58abcae6c7df05ef198b8f279df2043747a5e12b09da5c3e141",
+  "server_final_hash": "b8d8729236f5fdb140afdebc81c0ecc3793bd4064dfb7869cd60fa054aecd239",
+  "source_sha": "14d768dc6d47f54daa9b1897639b5e14a4fa8101"
+}

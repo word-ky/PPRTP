@@ -1,0 +1,6 @@
+{
+  "runId": "20260919-135722-h15a-fedtgp",
+  "releaseId": "20260919-135557-h15a",
+  "sessionName": "autodl-20260919-135722-h15a-fedtgp",
+  "command": "PPRTP_SOURCE_SHA=14d768dc6d47f54daa9b1897639b5e14a4fa8101 bash scripts/run_h01.sh --data /home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar100 --modes fedtgp --seeds 0 --rounds 10 --full-data --dataset CIFAR100 --num-classes 100 --k 20 --ownership-seed 120100"
+}

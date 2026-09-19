@@ -135,3 +135,52 @@ Save newrelease/runID, fetchcompact to research_log/H15A/full, run `D:/anaconda3
 # CODEX REPORT H15-A — PARTIAL (running)
 
 SSH recovered. Unchanged deployment retry succeeded as release20260919-135557-h15a; run20260919-135722-h15a-fedtgp launched from source14d768dc6d47f54daa9b1897639b5e14a4fa8101. Only FedTGP seed0 graph120100, exact frozen command from prior PARTIAL. No accuracy verdict yet. Monitor this existing run; do not duplicate. Local71tests pass; remote full tests precede training. Earlier deploy135437 upload timed out without starting training. Project HANDOFF/progress record recovery and current run ID.
+
+
+# CODEX REPORT H15-A — DONE
+
+STATUS: DONE, 2026-09-19T14:04:10.564084+08:00. Preregistered matched-budget verdict: **CLEAR PPRTP EDGE**. Stop this baseline block; no extra rounds, seeds, tuning, or PPRTP modification performed.
+
+Source `14d768dc6d47f54daa9b1897639b5e14a4fa8101`; release `20260919-135557-h15a`; run `20260919-135722-h15a-fedtgp`; completed `2026-09-19T14:01:52+08:00`, exit0. Official FedTGP remains pinned at `c77cbbb31eb30d13066cd11f7f4a2e732aeaae24`, official PFLlib at `0169ba7e412c9856a08bb3faefab1e35f538a3c1`. Both vendor trees unmodified. Implementation files and matched-protocol adaptations are in the prior PARTIAL and PROVENANCE.md; final reporting changes only artifacts/logs/BRIDGE.
+
+Exact run and validation:
+```sh
+D:/anaconda3/python.exe -m unittest discover -s tests -q
+D:/anaconda3/python.exe -m unittest discover -s tests -p test_fedtgp.py -v
+PPRTP_SOURCE_SHA=14d768dc6d47f54daa9b1897639b5e14a4fa8101 bash scripts/run_h01.sh --data /home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar100 --modes fedtgp --seeds 0 --rounds 10 --full-data --dataset CIFAR100 --num-classes 100 --k 20 --ownership-seed 120100
+D:/anaconda3/python.exe scripts/report_h15a.py research_log/H15A/full
+```
+Baseline68 PASS220.813s; focused3 PASS10.062s; full71 PASS246.188s locally and74.879s remotely. Final unchanged reporting checks pass. Exactly10localcycles/15,600clientSGDsteps/7,000serverSGDsteps. No historical arm/PPRTP rerun. Model initialization for all10clients exactly H12Aseed0; exact H12split,anchors excluded,train/testindices,classsets. Round1trainedmodelhashes equalH12, actualbatchhashes equalH13A on the exact sameH12split/seed/loader; H12itself predates batchhash logging, so the latter evidence is explicitly cross-referenced, not claimed to be an absent H12artifact. Uploadedlabels/counts match onlylocalobservedclasses; server receives exactly200individualclientclassprototypes/cycle. All100generatedprototypes used for every client's finite distance prediction. No anchors/correspondences/testlabels in optimization and no PPRTPtransport call.
+
+## Frozen result
+
+| Arm | Seen % | Missing % | All % | Macro % |
+|---|---:|---:|---:|---:|
+| FedTGP official nearest | 31.950000 | 0.000000 | 6.390000 | 6.390000 |
+| FedTGP local head | 32.750000 | 0.000000 | 6.550000 | 6.550000 |
+| frozen PPRTP | 15.895000 | 9.345000 | 10.655000 | 10.655000 |
+| frozen local | 32.440000 | 0.000000 | 6.488000 | 6.488000 |
+| frozen fedproto | 33.900000 | 0.000000 | 6.780000 | 6.780000 |
+| frozen fedgh | 16.180000 | 0.000000 | 3.236000 | 3.236000 |
+
+Frozen verdict: CLEAR PPRTP EDGE.
+PPRTP minus FedTGP (pp): {"seen": -16.055000200867653, "missing": 9.345000013709068, "all": 4.265000149607659}
+Per-client coverage: {"l2": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20], "head": [20, 20, 20, 20, 20, 20, 20, 20, 20, 20]}
+Aggregate predicted classes: {"head": 100, "cosine": 96, "l2": 100}
+Communication: {"client_vectors_uplink_bytes_per_cycle": 409600, "client_labels_uplink_bytes_per_cycle": 1600, "global_prototype_downlink_bytes_per_client": 204800, "global_prototype_downlink_bytes_all_clients_per_cycle": 2048000, "server_model_parameters": 576512, "server_model_transmitted": false, "pprtp_anchor_uplink_bytes": 5242880}
+Client optimizer steps15600; server SGD steps7000 (100epochs*7batches*10cycles). Total wall seconds176.751; server-update seconds26.96817898750305
+Server first/last epoch losses by cycle: [[4.934429168701172, 4.876330623626709], [12.899390678405762, 11.252895889282227], [6.342536849975586, 5.5849441719055175], [6.5212524795532225, 6.130675392150879], [6.393396167755127, 6.155823097229004], [6.698735980987549, 6.511864566802979], [6.477854175567627, 6.307934722900391], [6.367000637054443, 6.2381095123291015], [5.896900634765625, 5.766415596008301], [6.164946880340576, 6.026274299621582]]
+Initial/final server hashes: bb59b3677d36c58abcae6c7df05ef198b8f279df2043747a5e12b09da5c3e141 / b8d8729236f5fdb140afdebc81c0ecc3793bd4064dfb7869cd60fa054aecd239
+
+ExactH12split/initialization and round1trainedmodelhashes; actualround1batchhashes equalH13A on exactH12split/seed/loader. Allclasses finite distance predictions. No anchor/testdata in client/server optimization; no PPRTPtransport.
+Pinned official disk ordering uploads round-start checkpoint features; retained and tested. Matched batch32/drop_lastFalse/shuffled loaders/10cycles/finalpostserver evaluation and deterministicprivate server RNG are deliberate adaptations. Server margin unweighted-classmeans; individualprototype updates, no samplecount weighting.
+Short-budget matched baseline only, not best/converged FedTGP. OfficialREADME discusses >1000 communicationiterations; no extension permitted here. PPRTP uses extra unlabeled same-image correspondence and has a seen-class tradeoff; no communication-efficiency claim. Only one seed. Provenance and adaptations in PROVENANCE.md.
+
+
+Interpretation qualifications: all10FedTGP clients predict exactly their20seenclasses; aggregate100class coverage therefore does NOT mean locally missing recognition. FedTGP localhead also has0missing. PPRTP trades16.055pp seen accuracy for9.345pp missing and4.265pp all gains against the officialdistance readout under this protocol. It uses additional same-image anchor correspondence; do not imply equal information budgets.
+
+The server epoch100 mean loss in the finalcycle is6.026274, far from the near-zero convergence discussed in the upstream README. Thus this is a clear edge **at the frozen10cycle/local-training budget**, not evidence of superiority over converged/tuned FedTGP. Preserve the pinned round-start checkpoint collection behavior and the matched batch/drop_last/RNG/evaluation differences when writing the paper. No loss-driven retry or longer run was authorized or performed. Any future convergence or timing comparison requires a new research-lead assignment.
+
+Operational history: initial deployment attempts failed on closed SSH; this heartbeat first reconnected, then deployment135437 failed on SCP timeout (including existing fallback). Unchanged deployment135557 succeeded. No failed deployment launched training; exactlyone successful FedTGP experiment exists. The pinned upstream tensor-copy warning appears only in the server-equivalence test; this train.log has no nonfinite/SGD/runtime failure. No server/driver settings changed.
+
+Evidence: research_log/H15A/full/RESULTS.md,verification.json,artifacts/experiment/fedtgp_seed0/{metadata,split,rounds,final},artifacts/tests.txt,meta.json,run.sh,train.log. All per-round serverlosses/margins/hashes/updatecounts/labels and full per-client classcorrect/count/histograms retained. Original client0/serverTGP checkpoints remain on A6000 under /home/wenchang/asdasdsad/wjq/PPRTP/runs/20260919-135722-h15a-fedtgp/artifacts/experiment/fedtgp_seed0. Recommend lead review of the matched-budget edge together with nonconvergence/timing caveats; do not independently expand experiments.
