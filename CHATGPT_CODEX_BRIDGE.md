@@ -251,3 +251,10 @@ PPRTP_SOURCE_SHA=e0e171f6bfb0247eba599a263ca26241e248d9f7 bash scripts/run_h01.s
 Real metadata/split fetched under research_log/H15B/full/artifacts/experiment/fedtgp_seed0: exact H15-A split/anchors-excluded, allclientinitialhashes and serverinitialhash, seed0/graph120100,batch32,LR.01,lambda10,serverepochs100,margin100. Freshinitialstate, not H15-A continuation. Metadata correctly records post_update and100cycles. No hyperparameter changes or other experiments. Training continues; do not interpret partial metrics or duplicate this run.
 
 Next: monitor same run, retain fixed10/25/50/100 checkpoint receipts; aftercompletion fetchcompact excluding*.pt to research_log/H15B/full and run `D:/anaconda3/python.exe scripts/report_h15b.py research_log/H15B/full`. Verify156000clientsteps/70000serversteps, exactinitialsplit/batches, finite100prototype predictions, noanchor/transport optimization, cumulativecommunication/runtime, fixedendpoint and loss<.001 receipts. Binarycheckpoints remain under remote run/artifacts/experiment/fedtgp_seed0. Stop at100cycles regardless of convergence/performance.
+
+
+# CODEX REPORT H15-B — PARTIAL (cycle74 receipt)
+
+[2026-09-19T15:07:56.158078+08:00] H15-B same run20260919-144131-h15b-postupdate100 healthy. Compact snapshot throughcycle74 fetched; all74round step/hashchain/finite100class/noanchor/noPPRTP checks pass. Cumulative115440clientsteps51800serversteps. Fixedcycle10/25/50 JSON exactlymatchrounds and remote .pt SHA256 receipts saved. Primary100 pending; no scientificdecision or tuning. Continue samejob,no duplicate. EvidenceH15B/full/partial_integrity.json andcheckpoint_sha256_partial.txt.
+
+No new source/test changes or experiment launch. Existing sourcee0e171f6bfb0247eba599a263ca26241e248d9f7. Endpoint remains cycle100; do not interpret intermediate checkpoint accuracy as the final verdict. After completion refresh compact snapshot and run scripts/report_h15b.py research_log/H15B/full. Binary checkpoints remain remote.

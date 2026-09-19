@@ -1,0 +1,13 @@
+{
+  "status": "RUNNING",
+  "last_fetched_cycle": 74,
+  "fixed_checkpoint_receipts": [
+    10,
+    25,
+    50
+  ],
+  "all_fetched_cycles_integrity_pass": true,
+  "client_optimizer_steps_so_far": 115440,
+  "server_optimizer_steps_so_far": 51800,
+  "endpoint_verdict": "pending cycle100"
+}
