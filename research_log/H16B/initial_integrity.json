@@ -1,0 +1,9 @@
+{
+  "seed1_split_exact_h16a": true,
+  "seed1_initial_differs_seed0": true,
+  "seed1_actual_batches_differ_all10clients": true,
+  "initial_hashes": [
+    "45f199c1b832adf0f877a365c0d96fca9521efbd03ed5f13cc09ce49bfe321e0",
+    "953f01f3b69eb39d67d6c42d5fa50b4a30d4383541bb8e10f67f4fe92c623070"
+  ]
+}
