@@ -1,0 +1,11 @@
+{
+  "files": [
+    "research_log\\H16A\\full\\RESULTS.md",
+    "research_log\\H16A\\full\\verification.json"
+  ],
+  "sha256": [
+    "f57da75641b00655b1e980cb33f6c9ec106f76357dbaef0cd57c39549dc8eb89",
+    "e77e4c24f878f806b91dae4eeab2c604671169dd2b684eb0889176381fe8e1ef"
+  ],
+  "passed": true
+}

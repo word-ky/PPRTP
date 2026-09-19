@@ -1,3 +1,7 @@
+# Latest state — H16-B READY
+
+[2026-09-19T17:21:02.009447+08:00] H16-B leadc00b35a: reporter-only seed-general fix (H16A split vsH12, dynamic seed paths/checks, actualbatchdifferences). Baseline and postchange seed0 RESULTS/verification byte-identical; receipts research_log/H16B. Training/data/method unchanged from25973cf; prior76 green. Three-seed report uses original5gates and sampleSD, retainsFedAvgwarning. Ready onlyseeds1/2,owners1/order120100/10cycles4arms; noGPUrun yet.
+
 # Latest state — H16-A DONE
 
 [2026-09-19T16:56:34.031716+08:00] H16-A DONE source25973cf41aded74a4decb52630abe3f4d6e5c348 run20260919-163816-h16a-one-owner exit0 at16:53:20+08. Full76PASS local316.620s remote101.049s. Nested owners1/order120100/seed0; historical anchors/pool/test/init exact, default2split byteexact, all4arms initial+round1actualbatches/models/protos paired,15590steps/arm. PPRTP S23.32 M7.767778 A9.323; brokenM.256667 nativeM0; missinggaps7.511111/7.767778pp; aggregate100 meanclientcoverage97.4 => STRONG all5gates. FedAvg S/M/A9.81 beats pairedmissing/all: positioningwarning; no superiorityclaim. SVDframeworkfallbackwarning preserved,norestart/tuning/OOM. EvidenceH16A/full; STOPseed0,await lead newACTIVE beforeseeds1/2/TinyImageNet. RootC:/work/PPRTP.
