@@ -76,3 +76,23 @@ Do not start Tiny-ImageNet, stronger-baseline implementation, mixed-backbone gra
 ## CODEX H14-A preregistered execution choice
 
 New explicit ownership RNG seed = **1**, historical default remains **120100**; training seed = **0**, homogeneous FedAvgCNN. Reuse the existing balanced cyclic construction with the first class permutation from seed1, no graph search. This changes the labeled class-client incidence graph while retaining the unlabeled cyclic client-neighbor topology; report that scope explicitly. Keep anchor RNG161803 and allocation RNG110001 unchanged. No experiment launched yet.
+
+
+# CODEX REPORT H14-A — PARTIAL
+
+STATUS: PARTIAL, run active; no final performance interpretation. Updated 2026-09-19T12:30:23.522924+08:00.
+
+Source `c9b91c4dd55065cc3297afca363aadd40169ee4a`; release `20260919-122515-h14a`; run `20260919-122706-h14a-ownership1`. Only graph RNG changes from historical120100 to preregistered1; training seed0 and homogeneous FedAvgCNN, fixed H12 optimizer/rounds/readouts. Files: `pprtp/full_data.py` and `run.py` add explicit ownershipseed and reuse actualbatch logging; `tests/test_cifar100.py` adds two focused tests; shared `report_h12a.py` accepts optional graphseed with old default preserved, and `report_h14a.py` adds graph-distance and Local-all diagnostic. No method/metric/gate changes.
+
+Tests: baseline66 PASS182.946s; focusedCIFAR1007 PASS72.659s; full68 PASS215.746s locally and73.339s remotely. Commands `D:/anaconda3/python.exe -m unittest discover -s tests -q` and `-m unittest discover -s tests -p test_cifar100.py -v`. Historical H12A/H13A reports regenerate byte-identically. Old graph reproduces fullhistoricalsplit; graph1 deterministicdifferent; anchor/balance/disjointness and newgraph mini-three-arm initial/model/actualbatch pairing tests pass.
+
+Launch:
+```sh
+PPRTP_SOURCE_SHA=c9b91c4dd55065cc3297afca363aadd40169ee4a bash scripts/run_h01.sh --data /home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar100 --modes local fedproto fedgh --seeds 0 --rounds 10 --full-data --dataset CIFAR100 --num-classes 100 --k 20 --ownership-seed 1
+```
+
+Real initial split receipt: `research_log/H14A/full/initial_receipt.json`; raw metadata/split under `artifacts/experiment/local_seed0`. ClasssetSHA `462f14367ae84761514d70b1b33445e966c23f65797e413c262094fe965e8d83`; ownershiporderSHA `6860bb34e44af88356db6107db927bcc7759137dd7d415b49d1135b02f1510cb`; splitSHA `df7f7f5a2228489bd62d2415be8cf3229437e01729639751f4484daea1bdd7f2`. AnchorSHA remains `5ef034047d3bb6532a854912e7eccfc876d52d15053b0465d9f42741199983b4`; initialmodelSHA remains H12seed0 `45f199c1b832adf0f877a365c0d96fca9521efbd03ed5f13cc09ce49bfe321e0`. Nonanchor trainingpool and testindices exact. All10clients156steps/round.
+
+New graph removes165/200 old incidences and adds165 new incidences;330/1000 binary incidence entries differ; meanclientclasssetJaccard=.09723095. First graph produced by seed1 used, no graph search. This changes labeled class-client incidences while retaining the balanced cyclic client-neighbor topology. No claim of arbitrary topology robustness.
+
+Continue this same run; do not duplicate. After completion, fetchcompact artifacts excluding checkpoints and run `D:/anaconda3/python.exe scripts/report_h14a.py research_log/H14A/full`. Report all6arms, frozen4gates, Local-all gap, fullclasssets/ownerpairs, pairing/state/RNG/gradient/mode receipts and warnings. Stop after this onegraph/seed; await lead.

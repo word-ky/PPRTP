@@ -1,3 +1,7 @@
+# Latest state — H14-A RUNNING
+
+[2026-09-19T12:27:34.029204+08:00] H14-A RUNNING sourcec9b91c4dd55065cc3297afca363aadd40169ee4a release20260919-122515-h14a run20260919-122706-h14a-ownership1. Baseline66pass182.946s focused7pass72.659s full68pass215.746s. Ownershipseed1 trainingseed0 only, homogeneousFedAvgCNN, 3arms10rounds frozenH12protocol. Exacthistoricalanchors, firstvalidbalancedcyclicgraph1; nosearch. Monitor existingrun,no duplicate. Fetchcompact research_log/H14A/full; run scripts/report_h14a.py research_log/H14A/full. Reportgraphdistance/classsets/owners and frozen4gates+Localallgap. Stop afteronegraph/seed; awaitlead. RootC:/work/PPRTP.
+
 # Latest state — H13-B DONE
 
 [2026-09-19T11:29:44.587213+08:00] H13-B DONE source1f8403aa181880f14886053f2b26916857b3d13c run20260919-070015-h13b-mixed-seeds12 exit0 at07:36:48+08. Tests66 local183.646s remote62.158s. Allintegrity checks passed;seed0reused. All3strong. Paired S27.393333±.288718 M6.375833±.010631 A10.579333±.055582; missingpaired-broken5.985833±.031656pp,nativegap6.374583±.010483pp,allgainvsbestFL3.224000±.227414pp. Bothfamiliespositivecausalgapsall3seeds;ResNetpairedmissing4.7775/4.7775/4.9725 below5groupwise. Exactsplit;all10initial/batchordersdifferentacrossseeds,pairedwithinseed;15600steps/arm;readoutstate/RNG/rawmeans/modes/grad exact. NVML/SVDwarningspreserved. Collectionreport ran beforetransfercompleted once, FileNotFound resolvedbywaitingandrerunning unchangedreports;noexperimentrestart. STOP H13 seeds, await newleadtask. Evidence research_log/H13B/full. RootC:/work/PPRTP.

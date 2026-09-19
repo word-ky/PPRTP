@@ -1,0 +1,43 @@
+{
+  "ownership_seed": 1,
+  "training_seed": 0,
+  "class_sets_sha256": "462f14367ae84761514d70b1b33445e966c23f65797e413c262094fe965e8d83",
+  "ownership_order_sha256": "6860bb34e44af88356db6107db927bcc7759137dd7d415b49d1135b02f1510cb",
+  "split_sha256": "df7f7f5a2228489bd62d2415be8cf3229437e01729639751f4484daea1bdd7f2",
+  "anchor_indices_sha256": "5ef034047d3bb6532a854912e7eccfc876d52d15053b0465d9f42741199983b4",
+  "initial_state_sha256": "45f199c1b832adf0f877a365c0d96fca9521efbd03ed5f13cc09ce49bfe321e0",
+  "old_incidence_count": 200,
+  "new_incidence_count": 200,
+  "removed": 165,
+  "added": 165,
+  "changed_binary_entries": 330,
+  "changed_fraction_of_1000": 0.33,
+  "mean_client_jaccard": 0.09723094986252881,
+  "client_counts": [
+    4983,
+    4976,
+    4973,
+    4973,
+    4973,
+    4968,
+    4971,
+    4978,
+    4974,
+    4975
+  ],
+  "steps_per_client_round": [
+    156,
+    156,
+    156,
+    156,
+    156,
+    156,
+    156,
+    156,
+    156,
+    156
+  ],
+  "anchors_exact": true,
+  "pool_exact": true,
+  "initial_exact": true
+}
