@@ -99,3 +99,34 @@ Do not start Tiny-ImageNet, FedKTL, GPFL, more graph seeds, mixed-backbone FedTG
 ## CODEX H15-A upstream timing receipt (before implementation/run)
 
 Pinned official `TsingZ0/FedTGP@c77cbbb31eb30d13066cd11f7f4a2e732aeaae24` has a concrete timing detail: `clientTGP.train()` calls `collect_protos()` before saving its updated model; `collect_protos()` independently reloads the saved model with `torch.load`. Therefore this pinned executable uploads eval-mode class means from the **round-start checkpoint**, not the in-memory just-updated model or H12 online features. Preserve that actual pinned behavior via a round-start snapshot and explicitly test/document it; do not silently change it to post-update collection. This is a provenance qualification, not a performance-based adjustment. The matched port will keep all non-anchor samples (drop_last=False), historical shuffled training batches, exactly10cycles, and final post-server evaluation. Server equal-client class averages are used ONLY to compute its adaptive margin; server training uses all individual client-class prototypes. Author run_me.sh explicitly sets lam10/se100/mart100; CLI defaults differ, so follow the assigned author-run settings.
+
+
+# CODEX REPORT H15-A — PARTIAL (implementation verified; SSH deployment blocked)
+
+STATUS: PARTIAL, 2026-09-19T13:33:50.928879+08:00. No real FedTGP training run has been launched; no accuracy result or scientific verdict is available.
+
+Implementation source `14d768d` (full SHA in git), pinned FedTGP submodule `c77cbbb31eb30d13066cd11f7f4a2e732aeaae24`. Files: `.gitmodules`, `vendor/FedTGP`, `pprtp/fedtgp.py`, existing `pprtp/run.py`, `tests/test_fedtgp.py`, `scripts/report_h15a.py`, `PROVENANCE.md`, project logs/BRIDGE. Original PFLlib and FedTGP vendor code unmodified.
+
+Mechanics implemented: existing client CE+observed-class MSE(lambda10); pinned round-start checkpoint prototype collection; official512D embedding/Linear-ReLU/Linear TGP; unweighted per-class client means only for minimum-distance margin, cappedmaxgap100; individual uploaded prototypes drive server negative-Euclidean-distance CE; serverSGD.01,100innerepochs,batch32; all100 detached generated prototypes sent to clients; official all-class MSE-distance readout plus localhead diagnostic. No PPRTP fitting/transport or anchor input. Serverseed0/private shuffle RNG, initial/final hashes, per-epoch losses, update counts, finite logits, labels/payloads and modelparameter count576512 recorded. Exactly10 localcycles planned,15600clientsteps and7000serversteps. No historical baseline/PPRTP rerun.
+
+Provenance qualification already recorded before implementation: pinned official client collect_protos reloads disk before updatedmodel save, so uploads round-start means. Preserved literally and checked against pinned methods. Matched batch32/drop_lastFalse/shuffledlocalbatches/10cycles/finalpostserver evaluation and in-memory state are explicit protocol adaptations. Official README notes potentially much longer convergence; this short-budget test is not a claim of best/converged FedTGP. PPRTP's extra unlabeled anchor correspondence must stay visible.
+
+Validation completed:
+- baseline68tests PASS220.813s;
+- focused3tests PASS10.062s, executing AST-extracted unmodified pinned methods for two-cycle client model/prototype equivalence and server initialization/gap/update equivalence;
+- complete71tests PASS246.188s, prior68 preserved;
+- miniature100class two-cycle entrypoint with poisoned anchors and forbidden transport calls passed; allclass distance finite and prototype uploads restricted to observed classes;
+- report script compiles; historical real split/init/round1trainedmodel and actualbatch comparisons are implemented in final report (actualbatch reference is H13A on the exact H12split/seed/loader because H12 itself did not logbatchhashes). Those real-run checks remain pending, not yet passed.
+
+Commands run:
+```sh
+D:/anaconda3/python.exe -m unittest discover -s tests -q
+D:/anaconda3/python.exe -m unittest discover -s tests -p test_fedtgp.py -v
+```
+Deployment `scripts/autodl-deploy.ps1 -Tag h15a -ExtraExclude @('data')` attempted twice (releaseIDs20260919-133128-h15a and20260919-133157-h15a), both failed at initial SSH command before archive upload/launch: `Connection closed by 202.101.162.22 port 8220`, exit255. TCP port check succeeds, but a third read-only SSH attempt also closes. This is an observed remote-connection blocker, not a test/training failure. No SSH/driver/server configuration modified. Remote mirror could not be refreshed; local project logs and GitHub are authoritative for this pending state.
+
+Resume: recheck SSH using existing .autodl/config.json/scripts; deploy unchanged source successfully, then launch only:
+```sh
+PPRTP_SOURCE_SHA=<full SHA of implementation commit14d768d> bash scripts/run_h01.sh --data /home/wenchang/asdasdsad/wjq/PPRTP/shared/cifar100 --modes fedtgp --seeds 0 --rounds 10 --full-data --dataset CIFAR100 --num-classes 100 --k 20 --ownership-seed 120100
+```
+Save newrelease/runID, fetchcompact to research_log/H15A/full, run `D:/anaconda3/python.exe scripts/report_h15a.py research_log/H15A/full`, append frozen verdict/metrics/coverage/costs. Do not rerun PPRTP or change lambda/serverepochs/margin based on performance. Keep H15-A ACTIVE.
